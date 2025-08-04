@@ -13,40 +13,45 @@ async function ticket(interaction) {
         guild: interaction.guild?.name
     };
 
-        logger.debug('Iniciando comando ticket', context);
+    logger.debug('Iniciando comando ticket', context);
 
-        const authorizedExecutionComand = await checkingComandChannelBlocked(interaction);
-        if (!authorizedExecutionComand) {
-            logger.warn('Comando ticket bloqueado - canal não autorizado', context);
-            return;
-        }
-        
-        const authorizedExecutionComandModerador = await checkingComandExecuntionModerador(interaction);
-        if (!authorizedExecutionComandModerador) {
-            logger.warn('Comando ticket negado - usuário sem permissão de moderador', context);
-            return;
-        }
+    const authorizedExecutionComand = await checkingComandChannelBlocked(interaction);
+    if (!authorizedExecutionComand) {
+        logger.warn('Comando ticket bloqueado - canal não autorizado', context);
+        return;
+    }
 
-        const criarTicket = new ButtonBuilder()
-            .setCustomId('create_ticket')
-            .setLabel('Criar Ticket')
-            .setStyle(ButtonStyle.Primary)
-            .setEmoji('📩');
+    const authorizedExecutionComandModerador = await checkingComandExecuntionModerador(interaction);
+    if (!authorizedExecutionComandModerador) {
+        logger.warn('Comando ticket negado - usuário sem permissão de moderador', context);
+        return;
+    }
 
-        const btnOpenTicket = new ActionRowBuilder().addComponents(criarTicket);
+    const criarTicket = new ButtonBuilder()
+        .setCustomId('create_ticket')
+        .setLabel('Criar Ticket')
+        .setStyle(ButtonStyle.Primary)
+        .setEmoji('📩');
 
-        const embedTicket = new EmbedBuilder()
-            .setColor(0xffffff)
-            .setDescription('Para sugestões, dúvidas ou denúncias, abra seu ticket.')
-            .setTitle('Abra seu Ticket.')
-            .setFooter({ iconURL: client.user.displayAvatarURL({ dynamic: true }), text: `${client.user.tag} - Ticket sem confusão` });
+    const btnOpenTicket = new ActionRowBuilder().addComponents(criarTicket);
 
-        await interaction.reply({ content: 'Botão enviado!', ephemeral: true });
+    const embedTicket = new EmbedBuilder()
+        .setColor(0xffffff)
+        .setTitle('Central de Ajuda de Jonalandia.')
+        .setDescription(`
+            Nessa seção, você pode tirar suas dúvidas ou entrar em contato com a nossa equipe do Elixir Lab.
 
-        const discordChannel1 = client.channels.cache.get(process.env.CHANNEL_ID_TICKET);
-        discordChannel1.send({ embeds: [embedTicket], components: [btnOpenTicket] });
+            Para evitar problemas, leia as opções com atenção e lembre-se de tentar pedir ajuda nos suportes comunitários do servidor.
+        `)
+        // .setImage(bgticket)
+        .setFooter({ iconURL: client.user.displayAvatarURL({ dynamic: true }), text: `${client.user.tag} - Ticket sem confusão` });
 
-        logger.info('Sistema de ticket configurado com sucesso', context);
+    await interaction.reply({ content: 'Botão enviado!', ephemeral: true });
+
+    const discordChannel1 = client.channels.cache.get(process.env.CHANNEL_ID_TICKET);
+    discordChannel1.send({ embeds: [embedTicket], components: [btnOpenTicket] });
+
+    logger.info('Sistema de ticket configurado com sucesso', context);
 };
 
 // Listener único para interações de botões
@@ -147,7 +152,7 @@ client.on('interactionCreate', async (interaction) => {
 
         const channel = interaction.channel;
         await interaction.reply({ content: 'O ticket será fechado e o canal será excluído em 5 segundos.', ephemeral: true });
-        
+
         logger.info(`Ticket fechado - Canal: ${channel.name}`, {
             ...context,
             channelId: channel.id
