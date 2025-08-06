@@ -6,7 +6,7 @@
 
 **Um bot Discord para Gerenciamento do servidor Jonalandia**
 
-[![Version](https://img.shields.io/badge/version-1.1.6-blue.svg)](https://github.com/jonathasfrontend/jonalandia)
+[![Version](https://img.shields.io/badge/version-1.1.9-blue.svg)](https://github.com/jonathasfrontend/jonalandia)
 [![Node.js](https://img.shields.io/badge/node.js-16%2B-green.svg)](https://nodejs.org/)
 [![Discord.js](https://img.shields.io/badge/discord.js-14.14.1-7289da.svg)](https://discord.js.org/)
 [![MongoDB](https://img.shields.io/badge/mongodb-8.8.0-green.svg)](https://mongodb.com/)
@@ -1032,7 +1032,7 @@ Para reportar bugs, inclua:
 - [📋 Licença](./LICENSE)
 
 ### 🔄 Versionamento
-- **Versão Atual**: 1.1.6
+- **Versão Atual**: 1.1.9
 - **Sistema**: Semantic Versioning (SemVer)
 - **Changelog**: Disponível no repositório
 
