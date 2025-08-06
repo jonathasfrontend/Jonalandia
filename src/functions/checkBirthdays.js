@@ -48,7 +48,7 @@ async function checkBirthdays() {
 
                 const birthdayEmbed = new EmbedBuilder()
                     .setColor('#ffcc00')
-                    .setTitle('🎉 Feliz Aniversário! 🎉')
+                    .setTitle('<:feliz:1402690475634458664> 🎉 Feliz Aniversário! 🎉')
                     .setDescription(`Parabéns <@${user.userId}>! 🎂🎈🎉 Desejamos a você um dia incrível e muitas felicidades!`)
                     .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
                     .setImage('https://media.istockphoto.com/id/1431551851/pt/vetorial/birthday-cake-vector-background-design-happy-birthday-greeting-text-with-yummy-cake.jpg?s=612x612&w=0&k=20&c=2K8os5-bInEwNGLuHM5SICqrtlKDbmty3EBSWs80WtY=')

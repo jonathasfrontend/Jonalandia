@@ -36,7 +36,7 @@ async function onNotificationTwitch() {
                 const avatarResponse = await axios.get(`https://decapi.me/twitch/avatar/${streamer}`);
                 const titleResponse = await axios.get(`https://decapi.me/twitch/title/${streamer}`);
                 const gameResponse = await axios.get(`https://decapi.me/twitch/game/${streamer}`);
-                const imageResponse = `https://static-cdn.jtvnw.net/previews-ttv/live_user_${streamer}-440x248.jpg`;
+                // const imageResponse = `https://static-cdn.jtvnw.net/previews-ttv/live_user_${streamer}-440x248.jpg`;
 
                 if (uptimeResponse.data === `${streamer} is offline`) {
                     logger.silly(`${streamer} está offline`, streamerContext);
@@ -65,7 +65,7 @@ async function onNotificationTwitch() {
                     const embed = new EmbedBuilder()
                         .setColor('Blurple')
                         .setAuthor({
-                            name: `Twitch - ${streamer}`,
+                            name: `<:icon:1402690522375520378> ┃ Twitch - ${streamer}`,
                             iconURL: `${avatarResponse.data}`,
                         })
                         .setTitle(`${titleResponse.data}`)
@@ -74,7 +74,7 @@ async function onNotificationTwitch() {
                         .addFields(
                             { name: 'Game', value: `${gameResponse.data}` },
                         )
-                        .setImage(imageResponse)
+                        // .setImage(imageResponse)
                         .setTimestamp()
                         .setFooter({ text: `Por: ${client.user.tag}`, iconURL: `${client.user.displayAvatarURL({ dynamic: true })}` });
 
@@ -105,7 +105,7 @@ async function onNotificationTwitch() {
                             const newNotification = new onNotificationTwitchSchema({
                                 title: titleResponse.data,
                                 streamer: streamer,
-                                image: imageResponse,
+                                image: "imageResponse",
                                 gamer: gameResponse.data,
                             });
 

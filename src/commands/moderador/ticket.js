@@ -1,7 +1,22 @@
-const { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, PermissionsBitField } = require("discord.js");
+const {
+    EmbedBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    ActionRowBuilder,
+    PermissionsBitField,
+    StringSelectMenuBuilder
+} = require("discord.js");
 const { client } = require("../../Client");
 const { logger, botEvent } = require('../../logger');
 const { checkingComandChannelBlocked, checkingComandExecuntionModerador } = require("../../utils/checkingComandsExecution");
+
+const TICKET_OPTIONS = [
+    { label: 'Tirar dúvidas', value: 'tirarduvida', emoji: '🌞' },
+    { label: 'Fazer uma denúncia', value: 'denuncia', emoji: '🚨' },
+    { label: 'Enviar sugestões', value: 'sugestao', emoji: '💡' },
+    { label: 'Reportar Bug', value: 'reportarbug', emoji: '🐛' },
+    { label: 'Minha opção não está aqui! Me ajuda!', value: 'outra', emoji: '<:1598blurplesupport:1402373636513337550>' },
+];
 
 async function ticket(interaction) {
     if (!interaction.isCommand()) return;
@@ -27,6 +42,13 @@ async function ticket(interaction) {
         return;
     }
 
+    const row = new ActionRowBuilder().addComponents(
+        new StringSelectMenuBuilder()
+            .setCustomId('ticket')
+            .setPlaceholder('Selecione uma opção...')
+            .addOptions(TICKET_OPTIONS)
+    );
+
     const criarTicket = new ButtonBuilder()
         .setCustomId('create_ticket')
         .setLabel('Criar Ticket')
@@ -39,24 +61,32 @@ async function ticket(interaction) {
         .setColor(0xffffff)
         .setTitle('Central de Ajuda de Jonalandia.')
         .setDescription(`
-            Nessa seção, você pode tirar suas dúvidas ou entrar em contato com a nossa equipe do Elixir Lab.
+            **Abra um ticket para falar com nossa equipe.**
+            Use esta seção para tirar dúvidas, relatar problemas ou buscar suporte direto com a equipe do Jonalandia.
 
-            Para evitar problemas, leia as opções com atenção e lembre-se de tentar pedir ajuda nos suportes comunitários do servidor.
+            Antes de abrir um ticket, verifique se sua dúvida já foi respondida nos canais comunitários para evitar solicitações desnecessárias.
         `)
-        // .setImage(bgticket)
-        .setFooter({ iconURL: client.user.displayAvatarURL({ dynamic: true }), text: `${client.user.tag} - Ticket sem confusão` });
+        .setImage('https://raw.githubusercontent.com/jonathasfrontend/Jonalandia/refs/heads/main/bgticket.png');
 
     await interaction.reply({ content: 'Botão enviado!', ephemeral: true });
 
     const discordChannel1 = client.channels.cache.get(process.env.CHANNEL_ID_TICKET);
-    discordChannel1.send({ embeds: [embedTicket], components: [btnOpenTicket] });
+    discordChannel1.send({ embeds: [embedTicket], components: [row] });
 
     logger.info('Sistema de ticket configurado com sucesso', context);
 };
 
-// Listener único para interações de botões
+// Listener específico para interações do sistema de tickets
 client.on('interactionCreate', async (interaction) => {
-    if (!interaction.isButton()) return;
+    if (!interaction.isButton() && !interaction.isStringSelectMenu()) return;
+
+    // Verificar se a interação é relacionada ao sistema de tickets
+    const isTicketInteraction = interaction.customId === 'ticket' ||
+        interaction.customId === 'create_ticket' ||
+        interaction.customId.startsWith('create_ticket_') ||
+        interaction.customId === 'close_ticket';
+
+    if (!isTicketInteraction) return;
 
     const fecharTicket = new ButtonBuilder()
         .setCustomId('close_ticket')
@@ -66,7 +96,82 @@ client.on('interactionCreate', async (interaction) => {
 
     const btnCloseTicket = new ActionRowBuilder().addComponents(fecharTicket);
 
-    if (interaction.customId === 'create_ticket') {
+    // Tratamento do StringSelectMenu para seleção de categoria do ticket
+    if (interaction.isStringSelectMenu() && interaction.customId === 'ticket') {
+        const selectedValue = interaction.values[0];
+
+        let responseMessage = '';
+        let title = '';
+
+        switch (selectedValue) {
+            case 'tirarduvida':
+                responseMessage = `
+                    <:feliz:1402690475634458664> ┃ Para tirar dúvidas gerais sobre Discord ou Bots use os canais de suporte comunitário como <#1253377112380018801>, <#1253378158045040733> acima.
+                `;
+                break;
+            case 'denuncia':
+                responseMessage = `
+                    <:feliz:1402690475634458664> ┃ Para fazer uma denúncia, vamos precisar do **motivo da denúncia, autores do ocorrido e provas**.
+
+Não crie um ticket de denúncia apenas para testar a ferramenta ou para tirar dúvidas (existem outros espaços para isso!).
+
+Se quiser prosseguir com sua denúncia, crie um atendimento abaixo.
+                `;
+                break;
+            case 'sugestao':
+                responseMessage = '<:feliz:1402690475634458664> ┃ Para enviar uma sugestão, utilize o chat. <#1401944421565595648>';
+                break;
+            case 'reportarbug':
+                responseMessage = `
+                <:feliz:1402690475634458664> ┃ Para reportar um Bug do Servidor, atente-se as instruções:
+
+Envie o máximo de detalhes sobre ele (incluindo descrição e fotos).
+
+Havendo isso em mãos, crie um ticket abaixo e faça o seu envio.
+                `;
+                break;
+            case 'outra':
+                responseMessage = `
+                 ⚠️ NÃO use essa aba para tirar dúvidas de Discord e etc... Existem abas comunitárias acima para te ajudar! Use-as com carinho e paciência.
+
+<:feliz:1402690475634458664> Se você tem alguma questão extraordinária que APENAS um Staff pode lhe auxiliar, clique abaixo para criar um Ticket!
+                `;
+                break;
+            default:
+                responseMessage = 'Opção inválida selecionada.';
+        }
+
+        // Só mostrar o botão "Criar Ticket" para denúncias
+        const components = [];
+        if (selectedValue === 'denuncia' || selectedValue === 'reportarbug' || selectedValue === 'outra') {
+            const criarTicketPersonalizado = new ButtonBuilder()
+                .setCustomId(`create_ticket_${selectedValue}`)
+                .setLabel('Criar Ticket')
+                .setStyle(ButtonStyle.Primary)
+                .setEmoji('📩');
+
+            const btnCreateTicketRow = new ActionRowBuilder().addComponents(criarTicketPersonalizado);
+            components.push(btnCreateTicketRow);
+        }
+
+        await interaction.reply({
+            content: responseMessage,
+            components: components,
+            ephemeral: true
+        });
+
+        logger.info(`Usuário ${interaction.user.tag} selecionou categoria: ${selectedValue}`, {
+            module: 'SUPPORT',
+            command: 'ticket_select',
+            user: interaction.user.tag,
+            guild: interaction.guild?.name,
+            category: selectedValue
+        });
+
+        return;
+    }
+
+    if (interaction.customId === 'create_ticket' || interaction.customId.startsWith('create_ticket_')) {
         const context = {
             module: 'SUPPORT',
             command: 'create_ticket',
@@ -127,11 +232,25 @@ client.on('interactionCreate', async (interaction) => {
 
             botEvent('TICKET_CREATED', `${interaction.user.username} criou ticket no canal ${ticketChannel.name}`);
 
+            // Determinar a categoria do ticket baseada no customId
+            let ticketCategory = 'Geral';
+            let categoryEmoji = '📩';
+
+            if (interaction.customId.startsWith('create_ticket_')) {
+                const categoryValue = interaction.customId.replace('create_ticket_', '');
+                const categoryOption = TICKET_OPTIONS.find(option => option.value === categoryValue);
+                if (categoryOption) {
+                    ticketCategory = categoryOption.label;
+                    categoryEmoji = categoryOption.emoji;
+                }
+            }
+
             const embedTicket = new EmbedBuilder()
                 .setColor(0xffffff)
-                .setTitle(`Olá <@${interaction.user.displayName}>`)
-                .setDescription('O suporte estará com você em breve. Para fechar esse ticket clique em 🔒')
-                .setFooter({ iconURL: client.user.displayAvatarURL({ dynamic: true }), text: `${client.user.tag} - Ticket sem confusão` });
+                .setTitle(`${categoryEmoji} Ticket: ${ticketCategory}`)
+                .setDescription(`Olá <@${interaction.user.id}>!\n\nVocê abriu um ticket na categoria: **${ticketCategory}**\n\nO suporte estará com você em breve. Para fechar esse ticket clique em 🔒`)
+                .setFooter({ iconURL: client.user.displayAvatarURL({ dynamic: true }), text: `${client.user.tag} - Ticket sem confusão` })
+                .setTimestamp();
 
             await ticketChannel.send({ embeds: [embedTicket], components: [btnCloseTicket] });
 

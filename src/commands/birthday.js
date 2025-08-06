@@ -29,7 +29,7 @@ async function Birthday(interaction) {
     botEvent('birthday', interaction);
     await birthday.save();
 
-    await interaction.reply(`Aniversário salvo: ${day}/${month}`);
+    await interaction.reply({ content: `<:feliz:1402690475634458664> ┃ Aniversário salvo: ${day}/${month}`, ephemeral: true });
     Logger.info(`Aniversário salvo para ${username}: ${day}/${month}`);
 
 }

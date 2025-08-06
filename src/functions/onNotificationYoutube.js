@@ -94,7 +94,7 @@ async function onNotificationYoutube() {
                             .setAuthor({
                                 name: `Youtube - ${channel}`,
                             })
-                            .setTitle(`${title}`)
+                            .setTitle(`<:icon:1402690522375520378> ┃ ${title}`)
                             .setDescription(`${channel} postou um novo vídeo! **Vá assisti-lo**`)
                             .setURL(videoUrl)
                             .setImage(thumbnailUrl)

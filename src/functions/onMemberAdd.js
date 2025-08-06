@@ -24,7 +24,7 @@ function onMemberAdd(member) {
         })
         .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
         .setTitle(`${member.user.tag} | Bem-vindo(a)!`)
-        .setDescription(`Salve ${member.user}! Você acabou de entrar no 
+        .setDescription(`<:feliz:1402690475634458664> ┃ Salve ${member.user}! Você acabou de entrar no 
                          servidor do ${member.guild}, aqui você poderá se 
                          interagir com fãs do ${member.guild}, conversar 
                          sobre suas coisas favoritas e muito mais!`)

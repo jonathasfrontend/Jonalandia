@@ -350,7 +350,7 @@ client.once('ready', () => {
     description: 'Exclui um comando do bot. (Moderador)',
     options: [
       {
-        type: 3, // Tipo de string
+        type: 3, //  
         name: 'comando',
         description: 'O nome do comando a ser excluído.',
         required: true,

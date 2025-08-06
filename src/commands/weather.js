@@ -43,7 +43,7 @@ async function getWeather(interaction) {
             .setTimestamp()
             .setFooter({ text: `Por: ${client.user.tag}`, iconURL: client.user.displayAvatarURL({ dynamic: true }) });
 
-        await interaction.editReply({ embeds: [embed] });
+        await interaction.editReply({ embeds: [embed], ephemeral: true });
 
         const logChannel = client.channels.cache.get(process.env.CHANNEL_ID_LOGS_INFO_BOT);
         await logChannel.send(`Usuário ${interaction.user.username} consultou o clima em ${city}.`);

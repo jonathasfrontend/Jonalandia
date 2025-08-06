@@ -6,7 +6,7 @@
 
 **Um bot Discord para Gerenciamento do servidor Jonalandia**
 
-[![Version](https://img.shields.io/badge/version-1.1.3-blue.svg)](https://github.com/jonathasfrontend/jonalandia)
+[![Version](https://img.shields.io/badge/version-1.1.6-blue.svg)](https://github.com/jonathasfrontend/jonalandia)
 [![Node.js](https://img.shields.io/badge/node.js-16%2B-green.svg)](https://nodejs.org/)
 [![Discord.js](https://img.shields.io/badge/discord.js-14.14.1-7289da.svg)](https://discord.js.org/)
 [![MongoDB](https://img.shields.io/badge/mongodb-8.8.0-green.svg)](https://mongodb.com/)
@@ -303,20 +303,6 @@ O comando `/clean` combina as funcionalidades dos antigos comandos `/clearall` e
 - ✅ `/removechannels` - Remoção de canais
 - ✅ `/addtwitch` - Cadastro de streamers
 - ✅ `/addyoutube` - Cadastro de canais YouTube
-
-### ✨ Comando `/clean` Unificado (v1.1.2)
-
-**🎯 Nova Funcionalidade:** Os comandos `/clearall` e `/clearuser` foram unificados no novo comando `/clean`, oferecendo:
-
-- **Interface Moderna**: Menu de seleção intuitivo para escolher o tipo de limpeza
-- **Experiência Melhorada**: Um único comando para todas as necessidades de limpeza
-- **Recursos Aprimorados**: 
-  - Embeds mais bonitos e informativos
-  - Melhor tratamento de erros
-  - Logs automáticos mais detalhados
-  - Validações de segurança aprimoradas
-
-**⚠️ Importante:** Os comandos antigos `/clearall` e `/clearuser` foram removidos. Use apenas `/clean` a partir desta versão.
 
 ---
 
@@ -733,51 +719,6 @@ https://api.openweathermap.org/data/2.5/weather?q=São Paulo&units=metric&appid=
 
 ---
 
-## � Changelog Detalhado
-
-### 🆕 Versão 1.1.3 (Atual)
-**Data de Release:** 30 de julho de 2025
-
-**🔧 Correções:**
-- ✅ Correção de nomes de comandos na documentação
-- ✅ Sincronização entre código implementado e documentação
-- ✅ Atualização de exemplos de uso
-- ✅ Verificação completa de funcionalidades
-
-**📋 Comandos Corrigidos:**
-- `aniversario` (antes referenciado como `birthday`)
-- `ficha` (antes referenciado como `infouser`) 
-- `addtwitch` (comando simplificado)
-- `addyoutube` (comando simplificado)
-
-**📊 Melhorias na Documentação:**
-- Lista completa de cargos de jogos disponíveis
-- Seção de verificação de conformidade
-- Troubleshooting expandido
-- Exemplos de configuração atualizados
-
-### ✨ Versão 1.1.2
-**🎯 Principais Mudanças:**
-- Unificação dos comandos de limpeza em `/clean`
-- Interface moderna com menus de seleção
-- Melhor tratamento de erros e logs
-- Remoção dos comandos antigos `/clearall` e `/clearuser`
-
-### 🏗️ Versão 1.1.1
-**🔧 Melhorias Incrementais:**
-- Otimizações de performance
-- Correções de bugs menores
-- Melhorias no sistema de logs
-
-### 🚀 Versão 1.1.0
-**🎯 Grandes Funcionalidades:**
-- Sistema de logs avançado implementado
-- Múltiplas camadas de segurança
-- Monitoramento de plataformas externas
-- Sistema de sorteios completo
-
----
-
 ## �🐛 Resolução de Problemas
 
 ### ❗ Problemas Comuns
@@ -889,7 +830,7 @@ Para reportar bugs, inclua:
 - [📋 Licença](./LICENSE)
 
 ### 🔄 Versionamento
-- **Versão Atual**: 1.1.3
+- **Versão Atual**: 1.1.6
 - **Sistema**: Semantic Versioning (SemVer)
 - **Changelog**: Disponível no repositório
 

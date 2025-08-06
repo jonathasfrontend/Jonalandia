@@ -23,7 +23,7 @@ function onMemberRemove(member) {
                     iconURL: member.user.displayAvatarURL({ dynamic: true }),
                 })
                 .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
-                .setTitle('😭 ahhhhh!')
+                .setTitle('<:affs:1402695937175846912> ahhhhh!')
                 .setDescription(`⚰ **${member.user}** saiu do servidor...`)
                 .setImage('https://i.pinimg.com/originals/81/2d/e9/812de920c0c7076356699d644418e326.gif')
                 .setFooter({ text: `${member.user.username}`, iconURL: member.user.displayAvatarURL({ dynamic: true }) });
