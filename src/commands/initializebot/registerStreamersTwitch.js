@@ -1,5 +1,5 @@
 const { EmbedBuilder } = require("discord.js");
-const onTwitchStreamersSchema = require('../../models/onTwitchStreamersSchema');
+const onTwitchStreamersSchema = require('../../models/streamers');
 const { client } = require("../../Client");
 const { Logger, error, botEvent, warn } = require('../../logger');
 const { checkingComandChannelBlocked, checkingComandExecuntionModerador } = require("../../utils/checkingComandsExecution");

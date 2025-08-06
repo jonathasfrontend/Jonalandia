@@ -24,6 +24,7 @@
 - [🔧 Funcionalidades Automáticas](#-funcionalidades-automáticas)
 - [🛡️ Sistema de Segurança](#️-sistema-de-segurança)
 - [📊 Sistema de Logs Avançado](#-sistema-de-logs-avançado)
+- [🗄️ Estrutura do Banco de Dados (MongoDB)](#️-estrutura-do-banco-de-dados-mongodb)
 - [🔔 Sistema de Notificações](#-sistema-de-notificações)
 - [⚙️ Configuração Avançada](#️-configuração-avançada)
 - [🐛 Resolução de Problemas](#-resolução-de-problemas)
@@ -486,7 +487,208 @@ databaseEvent('INSERT', 'users', true, 'Usuário criado');
 
 ---
 
-## 🔔 Sistema de Notificações
+## �️ Estrutura do Banco de Dados (MongoDB)
+
+O Bot Jonalandia utiliza **MongoDB** como banco de dados principal, com uma arquitetura bem estruturada que gerencia todas as informações necessárias para o funcionamento completo do bot. Abaixo está a documentação detalhada de todas as coleções e seus schemas.
+
+### 📊 Visão Geral das Coleções
+
+| Coleção | Propósito | Arquivo Modelo |
+|---------|-----------|----------------|
+| `channelsServer` | Gerenciamento de canais do servidor | `addChannel.js` |
+| `gameNotification` | Notificações de jogos gratuitos | `gameNotification.js` |
+| `infractionsUsers` | Sistema de infrações e logs de usuários | `infracoesUsers.js` |
+| `notificationBirthday` | Cadastro de aniversários | `notificationBirthday.js` |
+| `notificationTwitch` | Cache de notificações Twitch | `notificationTwitch.js` |
+| `notificationYoutube` | Cache de notificações YouTube | `notificationYoutube.js` |
+| `premioSorteio` | Gerenciamento de prêmios de sorteios | `premioSorteio.js` |
+| `sorteio` | Participantes de sorteios | `sorteio.js` |
+| `streamers` | Lista de streamers monitorados | `streamers.js` |
+| `votoBanUser` | Sistema de votação para banimentos | `votoBanUser.js` |
+| `youtubeChannel` | Lista de canais YouTube monitorados | `youtubeChannel.js` |
+
+---
+
+### 📋 Documentação Detalhada dos Schemas
+
+#### 🏠 **channelsServer** - Gerenciamento de Canais
+```javascript
+{
+  channelId: String,        // ID único do canal Discord (único, obrigatório)
+  channelName: String,      // Nome do canal (obrigatório)
+  channelType: String,      // Tipo do canal (texto/voz) (obrigatório)
+  guildId: String,          // ID do servidor Discord (obrigatório)
+  guildName: String,        // Nome do servidor Discord (obrigatório)
+  createdAt: Date,          // Data de criação (automático)
+  updatedAt: Date           // Data da última atualização (automático)
+}
+```
+**Propósito**: Armazena informações de todos os canais do servidor para controle interno e logs.
+
+#### 🎮 **gameNotification** - Jogos Gratuitos
+```javascript
+{
+  title: String,            // Título do jogo (obrigatório)
+  genre: String,            // Gênero do jogo (obrigatório)
+  platform: String,        // Plataforma (Epic, Steam, etc.) (obrigatório)
+  release_date: String,     // Data de lançamento (obrigatório)
+  createdAt: Date           // Data de cadastro (automático)
+}
+```
+**Propósito**: Armazena informações dos jogos gratuitos para evitar notificações duplicadas.
+
+#### 👤 **infractionsUsers** - Sistema de Infrações
+```javascript
+{
+  userId: String,           // ID único do usuário Discord (único, obrigatório)
+  username: String,         // Nome de usuário (obrigatório)
+  avatarUrl: String,        // URL do avatar (obrigatório)
+  accountCreatedDate: Date, // Data de criação da conta Discord (obrigatório)
+  joinedServerDate: Date,   // Data de entrada no servidor (obrigatório)
+  
+  infractions: {            // Contadores de infrações
+    timeouts: Number,               // Quantidade de timeouts aplicados (padrão: 0)
+    inappropriateLanguage: Number,  // Linguagem inadequada detectada (padrão: 0)
+    voiceChannelKicks: Number,      // Expulsões de canal de voz (padrão: 0)
+    bans: Number,                   // Banimentos aplicados (padrão: 0)
+    unbans: Number,                 // Desbanimentos realizados (padrão: 0)
+    floodTimeouts: Number,          // Timeouts por anti-flood (padrão: 0)
+    blockedFiles: Number,           // Arquivos bloqueados enviados (padrão: 0)
+    serverLinksPosted: Number,      // Links de servidor postados (padrão: 0)
+    expulsion: Number               // Expulsões do servidor (padrão: 0)
+  },
+  
+  logs: [{                  // Array de logs detalhados
+    type: String,           // Tipo da infração (obrigatório)
+    reason: String,         // Motivo da infração (obrigatório)
+    date: Date,             // Data da infração (obrigatório)
+    moderator: String       // Moderador responsável (obrigatório)
+  }]
+}
+```
+**Propósito**: Sistema completo de rastreamento de infrações e histórico de moderação.
+
+#### 🎂 **notificationBirthday** - Sistema de Aniversários
+```javascript
+{
+  userId: String,           // ID único do usuário Discord (obrigatório)
+  name: String,             // Nome do usuário (obrigatório)
+  day: Number,              // Dia do aniversário (1-31) (obrigatório)
+  month: Number             // Mês do aniversário (1-12) (obrigatório)
+}
+```
+**Propósito**: Armazena datas de aniversário para notificações automáticas diárias.
+
+#### 📺 **notificationTwitch** - Cache Twitch
+```javascript
+{
+  title: String,            // Título da transmissão (obrigatório)
+  streamer: String,         // Nome do streamer (obrigatório)
+  image: String,            // URL da imagem/thumbnail (obrigatório)
+  gamer: String             // Categoria/jogo transmitido (obrigatório)
+}
+```
+**Propósito**: Cache temporário das informações de transmissões para comparação de estados.
+
+#### 📹 **notificationYoutube** - Cache YouTube
+```javascript
+{
+  title: String,            // Título do vídeo (obrigatório)
+  author: String,           // Autor do canal (obrigatório)
+  thumbnail: String,        // URL da thumbnail (obrigatório)
+  description: String       // Descrição do vídeo (obrigatório)
+}
+```
+**Propósito**: Cache temporário das informações de vídeos para evitar notificações duplicadas.
+
+#### 🎁 **premioSorteio** - Prêmios de Sorteios
+```javascript
+{
+  premio: String,           // Descrição do prêmio (obrigatório)
+  dono: String,             // ID do usuário que definiu o prêmio (obrigatório)
+  dataCadastro: Date        // Data de cadastro do prêmio (automático)
+}
+```
+**Propósito**: Gerencia os prêmios disponíveis para sorteios no servidor.
+
+#### 🎲 **sorteio** - Participantes de Sorteios
+```javascript
+{
+  usuarioId: String,        // ID único do usuário (único, obrigatório)
+  nomeUsuario: String,      // Nome do usuário participante (obrigatório)
+  dataCadastro: Date        // Data de participação (automático)
+}
+```
+**Propósito**: Lista de participantes dos sorteios ativos no servidor.
+
+#### 🎮 **streamers** - Streamers Monitorados
+```javascript
+{
+  name: String              // Nome único do streamer Twitch (único, obrigatório)
+}
+```
+**Propósito**: Lista de streamers do Twitch que são monitorados para notificações de live.
+
+#### 🗳️ **votoBanUser** - Sistema de Votação
+```javascript
+{
+  targetUserId: String,     // ID do usuário alvo da votação (obrigatório)
+  targetUsername: String,   // Nome do usuário alvo (obrigatório)
+  targetAvatarUrl: String,  // Avatar do usuário alvo (obrigatório)
+  startedBy: String,        // ID de quem iniciou a votação (obrigatório)
+  startTime: Date,          // Data de início (automático)
+  endTime: Date,            // Data de término (obrigatório)
+  
+  votes: [{                 // Array de votos
+    userId: String,         // ID do usuário que votou (obrigatório)
+    username: String,       // Nome do usuário que votou (obrigatório)
+    vote: String            // Voto: "sim" ou "nao" (obrigatório)
+  }]
+}
+```
+**Propósito**: Sistema democrático de votação para banimentos de usuários.
+
+#### 📺 **youtubeChannel** - Canais YouTube
+```javascript
+{
+  name: String              // Nome único do canal YouTube (único, obrigatório)
+}
+```
+**Propósito**: Lista de canais do YouTube monitorados para notificações de novos vídeos.
+
+---
+
+### 🔧 Configuração e Manutenção do Banco
+
+#### 📊 Indexação Otimizada
+```javascript
+// Índices recomendados para performance
+channelsServer: { channelId: 1 }           // Busca rápida por canal
+infractionsUsers: { userId: 1 }            // Busca rápida por usuário
+sorteio: { usuarioId: 1 }                  // Evita participações duplicadas
+streamers: { name: 1 }                     // Busca rápida por streamer
+youtubeChannel: { name: 1 }                // Busca rápida por canal
+```
+
+#### 🧹 Limpeza Automática
+O sistema inclui rotinas de limpeza para:
+- ✅ Remoção de dados antigos de cache (Twitch/YouTube)
+- ✅ Limpeza de sorteios finalizados
+- ✅ Arquivamento de logs antigos de infrações
+- ✅ Remoção de votações expiradas
+
+#### 📋 Backup e Restore
+```bash
+# Backup completo do banco
+mongodump --db jonalandia --out backup/
+
+# Restore do backup
+mongorestore --db jonalandia backup/jonalandia/
+```
+
+---
+
+## �🔔 Sistema de Notificações
 
 ### 📺 Notificações YouTube
 - **Canais Monitorados**: Lista configurável de canais

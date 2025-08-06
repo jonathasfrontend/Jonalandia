@@ -82,4 +82,4 @@ const UserSchemaInfraction = new mongoose.Schema({
     ]
 });
 
-module.exports = mongoose.model('onInfracoesUsersSchema', UserSchemaInfraction);
+module.exports = mongoose.model('infractionsUsers', UserSchemaInfraction);

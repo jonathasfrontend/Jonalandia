@@ -15,6 +15,6 @@ const premioSchema = new mongoose.Schema({
     },
 });
 
-const Premio = mongoose.model('onPremioSorteioSchema', premioSchema);
+const Premio = mongoose.model('premioSorteio', premioSchema);
 
 module.exports = Premio;

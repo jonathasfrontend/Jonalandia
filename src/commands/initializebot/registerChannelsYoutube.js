@@ -1,5 +1,5 @@
 const { EmbedBuilder } = require("discord.js");
-const onYoutubeChannelSchema = require('../../models/onYoutubeChannelSchema');
+const onYoutubeChannelSchema = require('../../models/youtubeChannel');
 const { client } = require("../../Client");
 const { Logger, botEvent, warn, error } = require('../../logger');
 const { checkingComandChannelBlocked, checkingComandExecuntionModerador } = require("../../utils/checkingComandsExecution");

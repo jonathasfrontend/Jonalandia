@@ -43,4 +43,4 @@ const VoteSchema = new mongoose.Schema({
   ],
 });
 
-module.exports = mongoose.model('onVotoBanUserSchema', VoteSchema);
+module.exports = mongoose.model('votoBanUser', VoteSchema);

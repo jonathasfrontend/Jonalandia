@@ -1,7 +1,7 @@
 const { logger, commandExecuted, databaseEvent } = require('../logger');
 const { EmbedBuilder } = require('discord.js');
 const { client } = require("../Client");
-const Sorteio = require('../models/onSorteioSchema');
+const Sorteio = require('../models/sorteio');
 const { checkingComandChannelBlocked } = require('../utils/checkingComandsExecution');
 
 async function sorteioUser(interaction) {

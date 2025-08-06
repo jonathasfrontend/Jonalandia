@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const streamersSchema = new mongoose.Schema({
+const channelSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
@@ -8,4 +8,4 @@ const streamersSchema = new mongoose.Schema({
     },
 });
 
-module.exports = mongoose.model("onTwitchStreamersSchema", streamersSchema);
+module.exports = mongoose.model("youtubeChannel", channelSchema);

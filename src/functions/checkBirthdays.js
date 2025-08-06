@@ -1,5 +1,5 @@
 const cron = require('node-cron');
-const onNotificationBirthdaySchema = require('../models/onNotificationBirthdaySchema');
+const onNotificationBirthdaySchema = require('../models/notificationBirthday');
 const { client } = require('../Client');
 const { EmbedBuilder } = require('discord.js');
 const { logger, botEvent, databaseEvent } = require('../logger');

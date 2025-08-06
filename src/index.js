@@ -51,6 +51,7 @@ const { limpaSorteio } = require('./commands/moderador/limpasorteio')
 const { sortear } = require('./commands/moderador/sortear')
 const { voteParaBan } = require('./commands/moderador/voteparaban')
 const { excluirComando } = require('./commands/moderador/deleteCommand');
+const { backup } = require('./commands/moderador/backup');
 
 const { registerStreamersTwitch } = require('./commands/initializebot/registerStreamersTwitch');
 const { registerChannelsYoutube } = require('./commands/initializebot/registerChannelsYoutube');
@@ -359,6 +360,11 @@ client.once('ready', () => {
   });
 
   client.application?.commands.create({
+    name: 'backup',
+    description: 'Faz backup completo de todas as coleções do banco de dados. (Moderador)',
+  });
+
+  client.application?.commands.create({
     name: 'addtwitch',
     description: 'Cadastra um novo streamer para ser notificado. (Moderador, Inicialização do Bot)',
     options: [
@@ -475,6 +481,8 @@ client.on('interactionCreate', async (interaction) => {
     await voteParaBan(interaction);
   } else if (commandName === 'excluicomando') {
     await excluirComando(interaction);
+  } else if (commandName === 'backup') {
+    await backup(interaction);
   } else if (commandName === 'addtwitch') {
     await registerStreamersTwitch(interaction);
   } else if (commandName === 'addyoutube') {

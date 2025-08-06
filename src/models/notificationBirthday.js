@@ -2,23 +2,23 @@ const mongoose = require('mongoose')
 
 const PostSchema = new mongoose.Schema(
     {
-        title: {
+        userId: {
             type: String,
             required: true
         },
-        streamer: {
+        name: {
             type: String,
             required: true
         },
-        image: {
-            type: String,
+        day: {
+            type: Number,
             required: true
         },
-        gamer: {
-            type: String,
+        month: {
+            type: Number,
             required: true
         },
     }
 );
 
-module.exports = mongoose.model('onNotificationTwitchSchema', PostSchema);
+module.exports = mongoose.model('notificationBirthday', PostSchema);

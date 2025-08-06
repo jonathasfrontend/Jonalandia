@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
 const PostSchema = new mongoose.Schema(
     {
@@ -6,23 +6,19 @@ const PostSchema = new mongoose.Schema(
             type: String,
             required: true
         },
-        genre: {
+        author: {
             type: String,
             required: true
         },
-        platform: {
+        thumbnail: {
             type: String,
             required: true
         },
-        release_date: {
+        description: {
             type: String,
             required: true
         },
-        createdAt: { 
-            type: Date,
-            default: Date.now
-        }
     }
 );
 
-module.exports = mongoose.model('onGameNotificationSchema', PostSchema);
+module.exports = mongoose.model('notificationYoutube', PostSchema);

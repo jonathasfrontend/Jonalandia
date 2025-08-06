@@ -8,6 +8,6 @@ const channelSchema = new mongoose.Schema({
     guildName: { type: String, required: true },
 }, { timestamps: true });
 
-const ChannelModel = mongoose.model('onAddChannelsSchema', channelSchema);
+const ChannelModel = mongoose.model('channelsServer', channelSchema);
 
 module.exports = ChannelModel;

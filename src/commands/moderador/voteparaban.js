@@ -1,5 +1,5 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const Vote = require('../../models/onVotoBanUserSchema ');
+const Vote = require('../../models/votoBanUser');
 const { client } = require("../../Client");
 const { logger, commandExecuted, securityEvent, databaseEvent } = require('../../logger');
 const { saveUserInfractions } = require('../../utils/saveUserInfractions');

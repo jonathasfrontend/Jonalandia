@@ -1,5 +1,5 @@
 const { Logger, botEvent, commandExecuted } = require('../logger');
-const onNotificationBirthdaySchema = require('../models/onNotificationBirthdaySchema');
+const onNotificationBirthdaySchema = require('../models/notificationBirthday');
 const { checkingComandChannelBlocked } = require("../utils/checkingComandsExecution");
 
 async function Birthday(interaction) {
