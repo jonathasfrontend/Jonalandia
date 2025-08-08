@@ -58,7 +58,7 @@ const { registerChannelsYoutube } = require('./commands/initialize/registerChann
 const { addChannels } = require('./commands/initialize/addChannels');
 const { removeChannels } = require('./commands/initialize/removeChannels');
 
-const { bdServerConect } = require('./config/bdServerConect');
+const { bdServerConect } = require('./database/bdServerConect');
 
 client.once('ready', () => {
   try {

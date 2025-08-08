@@ -149,6 +149,7 @@ jonalandia/
 │   │   ├── 📁 public/         # Comandos públicos/usuários
 │   │   └── 📁 initialize/     # Comandos de inicialização
 │   ├── 📁 config/             # Configurações do sistema
+│   ├── 📁 database/           # Conecção com mongodb
 │   ├── 📁 functions/          # Funções automáticas
 │   │   ├── 📁 checkPunishments/ # Funções de segurança
 │   │   └── 📁 public/         # Funções públicas automáticas
