@@ -1,8 +1,8 @@
-const { logger, commandExecuted, databaseEvent } = require('../logger');
+const { logger, commandExecuted, databaseEvent } = require('../../logger');
 const { EmbedBuilder } = require('discord.js');
-const { client } = require("../Client");
-const Sorteio = require('../models/sorteio');
-const { checkingComandChannelBlocked } = require('../utils/checkingComandsExecution');
+const { client } = require("../../Client");
+const Sorteio = require('../../models/sorteio');
+const { checkingComandChannelBlocked } = require('../../utils/checkingComandsExecution');
 
 async function sorteioUser(interaction) {
     const { commandName } = interaction;

@@ -75,7 +75,7 @@ async function timeout(interaction) {
             member.user.tag
         )
 
-        await guildMember.timeout(3 * 60 * 1000, 'Timeout de 3 minutos aplicado por adm.');
+        await guildMember.timeout(5 * 60 * 1000, 'Timeout de 5 minutos aplicado por adm.');
 
         const embed = new EmbedBuilder()
             .setColor('#ff0000')

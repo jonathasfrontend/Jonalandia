@@ -1,5 +1,5 @@
-const { logger, botEvent } = require('../logger');
-const { client } = require('../Client');
+const { logger, botEvent } = require('../../logger');
+const { client } = require('../../Client');
 
 function ruleMembreAdd(member) {
     const context = {

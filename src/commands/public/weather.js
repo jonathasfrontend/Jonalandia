@@ -1,8 +1,8 @@
 const { EmbedBuilder } = require("discord.js");
 const axios = require("axios");
-const { client } = require("../Client");
-const { Logger } = require('../logger');
-const { checkingComandChannelBlocked } = require('../utils/checkingComandsExecution');
+const { client } = require("../../Client");
+const { Logger } = require('../../logger');
+const { checkingComandChannelBlocked } = require('../../utils/checkingComandsExecution');
 
 async function getWeather(interaction) {
     const { commandName } = interaction;

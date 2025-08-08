@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require("discord.js");
-const { client } = require("../Client");
-const { logger, botEvent } = require('../logger');
+const { client } = require("../../Client");
+const { logger, botEvent } = require('../../logger');
 
 function onMemberRemove(member) {
     const context = {

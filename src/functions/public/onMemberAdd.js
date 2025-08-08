@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require("discord.js");
-const { client } = require("../Client");
-const { logger, botEvent, databaseEvent } = require('../logger');
+const { client } = require("../../Client");
+const { logger, botEvent, databaseEvent } = require('../../logger');
 
 function onMemberAdd(member) {
   const context = {

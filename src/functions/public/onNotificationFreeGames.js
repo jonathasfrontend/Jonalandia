@@ -1,9 +1,9 @@
 const axios = require('axios');
 const { EmbedBuilder } = require('discord.js');
 const cron = require('node-cron');
-const GameNotification = require('../models/gameNotification');
-const { client } = require('../Client');
-const { logger, botEvent, databaseEvent } = require('../logger');
+const GameNotification = require('../../models/gameNotification');
+const { client } = require('../../Client');
+const { logger, botEvent, databaseEvent } = require('../../logger');
 
 async function onNotificationFreeGames() {
     const context = { module: 'FREE_GAMES_NOTIFICATIONS' };

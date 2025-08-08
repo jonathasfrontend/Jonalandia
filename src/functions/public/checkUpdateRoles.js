@@ -1,6 +1,6 @@
 const cron = require('node-cron');
-const { logger, botEvent, databaseEvent } = require('../logger');
-const { client } = require("../Client");
+const { logger, botEvent, databaseEvent } = require('../../logger');
+const { client } = require("../../Client");
 
 function UpdateRoles() {
     const context = { module: 'ROLES' };

@@ -1,5 +1,5 @@
 const { EmbedBuilder } = require('discord.js');
-const { logger, commandExecuted } = require('../logger');
+const { logger, commandExecuted } = require('../../logger');
 
 async function Help(interaction) {
   try {

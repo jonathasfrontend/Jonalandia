@@ -10,29 +10,29 @@ require('dotenv').config();
 const { logger, botEvent } = require('./logger');
 const { client } = require('./Client');
 
-const { antiFloodChat } = require('./functions/punicfunction/antiFloodChat');
-const { blockLinks } = require('./functions/punicfunction/blockLinks');
-const { detectInappropriateWords } = require('./functions/punicfunction/detectInappropriateWords');
-const { autoKickNewMembers } = require('./functions/punicfunction/kickNewMembers');
-const { blockFileTypes } = require('./functions/punicfunction/blockFileTypes');
+const { antiFloodChat } = require('./functions/checkPunishments/antiFloodChat');
+const { blockLinks } = require('./functions/checkPunishments/blockLinks');
+const { detectInappropriateWords } = require('./functions/checkPunishments/detectInappropriateWords');
+const { autoKickNewMembers } = require('./functions/checkPunishments/kickNewMembers');
+const { blockFileTypes } = require('./functions/checkPunishments/blockFileTypes');
 
-const { onMemberAdd } = require('./functions/onMemberAdd');
-const { ruleMembreAdd } = require('./functions/ruleMembreAdd');
-const { onMemberRemove } = require('./functions/onMemberRemove');
-const { Status } = require('./functions/statusBot');
-const { checkUpdateRoles } = require('./functions/checkUpdateRoles');
-const { scheduleBirthdayCheck } = require('./functions/checkBirthdays');
-const { scheduleNotificationYoutubeCheck } = require('./functions/onNotificationYoutube');
-const { scheduleNotificationTwitchCheck } = require('./functions/onNotificationTwitch');
-const { scheduleonNotificationFreeGamesCheck } = require('./functions/onNotificationFreeGames');
+const { onMemberAdd } = require('./functions/public/onMemberAdd');
+const { ruleMembreAdd } = require('./functions/public/ruleMembreAdd');
+const { onMemberRemove } = require('./functions/public/onMemberRemove');
+const { Status } = require('./functions/public/statusBot');
+const { checkUpdateRoles } = require('./functions/public/checkUpdateRoles');
+const { scheduleBirthdayCheck } = require('./functions/public/checkBirthdays');
+const { scheduleNotificationYoutubeCheck } = require('./functions/public/onNotificationYoutube');
+const { scheduleNotificationTwitchCheck } = require('./functions/public/onNotificationTwitch');
+const { scheduleonNotificationFreeGamesCheck } = require('./functions/public/onNotificationFreeGames');
 
-const { Help } = require('./commands/help');
-const { searchGuild } = require('./commands/searchGuild');
-const { menssageFile } = require('./commands/mensage');
-const { Birthday } = require('./commands/birthday');
-const { getWeather } = require('./commands/weather');
-const { sorteioUser } = require('./commands/sorteio')
-const { infoSorteio } = require('./commands/infoSorteio')
+const { Help } = require('./commands/public/help');
+const { searchGuild } = require('./commands/public/searchGuild');
+const { menssageFile } = require('./commands/public/mensage');
+const { Birthday } = require('./commands/public/birthday');
+const { getWeather } = require('./commands/public/weather');
+const { sorteioUser } = require('./commands/public/sorteio')
+const { infoSorteio } = require('./commands/public/infoSorteio')
 
 const { mensageRegra } = require('./commands/moderador/regra');
 const { createEmbed } = require('./commands/moderador/createEmbed');
@@ -45,7 +45,7 @@ const { expulsar } = require('./commands/moderador/expulsar');
 const { banUser } = require('./commands/moderador/banUser');
 const { unbanUser } = require('./commands/moderador/unbanUser');
 const { kickUser } = require('./commands/moderador/kickUser');
-const { perfilInfoUser } = require('./commands/moderador/searchUser');
+const { Ficha } = require('./commands/moderador/ficha');
 const { premioSorteio } = require('./commands/moderador/premiosorteio')
 const { limpaSorteio } = require('./commands/moderador/limpasorteio')
 const { sortear } = require('./commands/moderador/sortear')
@@ -53,10 +53,10 @@ const { voteParaBan } = require('./commands/moderador/voteparaban')
 const { excluirComando } = require('./commands/moderador/deleteCommand');
 const { backup } = require('./commands/moderador/backup');
 
-const { registerStreamersTwitch } = require('./commands/initializebot/registerStreamersTwitch');
-const { registerChannelsYoutube } = require('./commands/initializebot/registerChannelsYoutube');
-const { addChannels } = require('./commands/initializebot/addChannels');
-const { removeChannels } = require('./commands/initializebot/removeChannels');
+const { registerStreamersTwitch } = require('./commands/initialize/registerStreamersTwitch');
+const { registerChannelsYoutube } = require('./commands/initialize/registerChannelsYoutube');
+const { addChannels } = require('./commands/initialize/addChannels');
+const { removeChannels } = require('./commands/initialize/removeChannels');
 
 const { bdServerConect } = require('./config/bdServerConect');
 
@@ -466,7 +466,7 @@ client.on('interactionCreate', async (interaction) => {
   } else if (commandName === 'clima') {
     await getWeather(interaction);
   } else if (commandName === 'ficha') {
-    await perfilInfoUser(interaction);
+    await Ficha(interaction);
   } else if (commandName === 'sorteio') {
     await sorteioUser(interaction);
   } else if (commandName === 'premiosorteio') {

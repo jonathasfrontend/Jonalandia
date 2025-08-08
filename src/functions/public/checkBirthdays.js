@@ -1,8 +1,8 @@
 const cron = require('node-cron');
-const onNotificationBirthdaySchema = require('../models/notificationBirthday');
-const { client } = require('../Client');
+const onNotificationBirthdaySchema = require('../../models/notificationBirthday');
+const { client } = require('../../Client');
 const { EmbedBuilder } = require('discord.js');
-const { logger, botEvent, databaseEvent } = require('../logger');
+const { logger, botEvent, databaseEvent } = require('../../logger');
 
 async function checkBirthdays() {
     const context = { module: 'BIRTHDAY' };

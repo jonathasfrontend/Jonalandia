@@ -4,7 +4,7 @@ const { client } = require("../../Client");
 const { Logger } = require('../../logger');
 const { checkingComandChannelBlocked, checkingComandExecuntionModerador } = require('../../utils/checkingComandsExecution');
 
-async function perfilInfoUser(interaction) {
+async function Ficha(interaction) {
     const { options, guild } = interaction;
 
     if (!interaction.isCommand()) return;
@@ -100,15 +100,15 @@ async function perfilInfoUser(interaction) {
                 {
                     name: '📊 Infrações',
                     value: `
-                        🗣️ Linguagem Inapropriada: ${infractions.inappropriateLanguage || 0}
-                        ⏳ Timeouts: ${infractions.timeouts || 0}
-                        🔇 Expulsões de Canal de Voz: ${infractions.voiceChannelKicks || 0}
-                        🚪 Expulsões do Servidor: ${infractions.expulsion || 0}
-                        ⛔ Bans: ${infractions.bans || 0}
-                        🔓 Unbans: ${infractions.unbans || 0}
-                        💬 Flood: ${infractions.floodTimeouts || 0}
-                        📂 Arquivos Bloqueados: ${infractions.blockedFiles || 0}
-                        🔗 Links Postados: ${infractions.serverLinksPosted || 0}`,
+                        <:blank:1403102288037281935> 🗣️ Linguagem Inapropriada: ${infractions.inappropriateLanguage || 0}
+                        <:blank:1403102288037281935> ⏳ Timeouts: ${infractions.timeouts || 0}
+                        <:blank:1403102288037281935> 🔇 Expulsões de Canal de Voz: ${infractions.voiceChannelKicks || 0}
+                        <:blank:1403102288037281935> 🚪 Expulsões do Servidor: ${infractions.expulsion || 0}
+                        <:blank:1403102288037281935> ⛔ Bans: ${infractions.bans || 0}
+                        <:blank:1403102288037281935> 🔓 Unbans: ${infractions.unbans || 0}
+                        <:blank:1403102288037281935> 💬 Flood: ${infractions.floodTimeouts || 0}
+                        <:blank:1403102288037281935> 📂 Arquivos Bloqueados: ${infractions.blockedFiles || 0}
+                        <:blank:1403102288037281935> 🔗 Links Postados: ${infractions.serverLinksPosted || 0}`,
                     inline: false,
                 }
             );
@@ -169,4 +169,4 @@ async function perfilInfoUser(interaction) {
     }
 }
 
-module.exports = { perfilInfoUser };
+module.exports = { Ficha };

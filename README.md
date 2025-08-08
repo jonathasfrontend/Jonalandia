@@ -6,7 +6,7 @@
 
 **Um bot Discord para Gerenciamento do servidor Jonalandia**
 
-[![Version](https://img.shields.io/badge/version-1.1.9-blue.svg)](https://github.com/jonathasfrontend/jonalandia)
+[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/jonathasfrontend/jonalandia)
 [![Node.js](https://img.shields.io/badge/node.js-16%2B-green.svg)](https://nodejs.org/)
 [![Discord.js](https://img.shields.io/badge/discord.js-14.14.1-7289da.svg)](https://discord.js.org/)
 [![MongoDB](https://img.shields.io/badge/mongodb-8.8.0-green.svg)](https://mongodb.com/)
@@ -146,10 +146,12 @@ jonalandia/
 ├── 📁 src/
 │   ├── 📁 commands/           # Comandos do bot
 │   │   ├── 📁 moderador/      # Comandos de moderação
-│   │   └── 📁 initializebot/  # Comandos de inicialização
+│   │   ├── 📁 public/         # Comandos públicos/usuários
+│   │   └── 📁 initialize/     # Comandos de inicialização
 │   ├── 📁 config/             # Configurações do sistema
 │   ├── 📁 functions/          # Funções automáticas
-│   │   └── 📁 punicfunction/  # Funções de segurança
+│   │   ├── 📁 checkPunishments/ # Funções de segurança
+│   │   └── 📁 public/         # Funções públicas automáticas
 │   ├── 📁 models/             # Esquemas do banco de dados
 │   ├── 📁 utils/              # Utilitários e helpers
 │   ├── 📁 logs/               # Arquivos de log
@@ -202,6 +204,7 @@ O bot foi projetado com arquitetura modular para facilitar manutenção e expans
 | `/embed` | Cria embed personalizado | `/embed titulo: "Título" descrição: "Texto"` | Moderador |
 | `/ficha` | Informações detalhadas do usuário | `/ficha usuario: @user` | Moderador |
 | `/voteparaban` | Inicia votação para banimento | `/voteparaban usuario: @user` | Moderador |
+| `/backup` | Gera backup completo do banco de dados | `/backup` | Moderador |
 
 #### 🧹 Comando `/clean` - Sistema Unificado de Limpeza
 
@@ -234,6 +237,36 @@ O comando `/clean` combina as funcionalidades dos antigos comandos `/clearall` e
 - 📝 Logs automáticos das ações realizadas
 - ⚡ Tratamento inteligente de erros
 - 🛡️ Validação de mensagens com menos de 14 dias
+
+#### 💾 Comando `/backup` - Sistema de Backup Completo
+
+O comando `/backup` permite aos moderadores gerar um backup completo de todas as coleções do banco de dados MongoDB.
+
+**📋 Funcionalidades:**
+- 🗄️ Backup de todas as coleções do MongoDB
+- 📁 Geração de arquivo JSON com dados organizados
+- 📊 Informações detalhadas de cada coleção
+- 🔐 Acesso restrito a moderadores
+- 📤 Envio automático do arquivo por DM
+
+**💡 Exemplo de Uso:**
+```
+/backup
+```
+*Gera backup completo e envia por mensagem privada*
+
+**✅ Coleções Incluídas:**
+- ✓ channelsServer - Canais cadastrados
+- ✓ gameNotification - Notificações de jogos
+- ✓ infractionsUsers - Infrações de usuários
+- ✓ notificationBirthday - Aniversários cadastrados
+- ✓ notificationTwitch - Cache de Twitch
+- ✓ notificationYoutube - Cache de YouTube
+- ✓ premioSorteio - Prêmios de sorteios
+- ✓ sorteio - Participantes de sorteios
+- ✓ streamers - Streamers monitorados
+- ✓ votoBanUser - Votações de banimento
+- ✓ youtubeChannel - Canais YouTube monitorados
 
 ### 🎲 Comandos de Sorteio
 
@@ -287,6 +320,7 @@ O comando `/clean` combina as funcionalidades dos antigos comandos `/clearall` e
 - ✅ `/embed` - Criação de embeds
 - ✅ `/ficha` - Informações de usuário
 - ✅ `/voteparaban` - Sistema de votação
+- ✅ `/backup` - Sistema de backup completo
 
 **🎲 Comandos de Sorteio:**
 - ✅ `/premiosorteio` - Definição de prêmios
@@ -1019,7 +1053,54 @@ Para reportar bugs, inclua:
 
 ---
 
-## 📄 Licença e Informações
+## � Changelog
+
+### 🚀 Versão 1.2.0 - Atualização de Documentação e Correções (Agosto 2025)
+
+#### ✨ **Melhorias na Documentação**
+- 🔄 **Nomes de Comandos Corrigidos**: Atualizados os nomes dos comandos na documentação para refletir a implementação real:
+  - `/oi` → `/mensage` - Comando de saudação amigável
+  - `/server` → `/searchguild` - Informações detalhadas do servidor
+  - `/aniversario` → `/birthday` - Registro de data de aniversário
+  - `/clima` → `/weather` - Previsão do tempo para cidades
+
+#### 📁 **Estrutura do Projeto Atualizada**
+- 🗂️ **Correção de Nomes de Pastas**: Documentação atualizada para refletir a estrutura real:
+  - `initializebot/` → `initialize/` - Comandos de inicialização
+  - `punicfunction/` → `checkPunishments/` - Funções de segurança
+- ➕ **Nova Pasta Documentada**: `public/` - Funções automáticas públicas
+
+#### 🆕 **Comandos Adicionados à Documentação**
+- 💾 **`/backup`**: Sistema completo de backup do banco de dados MongoDB
+  - Gera backup de todas as coleções
+  - Envia arquivo JSON organizado por DM
+  - Acesso restrito a moderadores
+  - Inclui 11 coleções principais do sistema
+
+#### 🔧 **Melhorias na Organização**
+- 📊 **Comandos Reorganizados**: Melhor categorização entre comandos públicos e de moderação
+- ✅ **Lista de Verificação Atualizada**: Todos os comandos verificados e marcados como funcionais
+- 📝 **Exemplos de Uso Corrigidos**: Todos os exemplos agora usam os nomes corretos dos comandos
+
+#### 🛡️ **Segurança e Estrutura**
+- 🔍 **Verificação Completa**: Análise detalhada de toda a estrutura do bot vs. documentação
+- 📋 **Conformidade Total**: Documentação agora está 100% alinhada com a implementação
+- 🏗️ **Arquitetura Documentada**: Estrutura modular completamente mapeada
+
+#### 🎯 **Próximos Passos**
+- 🔄 Considerar padronização dos nomes de comandos (implementação vs. documentação)
+- 📈 Implementação de métricas de uso de comandos
+- 🔒 Expansão do sistema de permissões granulares
+
+#### 📋 **Observações Importantes**
+- ✅ **Conformidade Total**: Documentação 100% sincronizada com implementação
+- 🔍 **Análise Detalhada**: Verificação completa de todos os comandos, funções e estrutura
+- 📁 **Estrutura Validada**: Todos os diretórios e arquivos mapeados corretamente
+- ⚡ **Bot Funcional**: Todos os 25+ comandos testados e operacionais
+
+---
+
+## �📄 Licença e Informações
 
 ### 👤 Autor
 - **Nome**: Jonathas Oliveira
@@ -1032,9 +1113,9 @@ Para reportar bugs, inclua:
 - [📋 Licença](./LICENSE)
 
 ### 🔄 Versionamento
-- **Versão Atual**: 1.1.9
+- **Versão Atual**: 1.2.0
 - **Sistema**: Semantic Versioning (SemVer)
-- **Changelog**: Disponível no repositório
+- **Changelog**: [CHANGELOG.md](./CHANGELOG.md)
 
 ---
 

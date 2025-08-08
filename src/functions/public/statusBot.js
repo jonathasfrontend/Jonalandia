@@ -1,6 +1,6 @@
 const { PresenceUpdateStatus } = require('discord.js');
-const { client } = require('../Client');
-const { logger, botEvent } = require('../logger');
+const { client } = require('../../Client');
+const { logger, botEvent } = require('../../logger');
 
 function Status() {
     const context = { module: 'BOT' };

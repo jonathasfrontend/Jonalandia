@@ -306,6 +306,8 @@ async function sendLogNotification(user, action, messageCount) {
             .setTimestamp();
             
         await logChannel.send({ embeds: [embed] });
+        await message.author.send({ embeds: [embed] });
+        
     } catch (error) {
         logger.error('Erro ao enviar notificação para logs', {
             module: 'ANTI_FLOOD',
@@ -333,7 +335,7 @@ async function antiFloodChat(message) {
     
     // Verificar se o usuário é imune ao anti-flood
     if (isUserImmune(member)) {
-        logger.silly(`Usuário ${author.tag} é imune ao anti-flood`, context);
+        logger.info(`Usuário ${author.tag} é imune ao anti-flood`, context);
         return;
     }
     

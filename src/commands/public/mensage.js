@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require("discord.js");
-const { client } = require("../Client");
-const { checkingComandChannelBlocked } = require("../utils/checkingComandsExecution");
+const { client } = require("../../Client");
+const { checkingComandChannelBlocked } = require("../../utils/checkingComandsExecution");
 
 async function menssageFile(interaction) {
   if (!interaction.isCommand()) return;

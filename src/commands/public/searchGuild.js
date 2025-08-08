@@ -1,7 +1,7 @@
 const { EmbedBuilder } = require("discord.js");
-const { client } = require("../Client");
-const { Logger } = require('../logger');
-const { checkingComandChannelBlocked } = require("../utils/checkingComandsExecution");
+const { client } = require("../../Client");
+const { Logger } = require('../../logger');
+const { checkingComandChannelBlocked } = require("../../utils/checkingComandsExecution");
 
 async function searchGuild(interaction) {
     if (!interaction.isCommand()) return;
