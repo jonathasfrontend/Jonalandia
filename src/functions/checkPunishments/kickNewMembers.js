@@ -1,6 +1,9 @@
 const { EmbedBuilder } = require('discord.js');
 const { logger, securityEvent, botEvent } = require('../../logger');
 const { client } = require("../../Client");
+const configData = require('../../config/punishmentConfig.json');
+
+const config = configData.antiFlood || {};
 
 async function autoKickNewMembers() {
     const context = { module: 'SECURITY' };

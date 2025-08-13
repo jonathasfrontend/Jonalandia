@@ -4,6 +4,9 @@ const { logger, securityEvent, databaseEvent } = require('../../logger');
 const inappropriateWordsData = require('../../config/InappropriateWords.json');
 const { getBlockedChannels } = require('../../utils/checkingComandsExecution');
 const { saveUserInfractions } = require('../../utils/saveUserInfractions');
+const configData = require('../../config/punishmentConfig.json');
+
+const config = configData.antiFlood || {};
 
 function isUserImmune(member) {
     if (!member) return false;
@@ -134,7 +137,7 @@ async function detectInappropriateWords(message) {
                 try {
                     await message.channel.send({ embeds: [channelEmbed], ephemeral: true });
                     await message.author.send({ embeds: [userEmbed], ephemeral: true });
-                    await message.member.timeout(5 * 60 * 1000, 'Timeout de 5 minutos aplicado pelo bot.');
+                    await message.member.timeout(config.timeoutDuration, 'Timeout de 5 minutos aplicado pelo bot.');
 
                     logger.debug('Embed de aviso de linguagem inadequada enviado', context);
                 } catch (dmError) {

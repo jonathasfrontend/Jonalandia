@@ -1,6 +1,8 @@
+# Main
 src/logs/
 /.vscode
 /cspell.json
+*.txt
 
 # dependencies
 /node_modules

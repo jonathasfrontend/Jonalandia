@@ -155,20 +155,8 @@ client.once('ready', () => {
 
   client.application?.commands.create({
     name: 'embed',
-    description: 'Cria um embed de exemplo no canal (Moderador)',
+    description: 'Cria um embed personalizado com opções flexíveis (Moderador)',
     options: [
-      {
-        type: 3, // Tipo de string
-        name: 'titulo',
-        description: 'O título do embed',
-        required: true
-      },
-      {
-        type: 3, // Tipo de string
-        name: 'descricao',
-        description: 'A descrição do embed',
-        required: true
-      },
       {
         type: 7, // Tipo de canal
         name: 'canal',
@@ -176,10 +164,76 @@ client.once('ready', () => {
         required: true
       },
       {
-        type: 3,
+        type: 3, // Tipo de string
+        name: 'titulo',
+        description: 'O título do embed',
+        required: false
+      },
+      {
+        type: 3, // Tipo de string
+        name: 'descricao',
+        description: 'A descrição do embed',
+        required: false
+      },
+      {
+        type: 3, // Tipo de string
         name: 'cor',
-        description: 'A cor do embed a ser enviado',
-        required: true
+        description: 'A cor do embed (hex, nome ou padrão)',
+        required: false
+      },
+      {
+        type: 3, // Tipo de string
+        name: 'imagem',
+        description: 'URL da imagem principal do embed',
+        required: false
+      },
+      {
+        type: 3, // Tipo de string
+        name: 'thumbnail',
+        description: 'URL da imagem em miniatura do embed',
+        required: false
+      },
+      {
+        type: 3, // Tipo de string
+        name: 'footer',
+        description: 'Texto do rodapé do embed',
+        required: false
+      },
+      {
+        type: 3, // Tipo de string
+        name: 'footer_icon',
+        description: 'URL do ícone do rodapé',
+        required: false
+      },
+      {
+        type: 3, // Tipo de string
+        name: 'author_name',
+        description: 'Nome do autor do embed',
+        required: false
+      },
+      {
+        type: 3, // Tipo de string
+        name: 'author_icon',
+        description: 'URL do ícone do autor',
+        required: false
+      },
+      {
+        type: 3, // Tipo de string
+        name: 'author_url',
+        description: 'URL do link do autor',
+        required: false
+      },
+      {
+        type: 3, // Tipo de string
+        name: 'url',
+        description: 'URL do link principal do embed',
+        required: false
+      },
+      {
+        type: 5, // Tipo boolean
+        name: 'timestamp',
+        description: 'Incluir timestamp (padrão: true)',
+        required: false
       }
     ],
   });
@@ -496,7 +550,7 @@ client.on('interactionCreate', async (interaction) => {
 
 client.on('guildMemberAdd', onMemberAdd);
 client.on('guildMemberAdd', ruleMembreAdd);
-client.on('guildMemberAdd', autoKickNewMembers);
+// client.on('guildMemberAdd', autoKickNewMembers);
 
 client.on('guildMemberRemove', onMemberRemove);
 

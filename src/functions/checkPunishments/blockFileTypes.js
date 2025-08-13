@@ -4,6 +4,9 @@ const blockedFileExtensions = require('../../config/blockedFileExtensions.json')
 const { getBlockedChannels } = require('../../utils/checkingComandsExecution')
 const { logger, securityEvent, databaseEvent } = require('../../logger');
 const { saveUserInfractions } = require('../../utils/saveUserInfractions');
+const configData = require('../../config/punishmentConfig.json');
+
+const config = configData.antiFlood || {};
 
 function isUserImmune(member) {
     if (!member) return false;
@@ -132,7 +135,7 @@ async function blockFileTypes(message) {
                         try {
                             await message.author.send({ embeds: [userEmbed] });
                             await message.channel.send({ embeds: [embed], content: `||${message.author}||` });
-                            await message.member.timeout(5 * 60 * 1000, 'Timeout de 5 minutos aplicado pelo bot.');
+                            await message.member.timeout(config.timeoutDuration, 'Timeout de 5 minutos aplicado pelo bot.');
 
                             logger.debug('Embed de aviso de arquivo bloqueado enviado', context);
                         } catch (embedError) {

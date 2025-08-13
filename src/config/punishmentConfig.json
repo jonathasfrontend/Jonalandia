@@ -1,0 +1,18 @@
+{
+    "antiFlood": {
+        "maxMessages": 3,
+        "timeWindow": 10000,
+        "timeoutDuration": 300000,
+        "decayTime": 2000,
+        "maxWarnings": 2,
+        "warningCooldown": 20000
+    },
+    "description": {
+        "maxMessages": "Limite de mensagens permitidas no período de tempo",
+        "timeWindow": "Período de tempo em milissegundos (padrão: 1 segundo)",
+        "timeoutDuration": "Duração do timeout em milissegundos (padrão: 5 minutos = 300000ms)",
+        "decayTime": "Tempo para decrementar mensagens antigas (padrão: 2 segundos)",
+        "maxWarnings": "Número de avisos antes do timeout",
+        "warningCooldown": "Cooldown entre avisos (com 20 segundos)"
+    }
+}
