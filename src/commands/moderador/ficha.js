@@ -89,39 +89,40 @@ async function Ficha(interaction) {
             .addFields(
                 { name: '👤 Nome', value: `**${user.tag}**`, inline: true },
                 { name: '🆔 ID', value: `**${user.id}**`, inline: true },
-                { name: '👤 Menção', value: `<@${user.id}>`, inline: true },
-                { name: '✅ Conta Criada', value: `${accountCreation.toLocaleDateString('pt-BR', { month: 'long', day: 'numeric', year: 'numeric' })} (há ${creationDiff})`, inline: false },
-                { name: '🟦 Entrou no Servidor', value: `${serverJoin.toLocaleDateString('pt-BR', { month: 'long', day: 'numeric', year: 'numeric' })} (há ${joinDiff})`, inline: false }
+                { name: '💭 Menção', value: `<@${user.id}>`, inline: true },
+                { name: '📃 Conta Criada', value: `${accountCreation.toLocaleDateString('pt-BR', { month: 'long', day: 'numeric', year: 'numeric' })} (há ${creationDiff})`, inline: true },
+                { name: '🟦 Entrou no Servidor', value: `${serverJoin.toLocaleDateString('pt-BR', { month: 'long', day: 'numeric', year: 'numeric' })} (há ${joinDiff})`, inline: true }
             );
 
         if (infractionData) {
             const infractions = infractionData.infractions || {};
             embed.addFields(
                 {
-                    name: '📊 Infrações',
+                    name: '**📊 Infrações**',
                     value: `
                         <:blank:1403102288037281935> 🗣️ Linguagem Inapropriada: ${infractions.inappropriateLanguage || 0}
                         <:blank:1403102288037281935> ⏳ Timeouts: ${infractions.timeouts || 0}
                         <:blank:1403102288037281935> 🔇 Expulsões de Canal de Voz: ${infractions.voiceChannelKicks || 0}
                         <:blank:1403102288037281935> 🚪 Expulsões do Servidor: ${infractions.expulsion || 0}
-                        <:blank:1403102288037281935> ⛔ Bans: ${infractions.bans || 0}
+                        <:blank:1403102288037281935> 🚫 Bans: ${infractions.bans || 0}
                         <:blank:1403102288037281935> 🔓 Unbans: ${infractions.unbans || 0}
                         <:blank:1403102288037281935> 💬 Flood: ${infractions.floodTimeouts || 0}
-                        <:blank:1403102288037281935> 📂 Arquivos Bloqueados: ${infractions.blockedFiles || 0}
-                        <:blank:1403102288037281935> 🔗 Links Postados: ${infractions.serverLinksPosted || 0}`,
+                        <:blank:1403102288037281935> <:arquivobloqueado:1410287568330686494> Arquivos Bloqueados: ${infractions.blockedFiles || 0}
+                        <:blank:1403102288037281935> 🔗 Links Postados: ${infractions.serverLinksPosted || 0}
+                        <:blank:1403102288037281935> <:warning:1410285637776576563> Warns: ${infractions.warns || 0}`,
                     inline: false,
                 }
             );
 
             if (infractionData.logs && infractionData.logs.length > 0) {
                 const logs = infractionData.logs
-                    .slice(-5) // Pega apenas os últimos 5 logs para evitar limite de caracteres
-                    .map((log) => `**${log.type}:** ${log.reason}\n*(por ${log.moderator} em ${new Date(log.date).toLocaleDateString()})*`)
+                    .slice(-6) // Pega apenas os últimos 6 logs para evitar limite de caracteres
+                    .map((log) => `**${log.type}:**\n \`${log.id}\`\n ${log.reason}\n*(por ${log.moderator} em ${new Date(log.date).toLocaleDateString()})*`)
                     .join('\n\n');
 
                 // Verifica se o texto dos logs não excede 1024 caracteres (limite do Discord)
                 const logsText = logs.length > 1024 ? logs.substring(0, 1020) + '...' : logs;
-                embed.addFields({ name: '📜 Logs de Moderação (Últimos 5)', value: logsText });
+                embed.addFields({ name: '📜 Logs de Moderação (Últimos 6 logs)', value: logsText });
             } else {
                 embed.addFields({ name: '📜 Logs de Moderação', value: 'Nenhum log encontrado.' });
             }

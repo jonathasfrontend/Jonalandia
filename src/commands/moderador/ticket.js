@@ -59,9 +59,9 @@ async function ticket(interaction) {
 
     const embedTicket = new EmbedBuilder()
         .setColor(0xffffff)
-        .setTitle('Central de Ajuda de Jonalandia.')
+        .setTitle('💁 Central de Ajuda de Jonalandia.')
         .setDescription(`
-            **Abra um ticket para falar com nossa equipe.**
+            **Abra um ticket 🎫 para falar com nossa equipe.**
             Use esta seção para tirar dúvidas, relatar problemas ou buscar suporte direto com a equipe do Jonalandia.
 
             Antes de abrir um ticket, verifique se sua dúvida já foi respondida nos canais comunitários para evitar solicitações desnecessárias.

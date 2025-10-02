@@ -58,10 +58,18 @@ const UserSchemaInfraction = new mongoose.Schema({
         expulsion: {
             type: Number,
             default: 0
+        },
+        warns: {
+            type: Number,
+            default: 0
         }
     },
     logs: [
         {
+            id: {
+                type: String,
+                required: true
+            },
             type: {
                 type: String,
                 required: true

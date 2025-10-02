@@ -3,6 +3,7 @@ const { client } = require("../../Client");
 const { logger, commandExecuted, securityEvent } = require('../../logger');
 const { saveUserInfractions } = require('../../utils/saveUserInfractions');
 const { checkingComandChannelBlocked, checkingComandExecuntionModerador } = require('../../utils/checkingComandsExecution');
+const configData = require('../../config/punishmentConfig.json');
 
 async function timeout(interaction) {
     if (!interaction.isCommand()) return;
@@ -61,7 +62,7 @@ async function timeout(interaction) {
             targetUser: userToTimeout.tag
         });
 
-        const reason = `O usuário ${userToTimeout.tag} recebeu um timeout de 3 minutos.`;
+        const reason = `O usuário ${userToTimeout.tag} recebeu um timeout de 10 minutos.`;
         const type = 'timeouts';
 
         saveUserInfractions(
@@ -75,24 +76,24 @@ async function timeout(interaction) {
             member.user.tag
         )
 
-        await guildMember.timeout(5 * 60 * 1000, 'Timeout de 5 minutos aplicado por adm.');
+        await guildMember.timeout(configData.timeoutLevel.lowMedium.timeoutDuration, 'Timeout de 10 minutos aplicado por adm.');
 
         const embed = new EmbedBuilder()
             .setColor('#ff0000')
             .setTitle('Timeout aplicado')
-            .setDescription(`O usuário ${userToTimeout.tag} recebeu um timeout de 3 minutos.`)
+            .setDescription(`O usuário ${userToTimeout.tag} recebeu um timeout de 10 minutos.`)
             .setTimestamp()
             .setFooter({ text: `Por: ${client.user.tag}`, iconURL: client.user.displayAvatarURL({ dynamic: true }) });
 
         await interaction.editReply({ embeds: [embed] });
 
         commandExecuted('timeout', interaction.user, interaction.guild, true);
-        securityEvent('USER_TIMEOUT', userToTimeout, interaction.guild, `Timeout de 3 minutos aplicado por ${interaction.user.tag}`);
+        securityEvent('USER_TIMEOUT', userToTimeout, interaction.guild, `Timeout de 10 minutos aplicado por ${interaction.user.tag}`);
 
         logger.info(`Timeout aplicado com sucesso em ${userToTimeout.tag}`, {
             ...context,
             targetUser: userToTimeout.tag,
-            duration: '3 minutos'
+            duration: '10 minutos'
         });
     } catch (error) {
         logger.error('Erro ao aplicar timeout', context, error);

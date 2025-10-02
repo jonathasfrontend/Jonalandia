@@ -1,6 +1,7 @@
 const { logger } = require('../logger');
 const { client } = require('../Client');
 const Infractions = require('../models/infracoesUsers');
+const { v4: uuidv4 } = require('uuid');
 
 async function saveUserInfractions(
     userId,
@@ -13,6 +14,7 @@ async function saveUserInfractions(
     moderator
 ) {
     try {
+        const infractionId = uuidv4();
         let userData = await Infractions.findOne({ username });
 
         if (!userData) {
@@ -24,6 +26,7 @@ async function saveUserInfractions(
                 joinedServerDate,
                 infractions: { [type]: 1 },
                 logs: [{
+                    id: infractionId,
                     type,
                     reason,
                     date: new Date(),
@@ -33,6 +36,7 @@ async function saveUserInfractions(
         } else {
             userData.infractions[type] = (userData.infractions[type] || 0) + 1;
             userData.logs.push({
+                id: infractionId,
                 type,
                 reason,
                 date: new Date(),
@@ -54,6 +58,7 @@ async function saveUserInfractions(
         }
 
         logger.info(`Infração registrada no banco com sucesso no usuário ${username} ${reason}.`);
+        return infractionId;
 
     } catch (error) {
         logger.error('Erro ao aplicar ao cadastrar a infração no banco de dados:', { username, reason }, error);
@@ -67,6 +72,7 @@ async function saveUserInfractions(
         } else {
             logger.warn('Canal de logs de erro não encontrado', { channelId: process.env.CHANNEL_ID_LOGS_ERRO_BOT });
         }
+        return null;
     }
 }
 

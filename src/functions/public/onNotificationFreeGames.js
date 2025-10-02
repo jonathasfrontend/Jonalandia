@@ -67,7 +67,7 @@ async function onNotificationFreeGames() {
 
                         const embed = new EmbedBuilder()
                             .setColor('Green')
-                            .setTitle(game.title)
+                            .setTitle(`<:icon:1402690522375520378> ${game.title}`)
                             .setDescription(game.short_description)
                             .addFields(
                                 { name: 'Gênero', value: game.genre, inline: true },

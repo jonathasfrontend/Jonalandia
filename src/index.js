@@ -25,6 +25,7 @@ const { scheduleBirthdayCheck } = require('./functions/public/checkBirthdays');
 const { scheduleNotificationYoutubeCheck } = require('./functions/public/onNotificationYoutube');
 const { scheduleNotificationTwitchCheck } = require('./functions/public/onNotificationTwitch');
 const { scheduleonNotificationFreeGamesCheck } = require('./functions/public/onNotificationFreeGames');
+const { scheduleTempBanCheck } = require('./functions/public/checkTempBans');
 
 const { Help } = require('./commands/public/help');
 const { searchGuild } = require('./commands/public/searchGuild');
@@ -44,6 +45,7 @@ const { timeout } = require('./commands/moderador/timeout');
 const { expulsar } = require('./commands/moderador/expulsar');
 const { banUser } = require('./commands/moderador/banUser');
 const { unbanUser } = require('./commands/moderador/unbanUser');
+const { listTempBans } = require('./commands/moderador/listTempBans');
 const { kickUser } = require('./commands/moderador/kickUser');
 const { Ficha } = require('./commands/moderador/ficha');
 const { premioSorteio } = require('./commands/moderador/premiosorteio')
@@ -83,6 +85,9 @@ client.once('ready', () => {
 
     scheduleonNotificationFreeGamesCheck();
     botEvent('FREE_GAMES_NOTIFICATION_STARTED', 'Monitoramento de jogos gratuitos iniciado');
+
+    scheduleTempBanCheck();
+    botEvent('TEMP_BAN_CHECKER_STARTED', 'Verificador de bans temporários iniciado');
 
     logger.info('Bot Jonalandia está online e todos os sistemas foram inicializados!', { module: 'BOT' });
   } catch (error) {
@@ -259,7 +264,7 @@ client.once('ready', () => {
 
   client.application?.commands.create({
     name: 'timeout',
-    description: 'Aplica um timeout de 3 minutos em um usuário. (Moderador)',
+    description: 'Aplica um timeout de 10 minutos em um usuário. (Moderador)',
     options: [
       {
         type: 6,
@@ -293,6 +298,34 @@ client.once('ready', () => {
         description: 'O usuário que será banido.',
         required: true,
       },
+      {
+        type: 3, // Tipo string
+        name: 'duracao',
+        description: 'Duração do ban (deixe vazio para ban permanente)',
+        required: false,
+        choices: [
+          {
+            name: '1 minuto',
+            value: '1m'
+          },
+          {
+            name: '1 hora',
+            value: '1h'
+          },
+          {
+            name: '5 horas',
+            value: '5h'
+          },
+          {
+            name: '1 dia',
+            value: '1d'
+          },
+          {
+            name: '10 dias',
+            value: '10d'
+          }
+        ]
+      },
     ],
   });
 
@@ -307,6 +340,11 @@ client.once('ready', () => {
         required: true,
       },
     ],
+  });
+
+  client.application?.commands.create({
+    name: 'listbans',
+    description: 'Lista todos os bans temporários ativos no servidor (Moderador)',
   });
 
   client.application?.commands.create({
@@ -515,6 +553,8 @@ client.on('interactionCreate', async (interaction) => {
     await banUser(interaction);
   } else if (commandName === 'desbanir') {
     await unbanUser(interaction);
+  } else if (commandName === 'listbans') {
+    await listTempBans(interaction);
   } else if (commandName === 'kickuser') {
     await kickUser(interaction);
   } else if (commandName === 'clima') {
@@ -550,7 +590,7 @@ client.on('interactionCreate', async (interaction) => {
 
 client.on('guildMemberAdd', onMemberAdd);
 client.on('guildMemberAdd', ruleMembreAdd);
-// client.on('guildMemberAdd', autoKickNewMembers);
+client.on('guildMemberAdd', autoKickNewMembers);
 
 client.on('guildMemberRemove', onMemberRemove);
 

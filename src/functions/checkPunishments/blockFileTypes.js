@@ -23,6 +23,34 @@ function isUserImmune(member) {
     return false;
 }
 
+async function registerInfraction(user, member, type, reason) {
+    try {
+        const infractionId = await saveUserInfractions(
+            user.id,
+            user.tag,
+            user.displayAvatarURL({ dynamic: true }),
+            user.createdAt,
+            member?.joinedAt || new Date(),
+            type,
+            reason,
+            client.user.tag
+        );
+
+        databaseEvent('INSERT', 'UserInfractions', true, `${type} registrado para ${user.tag}`);
+        return infractionId;
+    } catch (error) {
+        logger.error('Erro ao registrar infração no banco de dados', {
+            module: 'ANTI_FLOOD',
+            user: user.tag,
+            type,
+            error: error.message
+        });
+
+        databaseEvent('INSERT', 'UserInfractions', false, error.message);
+        return null;
+    }
+}
+
 async function blockFileTypes(message) {
     if (!message.inGuild()) return;
     if (message.author.bot) return;
@@ -65,49 +93,18 @@ async function blockFileTypes(message) {
                         await message.delete();
                         logger.debug('Mensagem com arquivo bloqueado deletada', context);
 
-                        // Salvar infração de arquivo bloqueado
-                        try {
-                            const reason = `Tentativa de envio de arquivo com extensão bloqueada: ${blockedFiles}`;
-                            const type = 'blockedFiles';
+                        const reasonBlockedFiles = `Tentativa de envio de arquivo com extensão bloqueada: ${blockedFiles}`;
+                        const typeBlockedFiles = 'blockedFiles';
+                        const reasonTimeout = `O usuário ${message.author.tag} recebeu um timeout de 5 minutos.`;
+                        const typeTimeout = 'timeouts';
+                        const reasonWarns = `O usuário ${message.author.tag} recebeu um aviso.`;
+                        const typeWarns = 'warns';
 
-                            await saveUserInfractions(
-                                message.author.id,
-                                message.author.tag,
-                                message.author.displayAvatarURL({ dynamic: true }),
-                                message.author.createdAt,
-                                message.member.joinedAt,
-                                type,
-                                reason,
-                                client.user.tag
-                            );
-                            databaseEvent('INSERT', 'UserInfractions', true, `Infração por arquivo bloqueado para ${message.author.tag}`);
+                        const blockedFileId = await registerInfraction(message.author, message.member, typeBlockedFiles, reasonBlockedFiles);
+                        const timeoutId = await registerInfraction(message.author, message.member, typeTimeout, reasonTimeout);
+                        const warnsId = await registerInfraction(message.author, message.member, typeWarns, reasonWarns);
+                        databaseEvent('INSERT', 'UserInfractions', true, `Infração por arquivo bloqueado para ${message.author.tag}`);
 
-                        } catch (dbError) {
-                            logger.error('Erro ao salvar infração por arquivo bloqueado', context, dbError);
-                            databaseEvent('INSERT', 'UserInfractions', false, dbError.message);
-                        }
-
-                        // salvar infração de timeout
-                        try {
-                            const reason = `O usuário ${message.author.tag} recebeu um timeout de 5 minutos.`;
-                            const type = 'timeouts';
-
-                            await saveUserInfractions(
-                                message.author.id,
-                                message.author.tag,
-                                message.author.displayAvatarURL({ dynamic: true }),
-                                message.author.createdAt,
-                                message.member.joinedAt,
-                                type,
-                                reason,
-                                client.user.tag
-                            );
-                            databaseEvent('INSERT', 'UserInfractions', true, `Infração de timeout por arquivo bloqueado para ${message.author.tag}`);
-
-                        } catch (dbError) {
-                            logger.error('Erro ao salvar infração por arquivo bloqueado', context, dbError);
-                            databaseEvent('INSERT', 'UserInfractions', false, dbError.message);
-                        }
 
                         // Enviar embed de aviso
                         const embed = new EmbedBuilder()
@@ -116,7 +113,7 @@ async function blockFileTypes(message) {
                                 name: client.user.username,
                                 iconURL: client.user.displayAvatarURL({ dynamic: true }),
                             })
-                            .setTitle('Arquivo Bloqueado')
+                            .setTitle('<:triste:1402690489462947981> Arquivo Bloqueado')
                             .setDescription(`${message.author}, o envio de arquivos com certas extensões é proibido neste servidor.`)
                             .setTimestamp()
                             .setFooter({ text: `Envio de arquivos monitorado por: ${client.user.tag}`, iconURL: `${client.user.displayAvatarURL({ dynamic: true })}` });
@@ -127,15 +124,16 @@ async function blockFileTypes(message) {
                                 name: client.user.username,
                                 iconURL: client.user.displayAvatarURL({ dynamic: true }),
                             })
-                            .setTitle('Arquivo Bloqueado')
+                            .setTitle('<:triste:1402690489462947981> Arquivo Bloqueado')
                             .setDescription(`${message.author} voce levou timeout de 5 minutos por envio de arquivos com certas extensões é proibido neste servidor.`)
+                            .addFields({ name: '🆔 ID da Infração', value: `\`${blockedFileId}\``, inline: true })
                             .setTimestamp()
                             .setFooter({ text: `Envio de arquivos monitorado por: ${client.user.tag}`, iconURL: `${client.user.displayAvatarURL({ dynamic: true })}` });
 
                         try {
                             await message.author.send({ embeds: [userEmbed] });
                             await message.channel.send({ embeds: [embed], content: `||${message.author}||` });
-                            await message.member.timeout(config.timeoutDuration, 'Timeout de 5 minutos aplicado pelo bot.');
+                            await message.member.timeout(configData.timeoutLevel.low.timeoutDuration, 'Timeout de 5 minutos aplicado pelo bot.');
 
                             logger.debug('Embed de aviso de arquivo bloqueado enviado', context);
                         } catch (embedError) {

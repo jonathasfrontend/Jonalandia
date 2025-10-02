@@ -54,7 +54,7 @@ async function autoKickNewMembers() {
                     // Enviar DM antes de expulsar
                     const embed = new EmbedBuilder()
                         .setColor('#FF0000')
-                        .setTitle('Expulsão do Servidor')
+                        .setTitle('<:feliz:1402690475634458664> Expulsão do Servidor')
                         .setDescription(`Olá ${member.user.tag}, sua conta foi criada há menos de 7 dias e, por isso, você foi expulso do servidor **${guild.name}**.`)
                         .addFields(
                             { name: 'Motivo', value: 'Conta criada em menos de 7 dias', inline: true },

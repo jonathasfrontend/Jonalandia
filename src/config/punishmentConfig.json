@@ -5,8 +5,23 @@
         "timeoutDuration": 300000,
         "decayTime": 2000,
         "maxWarnings": 2,
-        "warningCooldown": 20000
+        "warningCooldown": 30000
     },
+    "timeoutLevel": {
+        "low": {
+            "timeoutDuration": 300000
+        },
+        "lowMedium": {
+            "timeoutDuration": 600000
+        },
+        "medium": {
+            "timeoutDuration": 3600000
+        },
+        "high": {
+            "timeoutDuration": 86400000
+        }
+    },
+    
     "description": {
         "maxMessages": "Limite de mensagens permitidas no período de tempo",
         "timeWindow": "Período de tempo em milissegundos (padrão: 1 segundo)",

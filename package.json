@@ -1,7 +1,7 @@
 {
   "name": "jonalandia",
   "nameSpace": "Jonalandia_bot",
-  "version": "1.2.0",
+  "version": "10.2.1",
   "description": "bot para Discord Jonalandia feito com Discord.js e Node.js por Jonathas Oliveira",
   "main": "index.js",
   "license": "SEE LICENSE IN LICENSE",
@@ -40,6 +40,7 @@
     "mongoose": "^8.8.0",
     "node-cron": "^3.0.3",
     "nodemon": "^3.0.3",
+    "uuid": "^11.1.0",
     "winston": "^3.17.0"
   }
 }

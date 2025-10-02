@@ -1,13 +1,22 @@
 {
   "blockedLinks": [
-    "discord\\.gg\\/\\w+",
-    "steamcommunity\\.com\\/gift-card\\/pay\\/\\d+",
+    "(?:https?:\\/\\/)?(?:www\\.)?discord\\.gg\\/\\w+",
+    "(?:https?:\\/\\/)?(?:www\\.)?steamcommunity\\.com\\/gift-card\\/pay\\/\\d+",
     "(?:https?:\\/\\/)?(?:www\\.)?facebook\\.com\\/\\w+",
     "(?:https?:\\/\\/)?(?:www\\.)?instagram\\.com\\/\\w+",
     "(?:https?:\\/\\/)?(?:www\\.)?twitter\\.com\\/\\w+",
     "(?:https?:\\/\\/)?(?:www\\.)?youtube\\.com\\/\\w+",
     "(?:https?:\\/\\/)?(?:www\\.)?twitch\\.tv\\/\\w+",
     "(?:https?:\\/\\/)?(?:www\\.)?tiktok\\.com\\/\\w+",
-    "(?:https?:\\/\\/)?(?:www\\.)?linkedin\\.com\\/\\w+"
+    "(?:https?:\\/\\/)?(?:www\\.)?linkedin\\.com\\/\\w+",
+    "(?:https?:\\/\\/)?(?:www\\.)?bit\\.ly\\/\\w+",
+    "(?:https?:\\/\\/)?(?:www\\.)?tinyurl\\.com\\/\\w+",
+    "(?:https?:\\/\\/)?(?:www\\.)?rebrand\\.ly\\/\\w+",
+    "(?:https?:\\/\\/)?(?:www\\.)?t\\.ly\\/\\w+",
+    "(?:https?:\\/\\/)?(?:www\\.)?is\\.gd\\/\\w+",
+    "(?:https?:\\/\\/)?(?:www\\.)?cutt\\.ly\\/\\w+",
+    "(?:https?:\\/\\/)?(?:www\\.)?encurtador\\.com\\.br\\/\\w+",
+    "(?:https?:\\/\\/)?(?:www\\.)?shorte\\.st\\/\\w+",
+    "(?:https?:\\/\\/)?(?:www\\.)?linktr\\.ee\\/\\w+"
   ]
 }

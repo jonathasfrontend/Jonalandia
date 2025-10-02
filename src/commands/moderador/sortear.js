@@ -57,7 +57,7 @@ async function sortear(interaction) {
 
     const embed = new EmbedBuilder()
       .setColor("#00FF00")
-      .setTitle(`Parabéns @${vencedor.nomeUsuario}!`)
+      .setTitle(`<:icon:1402690522375520378> Parabéns @${vencedor.nomeUsuario}!`)
       .setAuthor({
         name: client.user.username,
         iconURL: client.user.displayAvatarURL({ dynamic: true }),

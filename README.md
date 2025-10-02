@@ -6,7 +6,7 @@
 
 **Um bot Discord para Gerenciamento do servidor Jonalandia**
 
-[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/jonathasfrontend/jonalandia)
+[![Version](https://img.shields.io/badge/version-10.2.1-blue.svg)](https://github.com/jonathasfrontend/jonalandia)
 [![Node.js](https://img.shields.io/badge/node.js-16%2B-green.svg)](https://nodejs.org/)
 [![Discord.js](https://img.shields.io/badge/discord.js-14.14.1-7289da.svg)](https://discord.js.org/)
 [![MongoDB](https://img.shields.io/badge/mongodb-8.8.0-green.svg)](https://mongodb.com/)
@@ -1052,55 +1052,6 @@ Para reportar bugs, inclua:
 - Passos para reproduzir
 - Comportamento esperado vs atual
 
----
-
-## � Changelog
-
-### 🚀 Versão 1.2.0 - Atualização de Documentação e Correções (Agosto 2025)
-
-#### ✨ **Melhorias na Documentação**
-- 🔄 **Nomes de Comandos Corrigidos**: Atualizados os nomes dos comandos na documentação para refletir a implementação real:
-  - `/oi` → `/mensage` - Comando de saudação amigável
-  - `/server` → `/searchguild` - Informações detalhadas do servidor
-  - `/aniversario` → `/birthday` - Registro de data de aniversário
-  - `/clima` → `/weather` - Previsão do tempo para cidades
-
-#### 📁 **Estrutura do Projeto Atualizada**
-- 🗂️ **Correção de Nomes de Pastas**: Documentação atualizada para refletir a estrutura real:
-  - `initializebot/` → `initialize/` - Comandos de inicialização
-  - `punicfunction/` → `checkPunishments/` - Funções de segurança
-- ➕ **Nova Pasta Documentada**: `public/` - Funções automáticas públicas
-
-#### 🆕 **Comandos Adicionados à Documentação**
-- 💾 **`/backup`**: Sistema completo de backup do banco de dados MongoDB
-  - Gera backup de todas as coleções
-  - Envia arquivo JSON organizado por DM
-  - Acesso restrito a moderadores
-  - Inclui 11 coleções principais do sistema
-
-#### 🔧 **Melhorias na Organização**
-- 📊 **Comandos Reorganizados**: Melhor categorização entre comandos públicos e de moderação
-- ✅ **Lista de Verificação Atualizada**: Todos os comandos verificados e marcados como funcionais
-- 📝 **Exemplos de Uso Corrigidos**: Todos os exemplos agora usam os nomes corretos dos comandos
-
-#### 🛡️ **Segurança e Estrutura**
-- 🔍 **Verificação Completa**: Análise detalhada de toda a estrutura do bot vs. documentação
-- 📋 **Conformidade Total**: Documentação agora está 100% alinhada com a implementação
-- 🏗️ **Arquitetura Documentada**: Estrutura modular completamente mapeada
-
-#### 🎯 **Próximos Passos**
-- 🔄 Considerar padronização dos nomes de comandos (implementação vs. documentação)
-- 📈 Implementação de métricas de uso de comandos
-- 🔒 Expansão do sistema de permissões granulares
-
-#### 📋 **Observações Importantes**
-- ✅ **Conformidade Total**: Documentação 100% sincronizada com implementação
-- 🔍 **Análise Detalhada**: Verificação completa de todos os comandos, funções e estrutura
-- 📁 **Estrutura Validada**: Todos os diretórios e arquivos mapeados corretamente
-- ⚡ **Bot Funcional**: Todos os 25+ comandos testados e operacionais
-
----
-
 ## �📄 Licença e Informações
 
 ### 👤 Autor
@@ -1114,7 +1065,7 @@ Para reportar bugs, inclua:
 - [📋 Licença](./LICENSE)
 
 ### 🔄 Versionamento
-- **Versão Atual**: 1.2.0
+- **Versão Atual**: 10.2.1
 - **Sistema**: Semantic Versioning (SemVer)
 - **Changelog**: [CHANGELOG.md](./CHANGELOG.md)
 

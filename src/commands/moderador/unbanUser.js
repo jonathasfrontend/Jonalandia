@@ -3,6 +3,7 @@ const { client } = require('../../Client');
 const { logger, commandExecuted, securityEvent } = require('../../logger');
 const { saveUserInfractions } = require('../../utils/saveUserInfractions');
 const { checkingComandChannelBlocked, checkingComandExecuntionModerador } = require('../../utils/checkingComandsExecution');
+const { TempBan } = require('../../models/tempBan');
 
 async function unbanUser(interaction) {
     if (!interaction.isCommand()) return;
@@ -53,9 +54,35 @@ async function unbanUser(interaction) {
 
         await interaction.guild.members.unban(userToUnban.id, reason);
 
+        // Verificar se havia um ban temporário ativo e cancelá-lo
+        let wasTempBan = false;
+        try {
+            const activeTempBan = await TempBan.findOne({
+                userId: userToUnban.id,
+                guildId: interaction.guild.id,
+                isActive: true
+            });
+
+            if (activeTempBan) {
+                activeTempBan.isActive = false;
+                await activeTempBan.save();
+                wasTempBan = true;
+                logger.info(`Ban temporário cancelado manualmente para ${userToUnban.tag}`, {
+                    ...context,
+                    targetUser: userToUnban.tag,
+                    originalDuration: activeTempBan.duration
+                });
+            }
+        } catch (tempBanError) {
+            logger.error('Erro ao verificar/cancelar ban temporário', context, tempBanError);
+        }
+
         // Tentativa de enviar DM
         try {
-            await userToUnban.send(reason);
+            const dmMessage = wasTempBan 
+                ? 'Você foi desbanido manualmente do servidor (seu ban temporário foi cancelado).'
+                : reason;
+            await userToUnban.send(dmMessage);
             logger.debug(`DM enviada com sucesso para ${userToUnban.tag}`, context);
         } catch (dmError) {
             logger.warn(`Não foi possível enviar DM para ${userToUnban.tag}`, context, dmError);
@@ -76,7 +103,9 @@ async function unbanUser(interaction) {
 
         const embed = new EmbedBuilder()
             .setColor('Green')
-            .setDescription(`${userToUnban.tag} foi desbanido com sucesso!`);
+            .setDescription(wasTempBan 
+                ? `${userToUnban.tag} foi desbanido com sucesso! (Ban temporário cancelado)`
+                : `${userToUnban.tag} foi desbanido com sucesso!`);
         await interaction.reply({ embeds: [embed], ephemeral: true });
 
         commandExecuted('desbanir', interaction.user, interaction.guild, true);

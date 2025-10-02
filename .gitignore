@@ -3,6 +3,7 @@ src/logs/
 /.vscode
 /cspell.json
 *.txt
+*.rar
 
 # dependencies
 /node_modules

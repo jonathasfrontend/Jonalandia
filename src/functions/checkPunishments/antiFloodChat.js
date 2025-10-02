@@ -13,10 +13,10 @@ class UserFloodData {
     constructor() {
         // Armazena timestamps das mensagens por usuário
         this.userMessages = new Collection();
-        
+
         // Armazena avisos dados aos usuários
         this.userWarnings = new Collection();
-        
+
         // Armazena cooldowns de avisos
         this.warningCooldowns = new Collection();
     }
@@ -30,16 +30,16 @@ class UserFloodData {
         if (!this.userMessages.has(userId)) {
             this.userMessages.set(userId, []);
         }
-        
+
         const messages = this.userMessages.get(userId);
         messages.push(timestamp);
-        
+
         // Remove mensagens antigas (fora da janela de tempo)
         const cutoff = timestamp - config.timeWindow;
         const recentMessages = messages.filter(msgTime => msgTime > cutoff);
-        
+
         this.userMessages.set(userId, recentMessages);
-        
+
         return recentMessages.length;
     }
 
@@ -51,7 +51,7 @@ class UserFloodData {
     getRecentMessageCount(userId) {
         const messages = this.userMessages.get(userId);
         if (!messages) return 0;
-        
+
         const cutoff = Date.now() - config.timeWindow;
         return messages.filter(msgTime => msgTime > cutoff).length;
     }
@@ -83,12 +83,12 @@ class UserFloodData {
     isInWarningCooldown(userId) {
         const cooldownEnd = this.warningCooldowns.get(userId);
         if (!cooldownEnd) return false;
-        
+
         if (Date.now() > cooldownEnd) {
             this.warningCooldowns.delete(userId);
             return false;
         }
-        
+
         return true;
     }
 
@@ -116,7 +116,7 @@ class UserFloodData {
     cleanup() {
         const now = Date.now();
         const cutoff = now - (config.timeWindow * 2); // Manter dados por 2x a janela de tempo
-        
+
         // Limpar mensagens antigas
         for (const [userId, messages] of this.userMessages.entries()) {
             const recentMessages = messages.filter(msgTime => msgTime > cutoff);
@@ -126,7 +126,7 @@ class UserFloodData {
                 this.userMessages.set(userId, recentMessages);
             }
         }
-        
+
         // Limpar avisos antigos (após 1 hora)
         const warningCutoff = now - (60 * 60 * 1000);
         for (const [userId, timestamp] of this.warningCooldowns.entries()) {
@@ -153,16 +153,16 @@ setInterval(() => {
  */
 function isUserImmune(member) {
     if (!member) return false;
-    
+
     // Dono do servidor é imune
     if (member.id === member.guild.ownerId) return true;
-    
+
     // Administradores são imunes
     if (member.permissions.has(PermissionFlagsBits.Administrator)) return true;
-    
+
     // Moderadores são imunes (ajuste o ID do cargo conforme necessário)
     if (process.env.CARGO_MODERADOR && member.roles.cache.has(process.env.CARGO_MODERADOR)) return true;
-    
+
     return false;
 }
 
@@ -170,14 +170,15 @@ function isUserImmune(member) {
  * Cria embed de aviso para flood
  * @param {User} user - Usuário que fez flood
  * @param {number} warnings - Número de avisos
+ * @param {string} infractionId - UUID da infração
  * @returns {EmbedBuilder} Embed de aviso
  */
-function createWarningEmbed(user, warnings) {
+function createWarningEmbed(user, warnings, infractionId = null) {
     const remainingWarnings = config.maxWarnings - warnings;
-    
-    return new EmbedBuilder()
+
+    const embed = new EmbedBuilder()
         .setColor('#FFA500')
-        .setTitle('⚠️ Aviso - Flood Detectado')
+        .setTitle('<:feliz:1402690475634458664> ⚠️ Aviso - Flood Detectado')
         .setDescription(
             `${user}, você está enviando mensagens muito rapidamente!\n\n` +
             `**Avisos:** ${warnings}/${config.maxWarnings}\n` +
@@ -185,24 +186,31 @@ function createWarningEmbed(user, warnings) {
             `Por favor, diminua a velocidade das suas mensagens.`
         )
         .setThumbnail(user.displayAvatarURL({ dynamic: true }))
-        .setFooter({ 
-            text: `Sistema Anti-Flood • ${client.user.tag}`, 
-            iconURL: client.user.displayAvatarURL({ dynamic: true }) 
+        .setFooter({
+            text: `Sistema Anti-Flood • ${client.user.tag}`,
+            iconURL: client.user.displayAvatarURL({ dynamic: true })
         })
         .setTimestamp();
+
+    if (infractionId) {
+        embed.addFields({ name: '🆔 ID da Infração', value: `\`${infractionId}\``, inline: true });
+    }
+
+    return embed;
 }
 
 /**
  * Cria embed de timeout por flood
  * @param {User} user - Usuário que levou timeout
+ * @param {string} infractionId - UUID da infração
  * @returns {EmbedBuilder} Embed de timeout
  */
-function createTimeoutEmbed(user) {
+function createTimeoutEmbed(user, infractionId = null) {
     const timeoutMinutes = Math.floor(config.timeoutDuration / 60000);
-    
-    return new EmbedBuilder()
+
+    const embed = new EmbedBuilder()
         .setColor('#FF0000')
-        .setTitle('🔇 Timeout Aplicado - Flood de Mensagens')
+        .setTitle('<:affs:1402695937175846912> 🔇 Timeout Aplicado - Flood de Mensagens')
         .setDescription(
             `${user} foi temporariamente silenciado por **${timeoutMinutes} minutos** ` +
             `devido ao flood de mensagens.\n\n` +
@@ -211,11 +219,17 @@ function createTimeoutEmbed(user) {
             `Leia as regras do servidor para evitar futuras punições.`
         )
         .setThumbnail(user.displayAvatarURL({ dynamic: true }))
-        .setFooter({ 
-            text: `Sistema Anti-Flood • ${client.user.tag}`, 
-            iconURL: client.user.displayAvatarURL({ dynamic: true }) 
+        .setFooter({
+            text: `Sistema Anti-Flood • ${client.user.tag}`,
+            iconURL: client.user.displayAvatarURL({ dynamic: true })
         })
         .setTimestamp();
+
+    if (infractionId) {
+        embed.addFields({ name: '🆔 ID da Infração', value: `\`${infractionId}\``, inline: true });
+    }
+
+    return embed;
 }
 
 /**
@@ -224,10 +238,11 @@ function createTimeoutEmbed(user) {
  * @param {GuildMember} member - Membro do servidor
  * @param {string} type - Tipo da infração
  * @param {string} reason - Motivo da infração
+ * @returns {string|null} UUID da infração ou null se falhou
  */
 async function registerInfraction(user, member, type, reason) {
     try {
-        await saveUserInfractions(
+        const infractionId = await saveUserInfractions(
             user.id,
             user.tag,
             user.displayAvatarURL({ dynamic: true }),
@@ -237,9 +252,9 @@ async function registerInfraction(user, member, type, reason) {
             reason,
             client.user.tag
         );
-        
+
         databaseEvent('INSERT', 'UserInfractions', true, `${type} registrado para ${user.tag}`);
-        return true;
+        return infractionId;
     } catch (error) {
         logger.error('Erro ao registrar infração no banco de dados', {
             module: 'ANTI_FLOOD',
@@ -247,9 +262,9 @@ async function registerInfraction(user, member, type, reason) {
             type,
             error: error.message
         });
-        
+
         databaseEvent('INSERT', 'UserInfractions', false, error.message);
-        return false;
+        return null;
     }
 }
 
@@ -262,16 +277,16 @@ async function registerInfraction(user, member, type, reason) {
 async function sendLogNotification(user, action, messageCount) {
     const logChannelId = process.env.CHANNEL_ID_LOGS_INFO_BOT;
     if (!logChannelId) return;
-    
+
     const logChannel = client.channels.cache.get(logChannelId);
     if (!logChannel) {
-        logger.warn('Canal de logs não encontrado', { 
+        logger.warn('Canal de logs não encontrado', {
             module: 'ANTI_FLOOD',
-            channelId: logChannelId 
+            channelId: logChannelId
         });
         return;
     }
-    
+
     try {
         const embed = new EmbedBuilder()
             .setColor(action === 'timeout' ? '#FF0000' : '#FFA500')
@@ -279,14 +294,13 @@ async function sendLogNotification(user, action, messageCount) {
             .addFields(
                 { name: 'Usuário', value: `${user} (${user.tag})`, inline: true },
                 { name: 'Ação', value: action === 'timeout' ? 'Timeout aplicado' : 'Aviso enviado', inline: true },
-                { name: 'Mensagens', value: `${messageCount} em ${config.timeWindow/1000}s`, inline: true }
+                { name: 'Mensagens', value: `${messageCount} em ${config.timeWindow / 1000}s`, inline: true }
             )
             .setThumbnail(user.displayAvatarURL({ dynamic: true }))
             .setTimestamp();
-            
+
         await logChannel.send({ embeds: [embed] });
-        await message.author.send({ embeds: [embed] });
-        
+
     } catch (error) {
         logger.error('Erro ao enviar notificação para logs', {
             module: 'ANTI_FLOOD',
@@ -303,7 +317,7 @@ async function antiFloodChat(message) {
     // Verificações básicas
     if (!message.inGuild()) return;
     if (message.author.bot) return;
-    
+
     const { author, member, guild } = message;
     const context = {
         module: 'ANTI_FLOOD',
@@ -311,93 +325,118 @@ async function antiFloodChat(message) {
         guild: guild?.name,
         userId: author.id
     };
-    
+
     // Verificar se o usuário é imune ao anti-flood
     if (isUserImmune(member)) {
         logger.info(`Usuário ${author.tag} é imune ao anti-flood`, context);
         return;
     }
-    
+
     try {
         // Adicionar mensagem e obter contagem
         const messageCount = floodData.addMessage(author.id);
-        
+
         logger.debug(`Mensagem registrada para ${author.tag}: ${messageCount}/${config.maxMessages}`, context);
-        
+
         // Verificar se ultrapassou o limite
         if (messageCount > config.maxMessages) {
             const warnings = floodData.getWarnings(author.id);
-            
+
             logger.warn(`Flood detectado para ${author.tag}: ${messageCount} mensagens`, {
                 ...context,
                 messageCount,
                 warnings
             });
-            
+
             // Se já tem avisos suficientes, aplicar timeout
             if (warnings >= config.maxWarnings) {
                 logger.info(`Aplicando timeout para ${author.tag} por flood persistente`, context);
-                
+
                 // Registrar infração de timeout
-                const timeoutReason = `Timeout por flood de mensagens (${messageCount} mensagens em ${config.timeWindow/1000}s)`;
-                await registerInfraction(author, member, 'floodTimeouts', timeoutReason);
-                
+                const reasonFlood = `Timeout por flood de mensagens (${messageCount} mensagens em ${config.timeWindow / 1000}s)`;
+                const typeFlood = 'floodTimeouts';
+                const reasonTimeout = `O usuário ${message.author.tag} recebeu um timeout de 5 minutos.`;
+                const typeTimeout = 'timeouts';
+                const reasonWarns = `O usuário ${message.author.tag} recebeu um aviso.`;
+                const typeWarns = 'warns';
+
+                const floodId = await registerInfraction(author, member, typeFlood, reasonFlood);
+                const timeoutId = await registerInfraction(message.author, message.member, typeTimeout, reasonTimeout);
+                const warnsId = await registerInfraction(message.author, message.member, typeWarns, reasonWarns);
+
+
                 try {
                     // Aplicar timeout
-                    await member.timeout(config.timeoutDuration, 'Flood de mensagens - Sistema automático');
-                    
+                    await member.timeout(configData.timeoutLevel.low.timeoutDuration, 'Flood de mensagens - Sistema automático');
+
                     // Criar e enviar embed de timeout
                     const timeoutEmbed = createTimeoutEmbed(author);
                     await message.reply({ embeds: [timeoutEmbed] });
-                    
+
+                    // Criar embed para DM com UUID
+                    const dmEmbed = createTimeoutEmbed(author, floodId);
+                    try {
+                        await author.send({ embeds: [dmEmbed] });
+                    } catch (dmError) {
+                        logger.warn(`Erro ao enviar DM para ${author.tag}`, context, dmError);
+                    }
+
                     // Enviar log
                     await sendLogNotification(author, 'timeout', messageCount);
-                    
+
                     // Registrar eventos de segurança
-                    securityEvent('ANTI_FLOOD_TIMEOUT', author, guild, `${messageCount} mensagens em ${config.timeWindow/1000}s`);
-                    
+                    securityEvent('ANTI_FLOOD_TIMEOUT', author, guild, `${messageCount} mensagens em ${config.timeWindow / 1000}s`);
+
                     logger.info(`Timeout aplicado com sucesso para ${author.tag}`, {
                         ...context,
-                        duration: `${config.timeoutDuration/60000} minutos`
+                        duration: `${config.timeoutDuration / 60000} minutos`
                     });
-                    
+
                     // Limpar dados do usuário
                     floodData.clearUser(author.id);
-                    
+
                 } catch (timeoutError) {
                     logger.error(`Erro ao aplicar timeout para ${author.tag}`, context, timeoutError);
                     securityEvent('TIMEOUT_FAILED', author, guild, timeoutError.message);
                 }
-                
+
             } else {
                 // Dar aviso se não estiver em cooldown
                 if (!floodData.isInWarningCooldown(author.id)) {
                     const newWarnings = floodData.addWarning(author.id);
                     floodData.setWarningCooldown(author.id);
-                    
+
                     logger.info(`Enviando aviso ${newWarnings}/${config.maxWarnings} para ${author.tag}`, context);
-                    
+
                     // Registrar infração de aviso
-                    const warningReason = `Aviso por flood de mensagens (${messageCount} mensagens em ${config.timeWindow/1000}s)`;
-                    await registerInfraction(author, member, 'floodWarning', warningReason);
-                    
+                    const warningReason = `Aviso por flood de mensagens (${messageCount} mensagens em ${config.timeWindow / 1000}s)`;
+                    const warningId = await registerInfraction(author, member, 'floodWarning', warningReason);
+
                     try {
                         // Criar e enviar embed de aviso
                         const warningEmbed = createWarningEmbed(author, newWarnings);
                         await message.reply({ embeds: [warningEmbed] });
-                        
+
+                        // Criar embed para DM com UUID
+                        const dmWarningEmbed = createWarningEmbed(author, newWarnings, warningId);
+                        try {
+                            await author.send({ embeds: [dmWarningEmbed] });
+                        } catch (dmError) {
+                            logger.warn(`Erro ao enviar DM de aviso para ${author.tag}`, context, dmError);
+                        }
+
                         // Enviar log
                         await sendLogNotification(author, 'warning', messageCount);
-                        
+
                         // Registrar evento de segurança
                         securityEvent('ANTI_FLOOD_WARNING', author, guild, `Aviso ${newWarnings}/${config.maxWarnings}`);
-                        
+
                         logger.info(`Aviso enviado para ${author.tag}`, {
                             ...context,
                             warnings: newWarnings,
                             maxWarnings: config.maxWarnings
                         });
-                        
+
                     } catch (warningError) {
                         logger.error(`Erro ao enviar aviso para ${author.tag}`, context, warningError);
                     }
@@ -406,7 +445,7 @@ async function antiFloodChat(message) {
                 }
             }
         }
-        
+
     } catch (error) {
         logger.error('Erro no sistema anti-flood', context, error);
     }
@@ -420,19 +459,19 @@ function reloadConfig() {
     try {
         const newConfig = loadConfiguration();
         CONFIG = newConfig;
-        
-        logger.info('Configurações do anti-flood recarregadas do arquivo', { 
+
+        logger.info('Configurações do anti-flood recarregadas do arquivo', {
             module: 'ANTI_FLOOD',
-            newConfig: CONFIG 
+            newConfig: CONFIG
         });
-        
+
         return true;
     } catch (error) {
         logger.error('Erro ao recarregar configurações do anti-flood', {
             module: 'ANTI_FLOOD',
             error: error.message
         });
-        
+
         return false;
     }
 }
@@ -457,15 +496,15 @@ function getFloodStats() {
  */
 function updateConfig(newConfig) {
     Object.assign(CONFIG, newConfig);
-    logger.info('Configurações do anti-flood atualizadas em tempo real', { 
+    logger.info('Configurações do anti-flood atualizadas em tempo real', {
         module: 'ANTI_FLOOD',
-        newConfig: CONFIG 
+        newConfig: CONFIG
     });
 }
 
-module.exports = { 
-    antiFloodChat, 
-    getFloodStats, 
+module.exports = {
+    antiFloodChat,
+    getFloodStats,
     updateConfig,
-    reloadConfig 
+    reloadConfig
 };
