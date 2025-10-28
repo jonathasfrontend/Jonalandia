@@ -1,24 +1,15 @@
 const { EmbedBuilder } = require("discord.js");
-const { client } = require("../../Client");
-const { checkingComandChannelBlocked, checkingComandExecuntionModerador } = require("../../utils/checkingComandsExecution");
+const { client } = require("../Client");
 
-async function mensageRegra(interaction) {
-  if (!interaction.isCommand()) return;
-
-  const authorizedExecutionComand = await checkingComandChannelBlocked(interaction);
-  if (!authorizedExecutionComand) return;
-
-  const authorizedExecutionComandModerador = await checkingComandExecuntionModerador(interaction);
-  if (!authorizedExecutionComandModerador) return;
-
-  const embed = await new EmbedBuilder()
-    .setColor("White")
-    .setTitle('📋 Regras')
-    .setAuthor({
-      name: client.user.username,
-      iconURL: client.user.displayAvatarURL({ dynamic: true }),
-    })
-    .setDescription(`
+function embedRegra() {
+    return new EmbedBuilder()
+        .setColor("White")
+        .setTitle('📋 Regras')
+        .setAuthor({
+            name: client.user.username,
+            iconURL: client.user.displayAvatarURL({ dynamic: true }),
+        })
+        .setDescription(`
         **Ofensas**:
         Qualquer tipo de ataque verbal que seja considerado ofensivo pra vítima; Ataques direcionadas no privado de quaisquer membro do servidor; Proibido assédio ou qualquer outro tipo de importunação que venha a constranger algum membro, seja ele homem/mulher ou não binário.
 
@@ -52,12 +43,10 @@ async function mensageRegra(interaction) {
         **Spoilers**:
         Qualquer spoiler de qualquer filme ou série deverá ser mandado no ⁠Desconhecido, qualquer outra sala é sujeito de banimento.
       `)
-    .setThumbnail(`${client.user.displayAvatarURL({ dynamic: true })}`)
-    .setImage('https://i.pinimg.com/originals/aa/b4/41/aab441520f83dbb4cbdaa6a61a9d76b4.jpg')
-    .setTimestamp()
-    .setFooter({ text: `Por: ${client.user.tag}`, iconURL: `${client.user.displayAvatarURL({ dynamic: true })}` });
+        .setThumbnail(`${client.user.displayAvatarURL({ dynamic: true })}`)
+        .setImage('https://i.pinimg.com/originals/aa/b4/41/aab441520f83dbb4cbdaa6a61a9d76b4.jpg')
+        .setTimestamp()
+        .setFooter({ text: `Por: ${client.user.tag}`, iconURL: `${client.user.displayAvatarURL({ dynamic: true })}` });
+}
 
-  await interaction.reply({ embeds: [embed] });
-};
-
-module.exports = { mensageRegra };
+module.exports = { embedRegra };

@@ -1,8 +1,9 @@
 const { EmbedBuilder } = require("discord.js");
 const { client } = require("../../Client");
 const { logger, botEvent } = require('../../logger');
+const NotificationChannelsModel = require('../../models/notificationChannels');
 
-function onMemberRemove(member) {
+async function onMemberRemove(member) {
     const context = {
         module: 'MEMBER_EVENTS',
         user: member.user.tag,
@@ -13,7 +14,22 @@ function onMemberRemove(member) {
     botEvent('MEMBER_LEFT', `${member.user.tag} saiu do servidor`);
 
     try {
-        const discordChannel = member.guild.channels.cache.get(process.env.CHANNEL_ID_ATE_LOGO);
+        // Busca o canal de despedida configurado no banco de dados
+        const goodbyeChannelConfig = await NotificationChannelsModel.findOne({ 
+            guildId: member.guild.id, 
+            notificationType: 'goodbye' 
+        });
+
+        let discordChannel;
+        
+        if (goodbyeChannelConfig) {
+            discordChannel = member.guild.channels.cache.get(goodbyeChannelConfig.channelId);
+            logger.debug(`Canal de despedida encontrado no banco: ${goodbyeChannelConfig.channelId}`, context);
+        } else {
+            // Fallback para variável de ambiente se não houver configuração no banco
+            discordChannel = member.guild.channels.cache.get(process.env.CHANNEL_ID_ATE_LOGO);
+            logger.debug('Usando canal de despedida da variável de ambiente (fallback)', context);
+        }
 
         if (discordChannel) {
             const embed = new EmbedBuilder()

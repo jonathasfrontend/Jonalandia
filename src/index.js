@@ -7,40 +7,51 @@
 
 require('dotenv').config();
 
-const { logger, botEvent } = require('./logger');
+const { logger, botEvent, erro, error } = require('./logger');
 const { client } = require('./Client');
-
+/*
+  // Funções 
+  * Check de punições
+*/
 const { antiFloodChat } = require('./functions/checkPunishments/antiFloodChat');
 const { blockLinks } = require('./functions/checkPunishments/blockLinks');
 const { detectInappropriateWords } = require('./functions/checkPunishments/detectInappropriateWords');
 const { autoKickNewMembers } = require('./functions/checkPunishments/kickNewMembers');
 const { blockFileTypes } = require('./functions/checkPunishments/blockFileTypes');
-
+/*  // Funções 
+  * Públicos
+*/
 const { onMemberAdd } = require('./functions/public/onMemberAdd');
 const { ruleMembreAdd } = require('./functions/public/ruleMembreAdd');
 const { onMemberRemove } = require('./functions/public/onMemberRemove');
 const { Status } = require('./functions/public/statusBot');
-const { checkUpdateRoles } = require('./functions/public/checkUpdateRoles');
 const { scheduleBirthdayCheck } = require('./functions/public/checkBirthdays');
 const { scheduleNotificationYoutubeCheck } = require('./functions/public/onNotificationYoutube');
 const { scheduleNotificationTwitchCheck } = require('./functions/public/onNotificationTwitch');
 const { scheduleonNotificationFreeGamesCheck } = require('./functions/public/onNotificationFreeGames');
 const { scheduleTempBanCheck } = require('./functions/public/checkTempBans');
-
+/*
+  // Comandos
+  * Inicialização
+*/
+const { Painel } = require('./commands/initialize/painel');
+/*
+  // Comandos
+  * Públicos
+*/
 const { Help } = require('./commands/public/help');
 const { searchGuild } = require('./commands/public/searchGuild');
 const { menssageFile } = require('./commands/public/mensage');
 const { Birthday } = require('./commands/public/birthday');
 const { getWeather } = require('./commands/public/weather');
-const { sorteioUser } = require('./commands/public/sorteio')
-const { infoSorteio } = require('./commands/public/infoSorteio')
-
-const { mensageRegra } = require('./commands/moderador/regra');
+/*
+  // Comandos
+  * Moderador
+*/
 const { createEmbed } = require('./commands/moderador/createEmbed');
 const { clean } = require('./commands/moderador/clean');
 const { cargo } = require('./commands/moderador/cargo');
 const { ticket } = require('./commands/moderador/ticket');
-const { manutencao } = require('./commands/moderador/manutencao');
 const { timeout } = require('./commands/moderador/timeout');
 const { expulsar } = require('./commands/moderador/expulsar');
 const { banUser } = require('./commands/moderador/banUser');
@@ -48,19 +59,14 @@ const { unbanUser } = require('./commands/moderador/unbanUser');
 const { listTempBans } = require('./commands/moderador/listTempBans');
 const { kickUser } = require('./commands/moderador/kickUser');
 const { Ficha } = require('./commands/moderador/ficha');
-const { premioSorteio } = require('./commands/moderador/premiosorteio')
-const { limpaSorteio } = require('./commands/moderador/limpasorteio')
-const { sortear } = require('./commands/moderador/sortear')
 const { voteParaBan } = require('./commands/moderador/voteparaban')
 const { excluirComando } = require('./commands/moderador/deleteCommand');
 const { backup } = require('./commands/moderador/backup');
-
-const { registerStreamersTwitch } = require('./commands/initialize/registerStreamersTwitch');
-const { registerChannelsYoutube } = require('./commands/initialize/registerChannelsYoutube');
-const { addChannels } = require('./commands/initialize/addChannels');
-const { removeChannels } = require('./commands/initialize/removeChannels');
-
+/*
+  // Database
+*/
 const { bdServerConect } = require('./database/bdServerConect');
+const { ApplicationCommandType } = require('discord.js');
 
 client.once('ready', () => {
   try {
@@ -70,9 +76,6 @@ client.once('ready', () => {
 
     Status();
     botEvent('STATUS_SET', 'Status do bot configurado');
-
-    checkUpdateRoles();
-    botEvent('ROLE_CHECKER_STARTED', 'Sistema de verificação de cargos iniciado');
 
     scheduleBirthdayCheck();
     botEvent('BIRTHDAY_SCHEDULER_STARTED', 'Agendador de aniversários iniciado');
@@ -100,8 +103,13 @@ client.once('ready', () => {
   })
 
   client.application?.commands.create({
-    name: 'regra',
-    description: 'Responde um embed de regras do servidor (Moderador)',
+    name: 'server',
+    description: "Busca informações do servidor!",
+  })
+
+  client.application?.commands.create({
+    name: 'help',
+    description: "Ajuda com os comandos!",
   })
 
   client.application?.commands.create({
@@ -134,16 +142,6 @@ client.once('ready', () => {
   });
 
   client.application?.commands.create({
-    name: 'server',
-    description: "Busca informações do servidor!",
-  })
-
-  client.application?.commands.create({
-    name: 'help',
-    description: "Ajuda com os comandos!",
-  })
-
-  client.application?.commands.create({
     name: 'cargo',
     description: "Comando para mostrar botões dos cargos! (Moderador)",
   })
@@ -154,9 +152,9 @@ client.once('ready', () => {
   })
 
   client.application?.commands.create({
-    name: 'manutencao',
-    description: "Menssagem de manutenção! (Moderador)",
-  })
+    name: 'painel',
+    description: 'Abre o painel de moderação (Moderador)',
+  });
 
   client.application?.commands.create({
     name: 'embed',
@@ -372,57 +370,21 @@ client.once('ready', () => {
   });
 
   client.application?.commands.create({
+    name: 'Ficha do Usuário',
+    type: ApplicationCommandType.User,
+  });
+
+  client.application?.commands.create({
     name: 'ficha',
-    description: 'Busca ficha dos dados do usuario no server. (Moderador)',
+    description: 'Busca ficha dos dados do usuario no servidor (Moderador)',
     options: [
       {
-        type: 6, // Tipo string
+        type: 6, // User
         name: 'usuario',
-        description: 'Nome do usuário a ser buscado.',
+        description: 'Usuário a ser consultado',
         required: true,
       },
     ],
-  });
-
-  client.application?.commands.create({
-    name: 'sorteio',
-    description: 'Cadastrar para participar do sorteio',
-    options: [
-      {
-        type: 6,
-        name: 'usuario',
-        description: 'Usuário a ser registrado no sorteio.',
-        required: true,
-      },
-    ],
-  });
-
-  client.application?.commands.create({
-    name: 'premiosorteio',
-    description: 'Cadastro de prêmio para sorteio (Moderador)',
-    options: [
-      {
-        type: 3,
-        name: 'premio',
-        description: 'O prêmio.',
-        required: true,
-      },
-    ],
-  });
-
-  client.application?.commands.create({
-    name: 'limpasorteio',
-    description: 'Limpa todos os participantes do sorteio (Moderador)',
-  });
-
-  client.application?.commands.create({
-    name: 'sortear',
-    description: 'Realiza o sorteio e exibe o vencedor',
-  });
-
-  client.application?.commands.create({
-    name: 'infosorteio',
-    description: 'Lista os participantes e informações do sorteio',
   });
 
   client.application?.commands.create({
@@ -455,69 +417,6 @@ client.once('ready', () => {
     name: 'backup',
     description: 'Faz backup completo de todas as coleções do banco de dados. (Moderador)',
   });
-
-  client.application?.commands.create({
-    name: 'addtwitch',
-    description: 'Cadastra um novo streamer para ser notificado. (Moderador, Inicialização do Bot)',
-    options: [
-      {
-        type: 3, // Tipo de string
-        name: 'streamer',
-        description: 'O nome do streamer.',
-        required: true,
-      }
-    ],
-  });
-
-  client.application?.commands.create({
-    name: 'addyoutube',
-    description: 'Cadastra um novo canal do youtube para ser notificado. (Moderador, Inicialização do Bot)',
-    options: [
-      {
-        type: 3, // Tipo de string
-        name: 'channel',
-        description: 'O nome do canal.',
-        required: true,
-      }
-    ],
-  });
-
-  client.application?.commands.create({
-    name: 'addchannels',
-    description: 'Adiciona canais ao banco de dados.',
-    options: [
-        {
-            type: 3, // Tipo string
-            name: 'opcao',
-            description: 'Escolha entre "todos" ou "um" (Moderador, Inicialização do Bot)',
-            required: true,
-            choices: [
-                { name: 'Todos os canais de texto', value: 'todos' },
-                { name: 'Adicionar um canal específico', value: 'um' }
-            ]
-        },
-        {
-            type: 7, // Tipo canal
-            name: 'canal',
-            description: 'Selecione o canal (opcional para a opção "um")',
-            required: false
-        }
-    ]
-  });
-
-  client.application?.commands.create({
-    name: 'removechannels',
-    description: 'Remove um canal de texto do banco de dados. (Moderador, Inicialização do Bot)',
-    options: [
-      {
-        type: 7, // Tipo 7 é para selecionar um canal
-        name: 'channel',
-        description: 'Selecione o canal de texto a ser removido.',
-        required: true,
-      },
-    ],
-  });
-
 });
 
 client.on('interactionCreate', async (interaction) => {
@@ -529,8 +428,6 @@ client.on('interactionCreate', async (interaction) => {
     await clean(interaction);
   } else if (commandName === 'oi') {
     await menssageFile(interaction);
-  } else if (commandName === 'regra') {
-    await mensageRegra(interaction);
   } else if (commandName === 'help') {
     await Help(interaction);
   } else if (commandName === 'server') {
@@ -539,8 +436,6 @@ client.on('interactionCreate', async (interaction) => {
     await cargo(interaction)
   } else if (commandName === 'ticket') {
     await ticket(interaction)
-  } else if (commandName === 'manutencao') {
-    await manutencao(interaction)
   } else if (commandName === 'embed') {
     await createEmbed(interaction);
   } else if (commandName === 'aniversario') {
@@ -559,39 +454,24 @@ client.on('interactionCreate', async (interaction) => {
     await kickUser(interaction);
   } else if (commandName === 'clima') {
     await getWeather(interaction);
-  } else if (commandName === 'ficha') {
+  } else if (commandName === 'ficha' || commandName === 'Ficha do Usuário') {
     await Ficha(interaction);
-  } else if (commandName === 'sorteio') {
-    await sorteioUser(interaction);
-  } else if (commandName === 'premiosorteio') {
-    await premioSorteio(interaction);
-  } else if (commandName === 'limpasorteio') {
-    await limpaSorteio(interaction);
-  } else if (commandName === 'sortear') {
-    await sortear(interaction);
-  } else if (commandName === 'infosorteio') {
-    await infoSorteio(interaction);
   } else if (commandName === 'voteparaban') {
     await voteParaBan(interaction);
   } else if (commandName === 'excluicomando') {
     await excluirComando(interaction);
   } else if (commandName === 'backup') {
     await backup(interaction);
-  } else if (commandName === 'addtwitch') {
-    await registerStreamersTwitch(interaction);
-  } else if (commandName === 'addyoutube') {
-    await registerChannelsYoutube(interaction);
-  } else if (commandName === 'addchannels') {
-    await addChannels(interaction);
-  } else if (commandName === 'removechannels') {
-    await removeChannels(interaction);
+  } else if (commandName === 'painel') {
+    await Painel(interaction);
+  } else {
+    erro('Comando não reconhecido', { module: 'INTERACTION_CREATE', command: commandName });
   }
 });
 
 client.on('guildMemberAdd', onMemberAdd);
 client.on('guildMemberAdd', ruleMembreAdd);
 client.on('guildMemberAdd', autoKickNewMembers);
-
 client.on('guildMemberRemove', onMemberRemove);
 
 client.on('messageCreate', blockLinks);

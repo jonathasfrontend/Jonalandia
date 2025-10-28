@@ -7,7 +7,7 @@ const { checkingComandChannelBlocked, checkingComandExecuntionModerador } = requ
 async function Ficha(interaction) {
     const { options, guild } = interaction;
 
-    if (!interaction.isCommand()) return;
+    if (!interaction.isCommand() && !interaction.isUserContextMenuCommand()) return;
 
     const authorizedExecutionComand = await checkingComandChannelBlocked(interaction);
     if (!authorizedExecutionComand) return;
@@ -18,7 +18,8 @@ async function Ficha(interaction) {
     try {
         await interaction.deferReply();
 
-        const userOption = options.getUser('usuario');
+        // Suporta tanto Context Menu (targetUser) quanto Slash Command (options.getUser)
+        const userOption = interaction.targetUser || options.getUser('usuario');
         if (!userOption) {
             return interaction.editReply({
                 content: '❌ Usuário não especificado ou inválido.',

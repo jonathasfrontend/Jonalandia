@@ -2,6 +2,7 @@ const { client } = require("../../Client");
 const { logger, botEvent, databaseEvent } = require('../../logger');
 const onNotificationTwitchSchema = require("../../models/notificationTwitch");
 const onTwitchStreamersSchema = require("../../models/streamers");
+const NotificationChannelsModel = require("../../models/notificationChannels");
 const axios = require('axios');
 const { EmbedBuilder } = require("discord.js");
 const cron = require('node-cron');
@@ -78,10 +79,31 @@ async function onNotificationTwitch() {
                         .setTimestamp()
                         .setFooter({ text: `Por: ${client.user.tag}`, iconURL: `${client.user.displayAvatarURL({ dynamic: true })}` });
 
-                    const discordChannel = client.channels.cache.get(process.env.CHANNEL_ID_NOTIFICATION_TWITCH);
+                    // Buscar canal de notificação do banco de dados
+                    let discordChannel = null;
+                    
+                    try {
+                        const notificationChannelData = await NotificationChannelsModel.findOne({ 
+                            notificationType: 'twitch' 
+                        });
+                        
+                        if (notificationChannelData) {
+                            discordChannel = client.channels.cache.get(notificationChannelData.channelId);
+                            databaseEvent('SELECT', 'NotificationChannels', true, `Canal Twitch encontrado: ${notificationChannelData.channelId}`);
+                        }
+                    } catch (dbError) {
+                        logger.error('Erro ao buscar canal de notificação Twitch no banco de dados', streamerContext, dbError);
+                        databaseEvent('SELECT', 'NotificationChannels', false, dbError.message);
+                    }
+
+                    // Fallback para variável de ambiente se não encontrar no banco
+                    if (!discordChannel && process.env.CHANNEL_ID_NOTIFICATION_TWITCH) {
+                        discordChannel = client.channels.cache.get(process.env.CHANNEL_ID_NOTIFICATION_TWITCH);
+                        logger.debug('Usando canal Twitch da variável de ambiente como fallback', streamerContext);
+                    }
 
                     if (!discordChannel) {
-                        logger.error('Canal de notificações Twitch não encontrado', streamerContext);
+                        logger.error('Canal de notificações Twitch não encontrado no banco de dados nem nas variáveis de ambiente', streamerContext);
                         continue;
                     }
 

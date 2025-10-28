@@ -13,8 +13,6 @@ const onInfracoesUsersSchema = require('../../models/infracoesUsers.js');
 const onNotificationBirthdaySchema = require('../../models/notificationBirthday.js');
 const onNotificationTwitchSchema = require('../../models/notificationTwitch.js');
 const onNotificationYoutubeSchema = require('../../models/notificationYoutube.js');
-const onPremioSorteioSchema = require('../../models/premioSorteio.js');
-const onSorteioSchema = require('../../models/sorteio.js');
 const onTwitchStreamersSchema = require('../../models/streamers.js');
 const onVotoBanUserSchema = require('../../models/votoBanUser.js');
 const onYoutubeChannelSchema = require('../../models/youtubeChannel.js');
@@ -34,8 +32,6 @@ async function backup(interaction) {
         { name: 'onNotificationBirthdaySchema', model: onNotificationBirthdaySchema },
         { name: 'onNotificationTwitchSchema', model: onNotificationTwitchSchema },
         { name: 'onNotificationYoutubeSchema', model: onNotificationYoutubeSchema },
-        { name: 'onPremioSorteioSchema', model: onPremioSorteioSchema },
-        { name: 'onSorteioSchema', model: onSorteioSchema },
         { name: 'onTwitchStreamersSchema', model: onTwitchStreamersSchema },
         { name: 'onVotoBanUserSchema', model: onVotoBanUserSchema },
         { name: 'onYoutubeChannelSchema', model: onYoutubeChannelSchema }
@@ -102,8 +98,6 @@ async function backup(interaction) {
             { name: 'notificationBirthday', model: onNotificationBirthdaySchema, filename: 'notificationBirthday.json' },
             { name: 'notificationTwitch', model: onNotificationTwitchSchema, filename: 'notificationTwitch.json' },
             { name: 'notificationYoutube', model: onNotificationYoutubeSchema, filename: 'notificationYoutube.json' },
-            { name: 'premioSorteio', model: onPremioSorteioSchema, filename: 'premioSorteio.json' },
-            { name: 'sorteio', model: onSorteioSchema, filename: 'sorteio.json' },
             { name: 'twitchStreamers', model: onTwitchStreamersSchema, filename: 'twitchStreamers.json' },
             { name: 'votoBanUser', model: onVotoBanUserSchema, filename: 'votoBanUser.json' },
             { name: 'youtubeChannels', model: onYoutubeChannelSchema, filename: 'youtubeChannels.json' }

@@ -9,6 +9,7 @@ const {
 const { client } = require("../../Client");
 const { logger, botEvent } = require('../../logger');
 const { checkingComandChannelBlocked, checkingComandExecuntionModerador } = require("../../utils/checkingComandsExecution");
+const TicketConfigModel = require("../../models/ticketConfig");
 
 const TICKET_OPTIONS = [
     { label: 'Tirar dúvidas', value: 'tirarduvida', emoji: '🌞' },
@@ -42,6 +43,18 @@ async function ticket(interaction) {
         return;
     }
 
+    // Buscar configurações do banco de dados
+    const ticketConfig = await TicketConfigModel.findOne({ guildId: interaction.guild.id });
+    
+    if (!ticketConfig || ticketConfig.channelId === '0' || ticketConfig.categoryId === '0' || ticketConfig.supportRoleId === '0') {
+        await interaction.reply({ 
+            content: '⚠️ As configurações de tickets não foram definidas! Use o comando `/painel` (página 5) para configurar o sistema de tickets.', 
+            ephemeral: true 
+        });
+        logger.warn('Tentativa de usar comando ticket sem configurações definidas', context);
+        return;
+    }
+
     const row = new ActionRowBuilder().addComponents(
         new StringSelectMenuBuilder()
             .setCustomId('ticket')
@@ -70,7 +83,17 @@ async function ticket(interaction) {
 
     await interaction.reply({ content: 'Botão enviado!', ephemeral: true });
 
-    const discordChannel1 = client.channels.cache.get(process.env.CHANNEL_ID_TICKET);
+    const discordChannel1 = client.channels.cache.get(ticketConfig.channelId);
+    
+    if (!discordChannel1) {
+        await interaction.followUp({ 
+            content: '⚠️ O canal configurado para tickets não foi encontrado! Verifique as configurações no painel.', 
+            ephemeral: true 
+        });
+        logger.error('Canal de tickets não encontrado', { ...context, channelId: ticketConfig.channelId });
+        return;
+    }
+    
     discordChannel1.send({ embeds: [embedTicket], components: [row] });
 
     logger.info('Sistema de ticket configurado com sucesso', context);
@@ -179,10 +202,21 @@ Havendo isso em mãos, crie um ticket abaixo e faça o seu envio.
             guild: interaction.guild?.name
         };
 
-        const category = interaction.guild.channels.cache.get(process.env.CATEGORY_ID);
+        // Buscar configurações do banco de dados
+        const ticketConfig = await TicketConfigModel.findOne({ guildId: interaction.guild.id });
+        
+        if (!ticketConfig || ticketConfig.categoryId === '0' || ticketConfig.supportRoleId === '0') {
+            logger.error('Configurações de ticket não encontradas ou incompletas', context);
+            return interaction.reply({ 
+                content: '⚠️ As configurações de tickets estão incompletas! Entre em contato com um administrador.', 
+                ephemeral: true 
+            });
+        }
+
+        const category = interaction.guild.channels.cache.get(ticketConfig.categoryId);
         if (!category || category.type !== 4) {
-            logger.error('Categoria inválida para tickets', context);
-            return interaction.reply({ content: 'Categoria inválida para tickets.', ephemeral: true });
+            logger.error('Categoria inválida para tickets', { ...context, categoryId: ticketConfig.categoryId });
+            return interaction.reply({ content: 'Categoria inválida para tickets. Entre em contato com um administrador.', ephemeral: true });
         }
 
         const channelName = `ticket-${interaction.user.username}`;
@@ -212,7 +246,7 @@ Havendo isso em mãos, crie um ticket abaixo e faça o seu envio.
                         ],
                     },
                     {
-                        id: process.env.CARGO_SUPPORT,
+                        id: ticketConfig.supportRoleId,
                         allow: [
                             PermissionsBitField.Flags.ViewChannel,
                             PermissionsBitField.Flags.SendMessages,

@@ -2,6 +2,7 @@ const { client } = require("../../Client");
 const { logger, botEvent, databaseEvent } = require('../../logger');
 const onNotificationYoutubeSchema = require('../../models/notificationYoutube');
 const onYoutubeChannelSchema = require('../../models/youtubeChannel');
+const NotificationChannelsModel = require('../../models/notificationChannels');
 const axios = require('axios');
 const { EmbedBuilder } = require("discord.js");
 const cron = require('node-cron');
@@ -101,10 +102,31 @@ async function onNotificationYoutube() {
                             .setTimestamp()
                             .setFooter({ text: `Por: ${client.user.tag}`, iconURL: `${client.user.displayAvatarURL({ dynamic: true })}` });
 
-                        const discordChannel = client.channels.cache.get(process.env.CHANNEL_ID_NOTIFICATION_YOUTUBE);
+                        // Buscar canal de notificação do banco de dados
+                        let discordChannel = null;
+                        
+                        try {
+                            const notificationChannelData = await NotificationChannelsModel.findOne({ 
+                                notificationType: 'youtube' 
+                            });
+                            
+                            if (notificationChannelData) {
+                                discordChannel = client.channels.cache.get(notificationChannelData.channelId);
+                                databaseEvent('SELECT', 'NotificationChannels', true, `Canal YouTube encontrado: ${notificationChannelData.channelId}`);
+                            }
+                        } catch (dbError) {
+                            logger.error('Erro ao buscar canal de notificação YouTube no banco de dados', channelContext, dbError);
+                            databaseEvent('SELECT', 'NotificationChannels', false, dbError.message);
+                        }
+
+                        // Fallback para variável de ambiente se não encontrar no banco
+                        if (!discordChannel && process.env.CHANNEL_ID_NOTIFICATION_YOUTUBE) {
+                            discordChannel = client.channels.cache.get(process.env.CHANNEL_ID_NOTIFICATION_YOUTUBE);
+                            logger.debug('Usando canal YouTube da variável de ambiente como fallback', channelContext);
+                        }
 
                         if (!discordChannel) {
-                            logger.error('Canal de notificações YouTube não encontrado', channelContext);
+                            logger.error('Canal de notificações YouTube não encontrado no banco de dados nem nas variáveis de ambiente', channelContext);
                             continue;
                         }
 

@@ -28,21 +28,27 @@ async function checkBirthdays() {
 
         for (const user of birthdaysToday) {
             try {
-                const guild = client.guilds.cache.get(process.env.GUILD_ID);
+                const guild = client.guilds.cache.get(user.guildId);
                 if (!guild) {
-                    logger.error('Guild não encontrada', context);
+                    logger.warn(`Guild ${user.guildId} não encontrada para aniversário de ${user.userId}`, context);
                     continue;
                 }
 
                 const member = guild.members.cache.get(user.userId);
                 if (!member) {
-                    logger.warn(`Membro ${user.userId} não encontrado no servidor`, context);
+                    logger.warn(`Membro ${user.userId} não encontrado no servidor ${guild.name}`, {
+                        ...context,
+                        guild: guild.name
+                    });
                     continue;
                 }
 
                 const channel = guild.channels.cache.get(process.env.CHANNEL_ID_ANIVERSARIO);
                 if (!channel) {
-                    logger.error('Canal de aniversário não encontrado', context);
+                    logger.error(`Canal de aniversário não encontrado no servidor ${guild.name}`, {
+                        ...context,
+                        guild: guild.name
+                    });
                     continue;
                 }
 

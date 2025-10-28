@@ -13,6 +13,7 @@ async function Birthday(interaction) {
     const month = interaction.options.getInteger('mes');
     const userId = interaction.user.id;
     const username = interaction.user.username;
+    const guildId = interaction.guild.id;
 
     if (day < 1 || day > 31 || month < 1 || month > 12) {
         Logger.error(`Data inválida fornecida por ${username}: ${day}/${month}`);
@@ -21,6 +22,7 @@ async function Birthday(interaction) {
 
     const birthday = new onNotificationBirthdaySchema({
         userId,
+        guildId,
         name: username,
         day,
         month,
