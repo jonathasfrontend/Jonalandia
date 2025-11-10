@@ -4,6 +4,7 @@ src/logs/
 /cspell.json
 *.txt
 *.rar
+*.backup
 
 # dependencies
 /node_modules

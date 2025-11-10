@@ -6,7 +6,7 @@
 
 **Um bot Discord para Gerenciamento do servidor Jonalandia**
 
-[![Version](https://img.shields.io/badge/version-10.2.1-blue.svg)](https://github.com/jonathasfrontend/jonalandia)
+[![Version](https://img.shields.io/badge/version-10.2.4-blue.svg)](https://github.com/jonathasfrontend/jonalandia)
 [![Node.js](https://img.shields.io/badge/node.js-16%2B-green.svg)](https://nodejs.org/)
 [![Discord.js](https://img.shields.io/badge/discord.js-14.14.1-7289da.svg)](https://discord.js.org/)
 [![MongoDB](https://img.shields.io/badge/mongodb-8.8.0-green.svg)](https://mongodb.com/)
@@ -17,10 +17,12 @@
 ## 📋 Sumário
 
 - [🚀 Introdução](#-introdução)
+  - [🆕 Novidades da Versão 10.2.4](#-novidades-da-versão-1021)
 - [⚡ Visão Geral](#-visão-geral)
 - [📦 Instalação e Configuração](#-instalação-e-configuração)
 - [🏗️ Estrutura do Projeto](#️-estrutura-do-projeto)
 - [🎯 Comandos Disponíveis](#-comandos-disponíveis)
+  - [🎛️ Comando /painel](#️-comando-painel---central-de-configuração-do-bot)
 - [🔧 Funcionalidades Automáticas](#-funcionalidades-automáticas)
 - [🛡️ Sistema de Segurança](#️-sistema-de-segurança)
 - [📊 Sistema de Logs Avançado](#-sistema-de-logs-avançado)
@@ -28,6 +30,7 @@
 - [🔔 Sistema de Notificações](#-sistema-de-notificações)
 - [⚙️ Configuração Avançada](#️-configuração-avançada)
 - [🐛 Resolução de Problemas](#-resolução-de-problemas)
+  - [❓ Perguntas Frequentes (FAQ)](#-perguntas-frequentes-faq)
 - [🤝 Contribuição](#-contribuição)
 
 ---
@@ -36,13 +39,23 @@
 
 O **Bot Jonalandia** é uma solução completa e avançada para servidores Discord, desenvolvida com foco na automação de tarefas de moderação, engajamento da comunidade e experiência personalizada. Criado por **Jonathas Oliveira**, o bot combina mais de 25 comandos especializados, sistema de logs avançado e funcionalidades de segurança.
 
-### 🎯 Principais Características
+### � Novidades da Versão 10.2.4
+
+- ✨ **Painel de Configuração Unificado** - Novo comando `/painel` com interface moderna usando Containers V2
+- 🎫 **Sistema de Tickets Completo** - Configuração integrada através do painel
+- ⏰ **Banimentos Temporários** - Gerenciamento automático de bans com tempo definido
+- 🔔 **Gerenciamento Centralizado de Notificações** - Configuração de todos os canais em um só lugar
+- 📊 **Interface Aprimorada** - Navegação por páginas com componentes visuais avançados
+- 🗄️ **Novos Schemas de Banco** - `notificationChannels`, `tempBan` e `ticketConfig`
+
+### �🎯 Principais Características
 
 - **Sistema de Moderação Completo** - Ferramentas avançadas para administração do servidor
+- **Painel de Configuração Centralizado** - Interface moderna para configuração completa do bot
 - **Segurança Multicamadas** - Anti-flood avançado com avisos progressivos, detecção de links maliciosos e palavras inadequadas
 - **Sistema de Logs Profissional** - Monitoramento detalhado de todas as atividades
 - **Notificações Inteligentes** - Monitoramento de YouTube, Twitch e jogos gratuitos
-- **Interface Moderna** - Embeds personalizados e botões interativos
+- **Interface Moderna** - Embeds personalizados e componentes interativos (Containers V2)
 
 ---
 
@@ -60,11 +73,14 @@ O **Bot Jonalandia** é uma solução completa e avançada para servidores Disco
 
 ### 🏆 Recursos Principais
 
-- ✅ **25+ Comandos Especializados** - Cobrindo moderação, diversão e utilidades
+- ✅ **25+ Comandos Especializados** - Cobrindo moderação, configuração e utilidades
+- ✅ **Painel de Configuração Interativo** - Setup completo através de interface visual moderna
 - ✅ **Sistema de Logs Avançado** - 6 níveis de log com rotação automática
 - ✅ **Segurança Multicamadas** - Proteção contra spam, links e conteúdo inadequado
-- ✅ **Notificações Inteligentes** - Monitoramento de plataformas externas
-- ✅ **Interface Moderna** - Embeds responsivos e componentes interativos
+- ✅ **Notificações Inteligentes** - Monitoramento de plataformas externas (Twitch, YouTube)
+- ✅ **Interface Moderna** - Embeds responsivos e componentes interativos (Containers V2)
+- ✅ **Sistema de Tickets** - Suporte organizado através de tickets
+- ✅ **Banimentos Temporários** - Gerenciamento automático de bans temporários
 
 ---
 
@@ -124,6 +140,15 @@ TWITCH_CLIENT_SECRET=seu_client_secret_twitch
 npm start
 ```
 
+6. **Configure o bot através do painel:**
+```
+Após o bot estar online em seu servidor:
+1. Execute o comando /painel
+2. Configure os canais de notificação
+3. Adicione streamers e canais do YouTube (opcional)
+4. Configure o sistema de tickets (opcional)
+```
+
 ### 🔒 Configuração de Segurança
 
 Para máxima segurança, configure:
@@ -145,23 +170,65 @@ Para máxima segurança, configure:
 jonalandia/
 ├── 📁 src/
 │   ├── 📁 commands/           # Comandos do bot
+│   │   ├── 📁 initialize/     # Comandos de inicialização e configuração
+│   │   │   └── 📄 painel.js   # Central de configuração do bot
 │   │   ├── 📁 moderador/      # Comandos de moderação
-│   │   ├── 📁 public/         # Comandos públicos/usuários
-│   │   └── 📁 initialize/     # Comandos de inicialização
+│   │   └── 📁 public/         # Comandos públicos/usuários
 │   ├── 📁 config/             # Configurações do sistema
-│   ├── 📁 database/           # Conecção com mongodb
+│   │   ├── � blockedFileExtensions.json    # Extensões bloqueadas
+│   │   ├── 📄 blockedLinks.json             # Links bloqueados
+│   │   ├── 📄 InappropriateWords.json       # Palavras inadequadas
+│   │   └── � punishmentConfig.json         # Configurações de punições
+│   ├── 📁 database/           # Conexão com MongoDB
+│   │   └── 📄 bdServerConect.js
+│   ├── 📁 embedsDefault/      # Embeds padrão do bot
+│   │   ├── 📄 embedManutencao.js
+│   │   └── 📄 embedRegra.js
 │   ├── 📁 functions/          # Funções automáticas
 │   │   ├── 📁 checkPunishments/ # Funções de segurança
+│   │   │   ├── 📄 antiFloodChat.js
+│   │   │   ├── 📄 blockFileTypes.js
+│   │   │   ├── 📄 blockLinks.js
+│   │   │   ├── 📄 detectInappropriateWords.js
+│   │   │   └── 📄 kickNewMembers.js
 │   │   └── 📁 public/         # Funções públicas automáticas
-│   ├── 📁 models/             # Esquemas do banco de dados
-│   ├── 📁 utils/              # Utilitários e helpers
+│   │       ├── 📄 checkBirthdays.js
+│   │       ├── 📄 checkTempBans.js
+│   │       ├── 📄 onMemberAdd.js
+│   │       ├── 📄 onMemberRemove.js
+│   │       ├── 📄 onNotificationFreeGames.js
+│   │       ├── � onNotificationTwitch.js
+│   │       ├── 📄 onNotificationYoutube.js
+│   │       ├── 📄 ruleMembreAdd.js
+│   │       └── 📄 statusBot.js
+│   ├── �📁 models/             # Esquemas do banco de dados (MongoDB)
+│   │   ├── 📄 addChannel.js
+│   │   ├── 📄 gameNotification.js
+│   │   ├── 📄 infracoesUsers.js
+│   │   ├── 📄 notificationBirthday.js
+│   │   ├── 📄 notificationChannels.js
+│   │   ├── 📄 notificationTwitch.js
+│   │   ├── 📄 notificationYoutube.js
+│   │   ├── 📄 streamers.js
+│   │   ├── 📄 tempBan.js
+│   │   ├── � ticketConfig.js
+│   │   ├── 📄 votoBanUser.js
+│   │   └── 📄 youtubeChannel.js
+│   ├── �📁 utils/              # Utilitários e helpers
+│   │   ├── 📄 checkingComandsExecution.js
+│   │   └── 📄 saveUserInfractions.js
 │   ├── 📁 logs/               # Arquivos de log
-│   ├── 📄 Client.js           # Cliente Discord
-│   ├── 📄 index.js            # Arquivo principal
-│   └── 📄 logger.js           # Sistema de logs
+│   ├── 📄 Client.js           # Cliente Discord customizado
+│   ├── 📄 index.js            # Arquivo principal de inicialização
+│   └── 📄 logger.js           # Sistema de logs profissional
+├── 📁 emotes/                 # Emotes customizados
 ├── 📄 package.json            # Dependências do projeto
-├── 📄 README.md               # Documentação
-└── 📄 .env                    # Variáveis de ambiente
+├── 📄 README.md               # Documentação completa
+├── 📄 LICENSE                 # Licença do projeto
+├── 📄 PRIVACY_POLICY.md       # Política de privacidade
+├── 📄 TERMS_OF_SERVICE.md     # Termos de serviço
+├── 📄 cspell.json             # Configuração do spell checker
+└── 📄 .env                    # Variáveis de ambiente (não versionado)
 ```
 
 ### 📊 Arquitetura Modular
@@ -200,6 +267,7 @@ O bot foi projetado com arquitetura modular para facilitar manutenção e expans
 | `/timeout` | Aplica timeout de 3 minutos | `/timeout usuario: @user` | Moderador |
 | `/banir` | Bane usuário do servidor | `/banir usuario: @user` | Moderador |
 | `/desbanir` | Remove ban de usuário | `/desbanir usuario: @user` | Moderador |
+| `/listarbanstemporarios` | Lista todos os bans temporários ativos | `/listarbanstemporarios` | Moderador |
 | `/expulsar` | Expulsa usuário de canal de voz | `/expulsar usuario: @user` | Moderador |
 | `/kickuser` | Remove usuário de canal de voz | `/kickuser usuario: @user` | Moderador |
 | `/embed` | Cria embed personalizado | `/embed titulo: "Título" descrição: "Texto"` | Moderador |
@@ -261,11 +329,12 @@ O comando `/backup` permite aos moderadores gerar um backup completo de todas as
 - ✓ gameNotification - Notificações de jogos
 - ✓ infractionsUsers - Infrações de usuários
 - ✓ notificationBirthday - Aniversários cadastrados
+- ✓ notificationChannels - Configurações de canais
 - ✓ notificationTwitch - Cache de Twitch
 - ✓ notificationYoutube - Cache de YouTube
-- ✓ premioSorteio - Prêmios de sorteios
-- ✓ sorteio - Participantes de sorteios
 - ✓ streamers - Streamers monitorados
+- ✓ tempBan - Banimentos temporários
+- ✓ ticketConfig - Configurações de tickets
 - ✓ votoBanUser - Votações de banimento
 - ✓ youtubeChannel - Canais YouTube monitorados
 
@@ -290,10 +359,71 @@ O comando `/backup` permite aos moderadores gerar um backup completo de todas as
 
 | Comando | Descrição | Uso | Permissão |
 |---------|-----------|-----|-----------|
-| `/addchannels` | Adiciona canais ao sistema | `/addchannels opcao: todos` | Moderador |
-| `/removechannels` | Remove canal do sistema | `/removechannels channel: #canal` | Moderador |
-| `/addtwitch` | Cadastra streamer Twitch | `/addtwitch streamer: nome` | Moderador |
-| `/addyoutube` | Cadastra canal YouTube | `/addyoutube channel: url` | Moderador |
+| `/painel` | Painel de configuração completo do bot | `/painel` | Moderador |
+
+#### 🎛️ Comando `/painel` - Central de Configuração do Bot
+
+O comando `/painel` é uma interface centralizada e moderna para configurar todas as funcionalidades do Bot Jonalandia. Este painel utiliza componentes visuais avançados do Discord (Containers V2) e oferece navegação intuitiva através de múltiplas páginas.
+
+**📋 Características do Painel:**
+
+- 🎨 **Interface Moderna**: Utiliza Containers V2 do Discord com design profissional
+- 📑 **5 Páginas de Configuração**: Organizado por categorias funcionais
+- 🔄 **Navegação Intuitiva**: Botões de anterior/próximo para navegar entre páginas
+- 🔒 **Acesso Restrito**: Disponível apenas para moderadores
+- 💾 **Configuração Persistente**: Todas as configurações são salvas no MongoDB
+- 🎯 **Interface Unificada**: Substitui múltiplos comandos de configuração individuais
+
+**📄 Páginas do Painel:**
+
+**Página 1 - 🗨️ Registro de Canais**
+- ✅ **Adicionar todos os canais**: Registra automaticamente todos os canais de texto do servidor
+- ✅ **Adicionar canal específico**: Seleciona e adiciona um canal individualmente
+- ✅ **Remover canal específico**: Remove um canal do sistema de gerenciamento
+
+**Página 2 - 📦 Envio de Embeds Padrão**
+- ✅ **Enviar embed de regras**: Envia mensagem formatada com as regras do servidor
+- ✅ **Enviar embed de manutenção**: Envia notificação de manutenção programada
+
+**Página 3 - 🎮 Configuração de Streamers**
+- ✅ **Cadastrar streamer Twitch**: Adiciona streamer para monitoramento de lives
+- ✅ **Cadastrar canal YouTube**: Adiciona canal para notificação de novos vídeos
+- ✅ **Configurar canais de notificação**: Define onde as notificações serão enviadas
+
+**Página 4 - 🔔 Notificações e Eventos**
+- ✅ **Canal de jogos gratuitos**: Define canal para notificações de jogos grátis
+- ✅ **Canal de boas-vindas**: Configura mensagens automáticas para novos membros
+- ✅ **Canal de despedida**: Configura mensagens quando membros saem do servidor
+
+**Página 5 - 🎫 Sistema de Tickets**
+- ✅ **Canal do painel de tickets**: Define onde o painel de tickets será exibido
+- ✅ **Categoria dos tickets**: Seleciona categoria onde tickets serão criados
+- ✅ **Cargo de suporte**: Define qual cargo terá acesso aos tickets
+
+**💡 Exemplo de Uso:**
+
+```
+/painel
+```
+
+**🔧 Funcionalidades Técnicas:**
+
+- **Componentes Reutilizáveis**: Factory pattern para otimização de memória
+- **Handlers Especializados**: Sistema modular de processamento de interações
+- **Validações Integradas**: Verificação automática de permissões e tipos de canal
+- **Sistema de Logs**: Registro detalhado de todas as configurações realizadas
+- **Gerenciamento de Estado**: Controle eficiente de listeners para evitar duplicações
+- **Error Handling**: Tratamento robusto de erros com feedback ao usuário
+
+**✅ Benefícios do Painel:**
+
+- 🚀 **Configuração Rápida**: Configure o bot em minutos através de uma interface única
+- 📊 **Organização Visual**: Todas as opções organizadas de forma lógica e intuitiva
+- 🔄 **Fácil Manutenção**: Atualize configurações a qualquer momento
+- 👁️ **Transparência**: Feedback imediato sobre cada ação realizada
+- 🛡️ **Segurança**: Validações em todas as operações para prevenir erros
+
+> **📝 Nota Importante**: O comando `/painel` substitui os antigos comandos individuais de configuração (`/addchannels`, `/removechannels`, `/addtwitch`, `/addyoutube`). Todas essas funcionalidades agora estão centralizadas em uma interface única e mais intuitiva.
 
 ---
 
@@ -303,7 +433,7 @@ O comando `/backup` permite aos moderadores gerar um backup completo de todas as
 
 **👥 Comandos Gerais:**
 - ✅ `/oi` - Saudação amigável
-- ✅ `/help` - Lista de comandos (necessita atualização interna)
+- ✅ `/help` - Lista de comandos
 - ✅ `/server` - Informações do servidor  
 - ✅ `/aniversario` - Registro de aniversário
 - ✅ `/clima` - Previsão do tempo
@@ -316,6 +446,7 @@ O comando `/backup` permite aos moderadores gerar um backup completo de todas as
 - ✅ `/timeout` - Aplicação de timeout
 - ✅ `/banir` - Banimento de usuários
 - ✅ `/desbanir` - Remoção de banimento
+- ✅ `/listarbanstemporarios` - Listagem de bans temporários ativos
 - ✅ `/expulsar` - Expulsão do servidor
 - ✅ `/kickuser` - Remoção de canal de voz
 - ✅ `/embed` - Criação de embeds
@@ -335,10 +466,7 @@ O comando `/backup` permite aos moderadores gerar um backup completo de todas as
 - ✅ `/excluicomando` - Remoção de comandos
 
 **🔧 Comandos de Inicialização:**
-- ✅ `/addchannels` - Adição de canais
-- ✅ `/removechannels` - Remoção de canais
-- ✅ `/addtwitch` - Cadastro de streamers
-- ✅ `/addyoutube` - Cadastro de canais YouTube
+- ✅ `/painel` - Central de configuração completa do bot
 
 ---
 
@@ -370,6 +498,12 @@ O comando `/backup` permite aos moderadores gerar um backup completo de todas as
 - **Frequência**: Verificação semanal
 - **Funcionalidade**: Promove membros após 30 dias no servidor
 - **Automação**: Adiciona cargo "Membro Plus" automaticamente
+
+#### ⏰ Gerenciamento de Banimentos Temporários
+- **Frequência**: Verificação contínua a cada minuto
+- **Funcionalidade**: Desbanimento automático quando o tempo expira
+- **Registro**: Logs detalhados de banimentos e desbanimentos
+- **Segurança**: Sistema de verificação dupla para evitar erros
 
 ---
 
@@ -534,11 +668,12 @@ O Bot Jonalandia utiliza **MongoDB** como banco de dados principal, com uma arqu
 | `gameNotification` | Notificações de jogos gratuitos | `gameNotification.js` |
 | `infractionsUsers` | Sistema de infrações e logs de usuários | `infracoesUsers.js` |
 | `notificationBirthday` | Cadastro de aniversários | `notificationBirthday.js` |
+| `notificationChannels` | Configuração de canais de notificação | `notificationChannels.js` |
 | `notificationTwitch` | Cache de notificações Twitch | `notificationTwitch.js` |
 | `notificationYoutube` | Cache de notificações YouTube | `notificationYoutube.js` |
-| `premioSorteio` | Gerenciamento de prêmios de sorteios | `premioSorteio.js` |
-| `sorteio` | Participantes de sorteios | `sorteio.js` |
-| `streamers` | Lista de streamers monitorados | `streamers.js` |
+| `tempBan` | Sistema de banimentos temporários | `tempBan.js` |
+| `ticketConfig` | Configurações do sistema de tickets | `ticketConfig.js` |
+| `streamers` | Lista de streamers monitorados (Twitch) | `streamers.js` |
 | `votoBanUser` | Sistema de votação para banimentos | `votoBanUser.js` |
 | `youtubeChannel` | Lista de canais YouTube monitorados | `youtubeChannel.js` |
 
@@ -625,6 +760,51 @@ O Bot Jonalandia utiliza **MongoDB** como banco de dados principal, com uma arqu
 ```
 **Propósito**: Cache temporário das informações de transmissões para comparação de estados.
 
+#### � **notificationChannels** - Configuração de Canais de Notificação
+```javascript
+{
+  guildId: String,                    // ID do servidor Discord (único, obrigatório)
+  freeGamesChannelId: String,         // Canal para notificações de jogos gratuitos
+  welcomeChannelId: String,           // Canal para mensagens de boas-vindas
+  goodbyeChannelId: String,           // Canal para mensagens de despedida
+  twitchNotificationChannelId: String, // Canal para notificações de Twitch
+  youtubeNotificationChannelId: String, // Canal para notificações de YouTube
+  createdAt: Date,                    // Data de criação (automático)
+  updatedAt: Date                     // Data da última atualização (automático)
+}
+```
+**Propósito**: Centraliza todas as configurações de canais de notificação do servidor, gerenciadas através do comando `/painel`.
+
+#### ⏰ **tempBan** - Sistema de Banimentos Temporários
+```javascript
+{
+  userId: String,           // ID único do usuário Discord (único, obrigatório)
+  guildId: String,          // ID do servidor Discord (obrigatório)
+  username: String,         // Nome do usuário banido (obrigatório)
+  reason: String,           // Motivo do banimento (obrigatório)
+  bannedAt: Date,           // Data do banimento (automático)
+  unbanAt: Date,            // Data programada para desbanimento (obrigatório)
+  moderator: String,        // ID do moderador que aplicou o ban (obrigatório)
+  moderatorName: String,    // Nome do moderador (obrigatório)
+  active: Boolean           // Se o banimento está ativo (padrão: true)
+}
+```
+**Propósito**: Gerencia banimentos temporários com desbanimento automático programado.
+
+#### 🎫 **ticketConfig** - Configuração do Sistema de Tickets
+```javascript
+{
+  guildId: String,          // ID do servidor Discord (único, obrigatório)
+  channelId: String,        // Canal onde o painel de tickets é exibido
+  categoryId: String,       // Categoria onde os tickets são criados
+  supportRoleId: String,    // Cargo que tem acesso aos tickets
+  ticketCounter: Number,    // Contador de tickets criados (padrão: 0)
+  createdAt: Date,          // Data de criação (automático)
+  updatedAt: Date           // Data da última atualização (automático)
+}
+```
+**Propósito**: Armazena todas as configurações do sistema de tickets do servidor, configurado através do `/painel`.
+
 #### 📹 **notificationYoutube** - Cache YouTube
 ```javascript
 {
@@ -635,26 +815,6 @@ O Bot Jonalandia utiliza **MongoDB** como banco de dados principal, com uma arqu
 }
 ```
 **Propósito**: Cache temporário das informações de vídeos para evitar notificações duplicadas.
-
-#### 🎁 **premioSorteio** - Prêmios de Sorteios
-```javascript
-{
-  premio: String,           // Descrição do prêmio (obrigatório)
-  dono: String,             // ID do usuário que definiu o prêmio (obrigatório)
-  dataCadastro: Date        // Data de cadastro do prêmio (automático)
-}
-```
-**Propósito**: Gerencia os prêmios disponíveis para sorteios no servidor.
-
-#### 🎲 **sorteio** - Participantes de Sorteios
-```javascript
-{
-  usuarioId: String,        // ID único do usuário (único, obrigatório)
-  nomeUsuario: String,      // Nome do usuário participante (obrigatório)
-  dataCadastro: Date        // Data de participação (automático)
-}
-```
-**Propósito**: Lista de participantes dos sorteios ativos no servidor.
 
 #### 🎮 **streamers** - Streamers Monitorados
 ```javascript
@@ -693,37 +853,51 @@ O Bot Jonalandia utiliza **MongoDB** como banco de dados principal, com uma arqu
 
 ---
 
-### 🔧 Configuração e Manutenção do Banco
+### � Configuração e Manutenção do Banco
 
 #### 📊 Indexação Otimizada
 ```javascript
 // Índices recomendados para performance
 channelsServer: { channelId: 1 }           // Busca rápida por canal
 infractionsUsers: { userId: 1 }            // Busca rápida por usuário
-sorteio: { usuarioId: 1 }                  // Evita participações duplicadas
+notificationChannels: { guildId: 1 }       // Busca rápida por servidor
 streamers: { name: 1 }                     // Busca rápida por streamer
 youtubeChannel: { name: 1 }                // Busca rápida por canal
+tempBan: { userId: 1, active: 1 }          // Busca eficiente de bans ativos
+ticketConfig: { guildId: 1 }               // Busca rápida por configuração
 ```
 
 #### 🧹 Limpeza Automática
 O sistema inclui rotinas de limpeza para:
 - ✅ Remoção de dados antigos de cache (Twitch/YouTube)
-- ✅ Limpeza de sorteios finalizados
+- ✅ Processamento de banimentos temporários expirados
 - ✅ Arquivamento de logs antigos de infrações
 - ✅ Remoção de votações expiradas
+- ✅ Limpeza de tickets fechados antigos
 
-#### 📋 Backup e Restore
+#### 💾 Backup e Restore
 ```bash
-# Backup completo do banco
+# Backup completo do banco (pode usar o comando /backup do bot)
 mongodump --db jonalandia --out backup/
 
 # Restore do backup
 mongorestore --db jonalandia backup/jonalandia/
+
+# Backup de coleção específica
+mongodump --db jonalandia --collection notificationChannels --out backup/
 ```
+
+#### 🔄 Coleções Gerenciadas pelo Painel
+As seguintes coleções são automaticamente gerenciadas através do comando `/painel`:
+- ✅ `channelsServer` - Registro de canais
+- ✅ `notificationChannels` - Configurações de notificações
+- ✅ `streamers` - Streamers da Twitch
+- ✅ `youtubeChannel` - Canais do YouTube
+- ✅ `ticketConfig` - Sistema de tickets
 
 ---
 
-## �🔔 Sistema de Notificações
+## 🔔 Sistema de Notificações
 
 ### 📺 Notificações YouTube
 - **Canais Monitorados**: Lista configurável de canais
@@ -1016,6 +1190,27 @@ grep "ERROR" src/logs/error.log
 - Taxa de erro por módulo
 ```
 
+### ❓ Perguntas Frequentes (FAQ)
+
+#### **Como configurar o bot pela primeira vez?**
+1. Execute `/painel` no seu servidor
+2. Navegue pelas 5 páginas usando os botões ◀ ▶
+3. Configure os canais nas páginas 1, 2 e 4
+4. Configure streamers/YouTube na página 3 (opcional)
+5. Configure o sistema de tickets na página 5 (opcional)
+
+#### **O que acontece se eu mudar um canal de notificação?**
+Você pode atualizar a qualquer momento através do `/painel`. Basta selecionar o novo canal no menu apropriado.
+
+#### **Como faço backup do banco de dados?**
+Use o comando `/backup` - ele enviará um arquivo JSON completo por DM.
+
+#### **Os banimentos temporários são confiáveis?**
+Sim! O sistema verifica a cada minuto e possui logs detalhados de todas as ações.
+
+#### **Posso usar o bot em múltiplos servidores?**
+Sim! Cada servidor tem suas próprias configurações isoladas no banco de dados.
+
 ---
 
 ## 🤝 Contribuição
@@ -1065,7 +1260,7 @@ Para reportar bugs, inclua:
 - [📋 Licença](./LICENSE)
 
 ### 🔄 Versionamento
-- **Versão Atual**: 10.2.1
+- **Versão Atual**: 10.2.4
 - **Sistema**: Semantic Versioning (SemVer)
 - **Changelog**: [CHANGELOG.md](./CHANGELOG.md)
 
