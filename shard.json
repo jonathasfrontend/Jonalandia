@@ -1,0 +1,11 @@
+{
+  "install": {
+    "command": "npm ci || npm install"
+  },
+  "build": {
+    "command": "echo 'Build completed'"
+  },
+  "start": {
+    "command": "node src/index.js"
+  }
+}
