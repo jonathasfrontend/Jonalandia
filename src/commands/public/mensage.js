@@ -3,10 +3,6 @@ const { client } = require("../../Client");
 const { checkingComandChannelBlocked } = require("../../utils/checkingComandsExecution");
 
 async function menssageFile(interaction) {
-  if (!interaction.isCommand()) return;
-
-  const { commandName } = interaction;
-
   const authorizedExecutionComand = await checkingComandChannelBlocked(interaction);
   if (!authorizedExecutionComand) return;
   const embed = await new EmbedBuilder()
