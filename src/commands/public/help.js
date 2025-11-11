@@ -30,7 +30,7 @@ async function Help(interaction) {
         value: '**Para configurar o bot pela primeira vez, use:**\n`/painel` - Abre o painel interativo com navegação por abas\n\nO painel centraliza todas as configurações em uma interface fácil de usar!'
       }
     )
-    .setFooter({ text: 'Jonalandia Bot v2.0 - Refatorado e Otimizado', iconURL: interaction.client.user.displayAvatarURL() })
+    .setFooter({ text: 'Jonalandia Bot', iconURL: interaction.client.user.displayAvatarURL() })
     .setTimestamp();
 
   await interaction.reply({ embeds: [embed] });
