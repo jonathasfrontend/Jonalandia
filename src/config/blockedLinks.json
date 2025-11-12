@@ -2,6 +2,7 @@
   "blockedLinks": [
     "(?:https?:\\/\\/)?(?:www\\.)?discord\\.gg\\/\\w+",
     "(?:https?:\\/\\/)?(?:www\\.)?steamcommunity\\.com\\/gift-card\\/pay\\/\\d+",
+    "(?:https?:\\/\\/)?(?:www\\.)?ibb\\.co\\/\\w+",
     "(?:https?:\\/\\/)?(?:www\\.)?facebook\\.com\\/\\w+",
     "(?:https?:\\/\\/)?(?:www\\.)?instagram\\.com\\/\\w+",
     "(?:https?:\\/\\/)?(?:www\\.)?twitter\\.com\\/\\w+",
