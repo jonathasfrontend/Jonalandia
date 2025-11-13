@@ -1,8 +1,6 @@
 const { EmbedBuilder } = require('discord.js');
-const { logger, commandExecuted } = require('../../logger');
 
 async function Help(interaction) {
-  logger.debug('Iniciando comando help', context);
 
   const embed = new EmbedBuilder()
     .setTitle('📋 Comandos do Bot Jonalandia')
@@ -34,12 +32,6 @@ async function Help(interaction) {
     .setTimestamp();
 
   await interaction.reply({ embeds: [embed] });
-
-  commandExecuted('help', interaction.user, interaction.guild, true);
-  logger.info('Lista de comandos exibida com sucesso', context);
-
-  logger.error('Erro ao executar comando help', context, error);
-  commandExecuted('help', interaction.user, interaction.guild, false);
 }
 
 module.exports = { Help };

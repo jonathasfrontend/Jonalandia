@@ -6,12 +6,13 @@ const pass = process.env.MONGO_PASS;
 const cluster = process.env.MONGO_CLUSTER;
 const db = process.env.MONGO_DB;
 
+
 function bdServerConect() {
     const context = { module: 'DATABASE' };
     
     logger.info('Iniciando conexão com MongoDB...', context);
     
-    mongoose.connect(`mongodb+srv://${user}:${pass}@${cluster}/${db}?retryWrites=true&w=majority`)
+    mongoose.connect(process.env.MONGO_SERVER)
         .then(() => {
             logger.info('Conectado ao MongoDB com sucesso', {
                 ...context,
