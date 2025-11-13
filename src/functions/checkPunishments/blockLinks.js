@@ -18,7 +18,7 @@ function isUserImmune(member) {
     if (member.permissions.has(PermissionFlagsBits.Administrator)) return true;
 
     // Moderadores são imunes (ajuste o ID do cargo conforme necessário)
-    if (process.env.CARGO_MODERADOR && member.roles.cache.has(process.env.CARGO_MODERADOR)) return true;
+    if (process.env.CARGO_ADM && member.roles.cache.has(process.env.CARGO_ADM)) return true;
 
     return false;
 }
