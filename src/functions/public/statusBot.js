@@ -11,7 +11,7 @@ function Status() {
         client.user.setPresence({
             activities: [
                 {
-                    name: ' | Jonalandia The Games',
+                    name: 'Jonalandia The Games',
                     status: PresenceUpdateStatus.Online,
                     url: 'https://github.com/jonathasfrontend',
                 }
