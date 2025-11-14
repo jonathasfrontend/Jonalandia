@@ -9,11 +9,11 @@ async function Help(interaction) {
     .addFields(
       {
         name: '🤖 Comandos Públicos',
-        value: '`/help` - Exibe esta mensagem de ajuda\n`/server` - Exibe informações do servidor\n`/clima` - Mostra a previsão do tempo para uma cidade\n`/aniversario` - Registra o dia do seu aniversário'
+        value: '`/help` - Exibe esta mensagem de ajuda\n`/server` - Exibe informações do servidor\n`/clima` - Mostra a previsão do tempo para uma cidade\n'
       },
       {
         name: '🛠️ Comandos de Moderação',
-        value: '`/clean` - Limpa mensagens do canal ou de usuário específico\n`/timeout` - Aplica timeout de 3 minutos em um usuário\n`/expulsar` - Expulsa um usuário do servidor\n`/banir` - Bane um usuário do servidor\n`/desbanir` - Desbane um usuário do servidor\n`/kickuser` - Expulsa um usuário do canal de voz\n`/embed` - Cria um embed personalizado\n`/ficha` - Busca dados do usuário no servidor\n`/voteparaban` - Inicia votação para banir um usuário\n`/backup` - Faz backup completo do banco de dados\n`/excluicomando` - Exclui um comando do bot\n`/cargo` - Mostra botões dos cargos\n`/ticket` - Mostra painel para abrir tickets'
+        value: '`/clean` - Limpa mensagens do canal ou de usuário específico\n`/timeout` - Aplica timeout de 3 minutos em um usuário\n`/expulsar` - Expulsa um usuário do servidor\n`/banir` - Bane um usuário do servidor\n`/desbanir` - Desbane um usuário do servidor\n`/kickuser` - Expulsa um usuário do canal de voz\n`/embed` - Cria um embed personalizado\n`/ficha` - Busca dados do usuário no servidor\n`/voteparaban` - Inicia votação para banir um usuário\n `/excluicomando` - Exclui um comando do bot\n`/cargo` - Mostra botões dos cargos\n`/ticket` - Mostra painel para abrir tickets'
       },
       {
         name: '⚙️ Comandos de Configuração Inicial',
@@ -21,7 +21,7 @@ async function Help(interaction) {
       },
       {
         name: '🔄 Funcionalidades Automáticas',
-        value: '**Sistema de Proteção:**\n• AntiFloodChat - Detecta spam de mensagens\n• BlockLinks - Bloqueia links não autorizados\n• DetectInappropriateWords - Filtra palavras inadequadas\n• AutoKickNewMembers - Remove contas suspeitas\n\n**Sistema de Notificações:**\n• Birthday Notifications - Parabeniza aniversariantes\n• Twitch Monitor - Notifica quando streamers entram ao vivo\n• YouTube Monitor - Avisa sobre novos vídeos\n• Free Games Monitor - Alerta sobre jogos gratuitos\n• Welcome/Goodbye Messages - Mensagens automáticas de entrada/saída'
+        value: '**Sistema de Proteção:**\n• AntiFloodChat - Detecta spam de mensagens\n• BlockLinks - Bloqueia links não autorizados\n• DetectInappropriateWords - Filtra palavras inadequadas\n• AutoKickNewMembers - Remove contas suspeitas\n\n**Sistema de Notificações:**\n• Twitch Monitor - Notifica quando streamers entram ao vivo\n• YouTube Monitor - Avisa sobre novos vídeos\n• Free Games Monitor - Alerta sobre jogos gratuitos\n• Welcome/Goodbye Messages - Mensagens automáticas de entrada/saída'
       },
       {
         name: '💡 Dica de Uso',

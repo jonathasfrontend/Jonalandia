@@ -14,8 +14,6 @@ const modules = [
   { name: 'ruleMembreAdd', path: './src/functions/public/ruleMembreAdd' },
   { name: 'onMemberRemove', path: './src/functions/public/onMemberRemove' },
   { name: 'Status', path: './src/functions/public/statusBot' },
-  { name: 'checkUpdateRoles', path: './src/functions/public/checkUpdateRoles' },
-  { name: 'scheduleBirthdayCheck', path: './src/functions/public/checkBirthdays' },
   { name: 'scheduleNotificationYoutubeCheck', path: './src/functions/public/onNotificationYoutube' },
   { name: 'scheduleNotificationTwitchCheck', path: './src/functions/public/onNotificationTwitch' },
   { name: 'scheduleonNotificationFreeGamesCheck', path: './src/functions/public/onNotificationFreeGames' },
@@ -24,7 +22,6 @@ const modules = [
   { name: 'Help', path: './src/commands/public/help' },
   { name: 'searchGuild', path: './src/commands/public/searchGuild' },
   { name: 'menssageFile', path: './src/commands/public/mensage' },
-  { name: 'Birthday', path: './src/commands/public/birthday' },
   { name: 'getWeather', path: './src/commands/public/weather' },
   { name: 'createEmbed', path: './src/commands/moderador/createEmbed' },
   { name: 'clean', path: './src/commands/moderador/clean' },
@@ -40,7 +37,10 @@ const modules = [
   { name: 'voteParaBan', path: './src/commands/moderador/voteparaban' },
   { name: 'excluirComando', path: './src/commands/moderador/deleteCommand' },
   { name: 'backup', path: './src/commands/moderador/backup' },
-  { name: 'bdServerConect', path: './src/database/bdServerConect' }
+  { name: 'bdServerConect', path: './src/database/bdServerConect' },
+  { name: 'RolePermissionsModel', path: './src/database/models/rolePermissions' },
+  { name: 'checkUserImmune', path: './src/utils/checkUserImmune' },
+  { name: 'checkingComandsExecution', path: './src/utils/checkingComandsExecution' }
 ];
 
 for (const mod of modules) {

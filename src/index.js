@@ -59,7 +59,6 @@ const { kickUser } = require('./commands/moderador/kickUser');
 const { Ficha } = require('./commands/moderador/ficha');
 const { voteParaBan } = require('./commands/moderador/voteparaban')
 const { excluirComando } = require('./commands/moderador/deleteCommand');
-const { backup } = require('./commands/moderador/backup');
 /*
   // Database
 */
@@ -237,8 +236,6 @@ client.once('ready', () => {
     ],
   });
 
-
-
   client.application?.commands.create({
     name: 'timeout',
     description: 'Aplica um timeout de 10 minutos em um usuário. (Moderador)',
@@ -391,11 +388,6 @@ client.once('ready', () => {
       }
     ],
   });
-
-  client.application?.commands.create({
-    name: 'backup',
-    description: 'Faz backup completo de todas as coleções do banco de dados. (Moderador)',
-  });
 });
 
 client.on('interactionCreate', async (interaction) => {
@@ -437,8 +429,6 @@ client.on('interactionCreate', async (interaction) => {
     await voteParaBan(interaction);
   } else if (commandName === 'excluicomando') {
     await excluirComando(interaction);
-  } else if (commandName === 'backup') {
-    await backup(interaction);
   } else if (commandName === 'painel') {
     await Painel(interaction);
   } else {
