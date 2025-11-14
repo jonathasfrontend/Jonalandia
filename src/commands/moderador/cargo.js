@@ -14,16 +14,7 @@ async function cargo(interaction) {
     // Definição de Botões
     const buttons = {
         membro: { id: 'membrocargo', label: 'Membro', emoji: '🟢' },
-        masculino: { id: 'masculino', label: 'Masculino', emoji: '💙' },
-        feminino: { id: 'feminino', label: 'Feminino', emoji: '❤' },
-        naobinario: { id: 'naobinario', label: 'Não binário', emoji: '💜' },
-        idade13_15: { id: '13_15', label: '13-15 anos' },
-        idade16_17: { id: '16_17', label: '16-17 anos' },
-        idade18: { id: 'idade18', label: '18+ anos' },
-        trabalhando: { id: 'trabalhando', label: 'Trabalhando' },
-        estudando: { id: 'estudando', label: 'Estudando' },
-        seguindoavida: { id: 'seguindoavida', label: 'Seguindo a Vida' },
-
+        
         freefire: { id: 'freefire', label: 'Free Fire', emoji: '🔫' },
         minecraft: { id: 'minecraft', label: 'Minecraft', emoji: '⛏️' },
         valorant: { id: 'valorant', label: 'Valorant', emoji: '🔫' },
@@ -90,16 +81,6 @@ client.on('interactionCreate', async (buttonInteraction) => {
 
     const cargoMap = {
         'membrocargo': { title: 'Você recebeu o cargo "Membro".', roleId: process.env.CARGO_MEMBRO },
-
-        'masculino': { title: 'Você recebeu o cargo "Masculino".', roleId: process.env.CARGO_MASCULINO },
-        'feminino': { title: 'Você recebeu o cargo "Feminino".', roleId: process.env.CARGO_FEMININO },
-        'naobinario': { title: 'Você recebeu o cargo "Nao Binario".', roleId: process.env.CARGO_NAO_BINARIO },
-        '13_15': { title: 'Você recebeu o cargo "13_15".', roleId: process.env.CARGO_13_A_15ANOS },
-        '16_17': { title: 'Você recebeu o cargo "16_17".', roleId: process.env.CARGO_16_A_17ANOS },
-        'idade18': { title: 'Você recebeu o cargo "Idade18".', roleId: process.env.CARGO_18ANOS },
-        'trabalhando': { title: 'Você recebeu o cargo "Trabalhando".', roleId: process.env.CARGO_TRABALHANDO },
-        'estudando': { title: 'Você recebeu o cargo "Estudando".', roleId: process.env.CARGO_ESTUDANDO },
-        'seguindoavida': { title: 'Você recebeu o cargo "Seguindoavida".', roleId: process.env.CARGO_SEGUINDO_A_VIDA },
 
         'freefire': { title: 'Você recebeu o cargo "Free Fire".', roleId: process.env.CARGO_FREE_FIRE },
         'minecraft': { title: 'Você recebeu o cargo "Minecraft".', roleId: process.env.CARGO_MINECRAFT },

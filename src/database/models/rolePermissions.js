@@ -7,6 +7,8 @@ const rolePermissionsSchema = new mongoose.Schema({
     moderatorRoleName: { type: String, default: null },
     immuneRoleId: { type: String, default: null },
     immuneRoleName: { type: String, default: null },
+    newMemberRoleId: { type: String, default: null },
+    newMemberRoleName: { type: String, default: null },
 }, { timestamps: true });
 
 const RolePermissionsModel = mongoose.model('rolePermissions', rolePermissionsSchema);

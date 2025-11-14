@@ -36,7 +36,6 @@ const modules = [
   { name: 'Ficha', path: './src/commands/moderador/ficha' },
   { name: 'voteParaBan', path: './src/commands/moderador/voteparaban' },
   { name: 'excluirComando', path: './src/commands/moderador/deleteCommand' },
-  { name: 'backup', path: './src/commands/moderador/backup' },
   { name: 'bdServerConect', path: './src/database/bdServerConect' },
   { name: 'RolePermissionsModel', path: './src/database/models/rolePermissions' },
   { name: 'checkUserImmune', path: './src/utils/checkUserImmune' },

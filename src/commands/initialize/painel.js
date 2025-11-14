@@ -342,6 +342,13 @@ const buildPage6Components = (selects) => [
       'Cargo que será imune às punições automáticas do bot (anti-flood, anti-spam, etc).',
   }),
   selects.immuneRole,
+  selects.separators.smallInvisible,
+  new TextDisplayBuilder({ content: '### 👋 Cargo de Novo Membro' }),
+  new TextDisplayBuilder({
+    content:
+      'Cargo que será dado automaticamente aos novos membros quando entrarem no servidor.',
+  }),
+  selects.newMemberRole,
 ];
 
 /**
@@ -449,6 +456,14 @@ const createAllSelects = () => {
         new RoleSelectMenuBuilder({
           customId: 'select_immune_role',
           placeholder: 'Selecione o cargo imune a punições',
+        }),
+      ],
+    }),
+    newMemberRole: new ActionRowBuilder({
+      components: [
+        new RoleSelectMenuBuilder({
+          customId: 'select_new_member_role',
+          placeholder: 'Selecione o cargo de novo membro',
         }),
       ],
     }),
@@ -763,6 +778,9 @@ const handleRolePermissionsConfig = async (interaction, roleType, roleId) => {
     } else if (roleType === 'immune') {
       roleConfig.immuneRoleId = roleId;
       roleConfig.immuneRoleName = role.name;
+    } else if (roleType === 'newMember') {
+      roleConfig.newMemberRoleId = roleId;
+      roleConfig.newMemberRoleName = role.name;
     }
 
     await roleConfig.save();
@@ -777,6 +795,11 @@ const handleRolePermissionsConfig = async (interaction, roleType, roleId) => {
         color: EMBED_COLORS.WARNING,
         title: 'Cargo Imune Configurado',
         description: `O cargo <@&${roleId}> foi configurado como cargo imune a punições.`,
+      },
+      newMember: {
+        color: EMBED_COLORS.INFO,
+        title: 'Cargo de Novo Membro Configurado',
+        description: `O cargo <@&${roleId}> será dado automaticamente aos novos membros.`,
       },
     };
 
@@ -1033,6 +1056,10 @@ function registerPainelListeners() {
     [
       'select_immune_role',
       (i) => handleRolePermissionsConfig(i, 'immune', i.values[0]),
+    ],
+    [
+      'select_new_member_role',
+      (i) => handleRolePermissionsConfig(i, 'newMember', i.values[0]),
     ],
   ]);
 

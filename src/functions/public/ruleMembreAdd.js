@@ -1,19 +1,35 @@
 const { logger, botEvent } = require('../../logger');
 const { client } = require('../../Client');
+const RolePermissionsModel = require('../../database/models/rolePermissions');
 
-function ruleMembreAdd(member) {
+async function ruleMembreAdd(member) {
     const context = {
         module: 'ROLES',
         user: member.user.tag,
         guild: member.guild?.name
     };
 
-    const cargoRecemChegado = process.env.CARGO_RECEM_CHEGADO;
-
     logger.debug(`Adicionando cargo de recém-chegado para ${member.user.tag}`, context);
 
     try {
-        member.roles.add(cargoRecemChegado);
+        // Buscar cargo de novo membro do banco de dados
+        const roleConfig = await RolePermissionsModel.findOne({ guildId: member.guild.id });
+        
+        let newMemberRoleId = null;
+        
+        if (roleConfig && roleConfig.newMemberRoleId) {
+            newMemberRoleId = roleConfig.newMemberRoleId;
+        } else if (process.env.CARGO_RECEM_CHEGADO) {
+            // Fallback para variável de ambiente (compatibilidade com sistema antigo)
+            newMemberRoleId = process.env.CARGO_RECEM_CHEGADO;
+        }
+
+        if (!newMemberRoleId) {
+            logger.warn('Nenhum cargo de novo membro configurado', context);
+            return;
+        }
+
+        await member.roles.add(newMemberRoleId);
         
         logger.info(`Cargo "Recém Chegado" adicionado para ${member.user.tag}`, context);
         botEvent('NEWCOMER_ROLE_ADDED', `Cargo adicionado para ${member.user.tag}`);
