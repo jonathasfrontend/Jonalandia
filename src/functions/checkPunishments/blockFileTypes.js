@@ -4,24 +4,10 @@ const blockedFileExtensions = require('../../config/blockedFileExtensions.json')
 const { getBlockedChannels } = require('../../utils/checkingComandsExecution')
 const { logger, securityEvent, databaseEvent } = require('../../logger');
 const { saveUserInfractions } = require('../../utils/saveUserInfractions');
+const { isUserImmune } = require('../../utils/checkUserImmune');
 const configData = require('../../config/punishmentConfig.json');
 
 const config = configData.antiFlood || {};
-
-function isUserImmune(member) {
-    if (!member) return false;
-
-    // Dono do servidor é imune
-    if (member.id === member.guild.ownerId) return true;
-
-    // Administradores são imunes
-    if (member.permissions.has(PermissionFlagsBits.Administrator)) return true;
-
-    // Moderadores são imunes (ajuste o ID do cargo conforme necessário)
-    if (process.env.CARGO_ADM && member.roles.cache.has(process.env.CARGO_ADM)) return true;
-
-    return false;
-}
 
 async function registerInfraction(user, member, type, reason) {
     try {
@@ -68,7 +54,7 @@ async function blockFileTypes(message) {
             logger.silly(`Verificando tipos de arquivo para ${message.author.tag} no canal ${message.channel.name}`, context);
 
             // Verificar se o usuário é imune ao bloqueio de tipos de arquivo
-            if (isUserImmune(message.member)) {
+            if (await isUserImmune(message.member)) {
                 logger.info(`Usuário ${message.author.tag} é imune ao bloqueio de tipos de arquivo`, context);
                 return;
             }

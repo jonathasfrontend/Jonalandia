@@ -2,6 +2,7 @@ const { Collection, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
 const { client } = require("../../Client");
 const { logger, securityEvent, databaseEvent } = require('../../logger');
 const { saveUserInfractions } = require('../../utils/saveUserInfractions');
+const { isUserImmune } = require('../../utils/checkUserImmune');
 const configData = require('../../config/punishmentConfig.json');
 
 const config = configData.antiFlood || {};
@@ -145,26 +146,6 @@ const floodData = new UserFloodData();
 setInterval(() => {
     floodData.cleanup();
 }, 5 * 60 * 1000);
-
-/**
- * Verifica se o usuário tem permissões especiais (imune ao anti-flood)
- * @param {GuildMember} member - Membro do servidor
- * @returns {boolean} True se for imune
- */
-function isUserImmune(member) {
-    if (!member) return false;
-
-    // Dono do servidor é imune
-    if (member.id === member.guild.ownerId) return true;
-
-    // Administradores são imunes
-    if (member.permissions.has(PermissionFlagsBits.Administrator)) return true;
-
-    // Moderadores são imunes (ajuste o ID do cargo conforme necessário)
-    if (process.env.CARGO_ADM && member.roles.cache.has(process.env.CARGO_ADM)) return true;
-
-    return false;
-}
 
 /**
  * Cria embed de aviso para flood
@@ -327,7 +308,7 @@ async function antiFloodChat(message) {
     };
 
     // Verificar se o usuário é imune ao anti-flood
-    if (isUserImmune(member)) {
+    if (await isUserImmune(member)) {
         logger.info(`Usuário ${author.tag} é imune ao anti-flood`, context);
         return;
     }

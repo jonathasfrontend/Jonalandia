@@ -26,6 +26,7 @@ const onTwitchStreamersSchema = require('../../database/models/streamers');
 const onYoutubeChannelSchema = require('../../database/models/youtubeChannel');
 const NotificationChannelsModel = require('../../database/models/notificationChannels');
 const TicketConfigModel = require('../../database/models/ticketConfig');
+const RolePermissionsModel = require('../../database/models/rolePermissions');
 const path = require('path');
 const { client } = require('../../Client');
 const { embedRegra } = require('../../embedsDefault/embedRegra');
@@ -36,7 +37,7 @@ const { embedManutencao } = require('../../embedsDefault/embedManutencao');
 // =====================================================
 
 const PANEL_CONFIG = {
-  TOTAL_PAGES: 5,
+  TOTAL_PAGES: 6,
   IMAGE_PATH: path.join(__dirname, '..', '..', '..', 'jonalandia.png'),
   IMAGE_NAME: 'jonalandia.png',
   ACCENT_COLOR: 0xffffff,
@@ -320,6 +321,30 @@ const buildPage5Components = (selects) => [
 ];
 
 /**
+ * Constrói componentes da página 6 (Cargos de Permissões)
+ */
+const buildPage6Components = (selects) => [
+  new TextDisplayBuilder({ content: '## 🔐 Configuração de Cargos' }),
+  new TextDisplayBuilder({
+    content: 'Configure os cargos de moderação e imunidade do bot.',
+  }),
+  selects.separators.smallInvisible,
+  new TextDisplayBuilder({ content: '### 🛡️ Cargo de Moderador' }),
+  new TextDisplayBuilder({
+    content:
+      'Cargo que terá permissão para executar comandos de moderação do bot.',
+  }),
+  selects.moderatorRole,
+  selects.separators.smallInvisible,
+  new TextDisplayBuilder({ content: '### 🛡️ Cargo Imune a Punições' }),
+  new TextDisplayBuilder({
+    content:
+      'Cargo que será imune às punições automáticas do bot (anti-flood, anti-spam, etc).',
+  }),
+  selects.immuneRole,
+];
+
+/**
  * Constrói o container completo de uma página
  */
 const buildPageContainer = (page, header, selects) => {
@@ -332,6 +357,7 @@ const buildPageContainer = (page, header, selects) => {
     3: () => components.push(...buildPage3Components(selects)),
     4: () => components.push(...buildPage4Components(selects)),
     5: () => components.push(...buildPage5Components(selects)),
+    6: () => components.push(...buildPage6Components(selects)),
   };
 
   if (pageBuilders[page]) {
@@ -407,6 +433,22 @@ const createAllSelects = () => {
         new RoleSelectMenuBuilder({
           customId: 'select_ticket_support_role',
           placeholder: 'Selecione o cargo de suporte',
+        }),
+      ],
+    }),
+    moderatorRole: new ActionRowBuilder({
+      components: [
+        new RoleSelectMenuBuilder({
+          customId: 'select_moderator_role',
+          placeholder: 'Selecione o cargo de moderador',
+        }),
+      ],
+    }),
+    immuneRole: new ActionRowBuilder({
+      components: [
+        new RoleSelectMenuBuilder({
+          customId: 'select_immune_role',
+          placeholder: 'Selecione o cargo imune a punições',
         }),
       ],
     }),
@@ -691,6 +733,69 @@ const handleTicketConfig = async (interaction, configType, value) => {
 };
 
 /**
+ * Handler para configuração de cargos de permissões
+ */
+const handleRolePermissionsConfig = async (interaction, roleType, roleId) => {
+  await interaction.deferReply({ flags: [64] });
+
+  const guild = interaction.guild;
+  const role = guild.roles.cache.get(roleId);
+
+  if (!role) {
+    await interaction.editReply('Cargo inválido selecionado.');
+    Logger.warn(`Cargo inválido selecionado: ${roleId}`);
+    return;
+  }
+
+  try {
+    let roleConfig = await RolePermissionsModel.findOne({ guildId: guild.id });
+
+    if (!roleConfig) {
+      roleConfig = new RolePermissionsModel({
+        guildId: guild.id,
+        guildName: guild.name,
+      });
+    }
+
+    if (roleType === 'moderator') {
+      roleConfig.moderatorRoleId = roleId;
+      roleConfig.moderatorRoleName = role.name;
+    } else if (roleType === 'immune') {
+      roleConfig.immuneRoleId = roleId;
+      roleConfig.immuneRoleName = role.name;
+    }
+
+    await roleConfig.save();
+
+    const configs = {
+      moderator: {
+        color: EMBED_COLORS.SUCCESS,
+        title: 'Cargo de Moderador Configurado',
+        description: `O cargo <@&${roleId}> foi configurado como cargo de moderador.`,
+      },
+      immune: {
+        color: EMBED_COLORS.WARNING,
+        title: 'Cargo Imune Configurado',
+        description: `O cargo <@&${roleId}> foi configurado como cargo imune a punições.`,
+      },
+    };
+
+    const config = configs[roleType];
+    const embed = createResponseEmbed(
+      config.color,
+      config.title,
+      config.description
+    );
+
+    await interaction.editReply({ embeds: [embed] });
+    Logger.info(`Cargo de ${roleType} configurado: ${role.name} (${roleId})`);
+  } catch (error) {
+    Logger.error(`Erro ao configurar cargo de ${roleType}: ${error}`);
+    await interaction.editReply('Ocorreu um erro ao configurar o cargo.');
+  }
+};
+
+/**
  * Handler para navegação entre páginas
  */
 const handlePageNavigation = async (interaction) => {
@@ -920,6 +1025,14 @@ function registerPainelListeners() {
     [
       'select_ticket_support_role',
       (i) => handleTicketConfig(i, 'supportRoleId', i.values[0]),
+    ],
+    [
+      'select_moderator_role',
+      (i) => handleRolePermissionsConfig(i, 'moderator', i.values[0]),
+    ],
+    [
+      'select_immune_role',
+      (i) => handleRolePermissionsConfig(i, 'immune', i.values[0]),
     ],
   ]);
 
