@@ -37,7 +37,7 @@ const { embedManutencao } = require('../../embedsDefault/embedManutencao');
 // =====================================================
 
 const PANEL_CONFIG = {
-  TOTAL_PAGES: 7,
+  TOTAL_PAGES: 6,
   IMAGE_PATH: path.join(__dirname, '..', '..', '..', 'jonalandia.png'),
   IMAGE_NAME: 'jonalandia.png',
   ACCENT_COLOR: 0xffffff,
