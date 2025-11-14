@@ -25,7 +25,6 @@ const { onMemberAdd } = require('./functions/public/onMemberAdd');
 const { ruleMembreAdd } = require('./functions/public/ruleMembreAdd');
 const { onMemberRemove } = require('./functions/public/onMemberRemove');
 const { Status } = require('./functions/public/statusBot');
-const { scheduleBirthdayCheck } = require('./functions/public/checkBirthdays');
 const { scheduleNotificationYoutubeCheck } = require('./functions/public/onNotificationYoutube');
 const { scheduleNotificationTwitchCheck } = require('./functions/public/onNotificationTwitch');
 const { scheduleonNotificationFreeGamesCheck } = require('./functions/public/onNotificationFreeGames');
@@ -42,7 +41,6 @@ const { Painel } = require('./commands/initialize/painel');
 const { Help } = require('./commands/public/help');
 const { searchGuild } = require('./commands/public/searchGuild');
 const { menssageFile } = require('./commands/public/mensage');
-const { Birthday } = require('./commands/public/birthday');
 const { getWeather } = require('./commands/public/weather');
 /*
   // Comandos
@@ -77,8 +75,6 @@ client.once('ready', () => {
     Status();
     botEvent('STATUS_SET', 'Status do bot configurado');
 
-    scheduleBirthdayCheck();
-    botEvent('BIRTHDAY_SCHEDULER_STARTED', 'Agendador de aniversários iniciado');
 
     scheduleNotificationYoutubeCheck();
     botEvent('YOUTUBE_NOTIFICATION_STARTED', 'Monitoramento de YouTube iniciado');
@@ -241,24 +237,7 @@ client.once('ready', () => {
     ],
   });
 
-  client.application?.commands.create({
-    name: 'aniversario',
-    description: 'Registra o dia do seu aniversário ',
-    options: [
-      {
-        type: 4, // Tipo de string
-        name: 'dia',
-        description: 'O dia do seu aniversário',
-        required: true
-      },
-      {
-        type: 4, // Tipo de string
-        name: 'mes',
-        description: 'O mês do seu aniversário',
-        required: true
-      }
-    ],
-  });
+
 
   client.application?.commands.create({
     name: 'timeout',
@@ -438,8 +417,6 @@ client.on('interactionCreate', async (interaction) => {
     await ticket(interaction)
   } else if (commandName === 'embed') {
     await createEmbed(interaction);
-  } else if (commandName === 'aniversario') {
-    await Birthday(interaction);
   } else if (commandName === 'timeout') {
     await timeout(interaction);
   } else if (commandName === 'expulsar') {

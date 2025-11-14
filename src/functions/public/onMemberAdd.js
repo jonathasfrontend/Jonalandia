@@ -1,7 +1,7 @@
 const { EmbedBuilder } = require("discord.js");
 const { client } = require("../../Client");
 const { logger, botEvent, databaseEvent } = require('../../logger');
-const NotificationChannelsModel = require('../../models/notificationChannels');
+const NotificationChannelsModel = require('../../database/models/notificationChannels');
 
 async function onMemberAdd(member) {
   const context = {

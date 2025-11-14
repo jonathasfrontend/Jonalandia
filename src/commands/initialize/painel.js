@@ -21,11 +21,11 @@ const {
   checkingComandChannelBlocked,
   checkingComandExecuntionModerador,
 } = require('../../utils/checkingComandsExecution');
-const ChannelModel = require('../../models/addChannel');
-const onTwitchStreamersSchema = require('../../models/streamers');
-const onYoutubeChannelSchema = require('../../models/youtubeChannel');
-const NotificationChannelsModel = require('../../models/notificationChannels');
-const TicketConfigModel = require('../../models/ticketConfig');
+const ChannelModel = require('../../database/models/addChannel');
+const onTwitchStreamersSchema = require('../../database/models/streamers');
+const onYoutubeChannelSchema = require('../../database/models/youtubeChannel');
+const NotificationChannelsModel = require('../../database/models/notificationChannels');
+const TicketConfigModel = require('../../database/models/ticketConfig');
 const path = require('path');
 const { client } = require('../../Client');
 const { embedRegra } = require('../../embedsDefault/embedRegra');

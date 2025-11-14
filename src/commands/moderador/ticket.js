@@ -9,7 +9,7 @@ const {
 const { client } = require("../../Client");
 const { logger, botEvent } = require('../../logger');
 const { checkingComandChannelBlocked, checkingComandExecuntionModerador } = require("../../utils/checkingComandsExecution");
-const TicketConfigModel = require("../../models/ticketConfig");
+const TicketConfigModel = require("../../database/models/ticketConfig");
 
 const TICKET_OPTIONS = [
     { label: 'Tirar dúvidas', value: 'tirarduvida', emoji: '🌞' },

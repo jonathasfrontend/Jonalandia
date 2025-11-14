@@ -3,7 +3,7 @@ const { client } = require('../../Client');
 const { logger, commandExecuted, securityEvent } = require('../../logger');
 const { saveUserInfractions } = require('../../utils/saveUserInfractions');
 const { checkingComandChannelBlocked, checkingComandExecuntionModerador } = require('../../utils/checkingComandsExecution');
-const { TempBan } = require('../../models/tempBan');
+const { TempBan } = require('../../database/models/tempBan');
 
 async function unbanUser(interaction) {
     if (!interaction.isCommand()) return;

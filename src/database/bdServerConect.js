@@ -1,12 +1,6 @@
 const mongoose = require('mongoose');
 const { logger, databaseEvent, botEvent } = require('../logger');
 
-const user = process.env.MONGO_USER;
-const pass = process.env.MONGO_PASS;
-const cluster = process.env.MONGO_CLUSTER;
-const db = process.env.MONGO_DB;
-
-
 function bdServerConect() {
     const context = { module: 'DATABASE' };
     
@@ -16,10 +10,8 @@ function bdServerConect() {
         .then(() => {
             logger.info('Conectado ao MongoDB com sucesso', {
                 ...context,
-                cluster,
-                database: db
             });
-            databaseEvent('CONNECT', 'MongoDB', true, `Cluster: ${cluster}, DB: ${db}`);
+            databaseEvent('CONNECT', 'MongoDB', true);
         })
         .catch(err => {
             logger.error('Erro ao conectar ao MongoDB', context, err);

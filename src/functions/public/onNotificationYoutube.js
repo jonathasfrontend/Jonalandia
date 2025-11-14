@@ -1,8 +1,8 @@
 const { client } = require("../../Client");
 const { logger, botEvent, databaseEvent } = require('../../logger');
-const onNotificationYoutubeSchema = require('../../models/notificationYoutube');
-const onYoutubeChannelSchema = require('../../models/youtubeChannel');
-const NotificationChannelsModel = require('../../models/notificationChannels');
+const onNotificationYoutubeSchema = require('../../database/models/notificationYoutube');
+const onYoutubeChannelSchema = require('../../database/models/youtubeChannel');
+const NotificationChannelsModel = require('../../database/models/notificationChannels');
 const axios = require('axios');
 const { EmbedBuilder } = require("discord.js");
 const cron = require('node-cron');

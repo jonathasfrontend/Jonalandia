@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require('discord.js');
 const { client } = require("../Client");
-const channelsIdBLockeds = require('../models/addChannel');
+const channelsIdBLockeds = require('../database/models/addChannel');
 
 async function getBlockedChannels() {
     try {

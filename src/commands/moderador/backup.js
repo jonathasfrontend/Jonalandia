@@ -7,15 +7,15 @@ const fs = require('fs');
 const path = require('path');
 
 // Importar todos os schemas/models existentes
-const onAddChannelSchema = require('../../models/addChannel.js');
-const onGameNotificationSchema = require('../../models/gameNotification.js');
-const onInfracoesUsersSchema = require('../../models/infracoesUsers.js');
-const onNotificationBirthdaySchema = require('../../models/notificationBirthday.js');
-const onNotificationTwitchSchema = require('../../models/notificationTwitch.js');
-const onNotificationYoutubeSchema = require('../../models/notificationYoutube.js');
-const onTwitchStreamersSchema = require('../../models/streamers.js');
-const onVotoBanUserSchema = require('../../models/votoBanUser.js');
-const onYoutubeChannelSchema = require('../../models/youtubeChannel.js');
+const onAddChannelSchema = require('../../database/models/addChannel.js');
+const onGameNotificationSchema = require('../../database/models/gameNotification.js');
+const onInfracoesUsersSchema = require('../../database/models/infracoesUsers.js');
+const onNotificationBirthdaySchema = require('../../database/models/notificationBirthday.js');
+const onNotificationTwitchSchema = require('../../database/models/notificationTwitch.js');
+const onNotificationYoutubeSchema = require('../../database/models/notificationYoutube.js');
+const onTwitchStreamersSchema = require('../../database/models/streamers.js');
+const onVotoBanUserSchema = require('../../database/models/votoBanUser.js');
+const onYoutubeChannelSchema = require('../../database/models/youtubeChannel.js');
 
 async function backup(interaction) {
     // Log inicial para debug

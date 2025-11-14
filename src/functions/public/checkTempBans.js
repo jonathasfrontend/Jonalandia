@@ -1,5 +1,5 @@
 const { client } = require('../../Client');
-const { TempBan } = require('../../models/tempBan');
+const { TempBan } = require('../../database/models/tempBan');
 const { logger, securityEvent } = require('../../logger');
 const { saveUserInfractions } = require('../../utils/saveUserInfractions');
 

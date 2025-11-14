@@ -1,8 +1,8 @@
 const axios = require('axios');
 const { EmbedBuilder } = require('discord.js');
 const cron = require('node-cron');
-const GameNotification = require('../../models/gameNotification');
-const NotificationChannelsModel = require('../../models/notificationChannels');
+const GameNotification = require('../../database/models/gameNotification');
+const NotificationChannelsModel = require('../../database/models/notificationChannels');
 const { client } = require('../../Client');
 const { logger, botEvent, databaseEvent } = require('../../logger');
 

@@ -1,6 +1,6 @@
 const { logger } = require('../logger');
 const { client } = require('../Client');
-const Infractions = require('../models/infracoesUsers');
+const Infractions = require('../database/models/infracoesUsers');
 const { v4: uuidv4 } = require('uuid');
 
 async function saveUserInfractions(

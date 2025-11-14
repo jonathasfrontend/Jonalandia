@@ -1,8 +1,8 @@
 const { client } = require("../../Client");
 const { logger, botEvent, databaseEvent } = require('../../logger');
-const onNotificationTwitchSchema = require("../../models/notificationTwitch");
-const onTwitchStreamersSchema = require("../../models/streamers");
-const NotificationChannelsModel = require("../../models/notificationChannels");
+const onNotificationTwitchSchema = require("../../database/models/notificationTwitch");
+const onTwitchStreamersSchema = require("../../database/models/streamers");
+const NotificationChannelsModel = require("../../database/models/notificationChannels");
 const axios = require('axios');
 const { EmbedBuilder } = require("discord.js");
 const cron = require('node-cron');
