@@ -15,12 +15,9 @@ const {
   TextInputStyle,
   ModalBuilder,
   EmbedBuilder,
+  PermissionFlagsBits,
 } = require('discord.js');
 const { Logger } = require('../../logger');
-const {
-  checkingComandChannelBlocked,
-  checkingComandExecuntionModerador,
-} = require('../../utils/checkingComandsExecution');
 const ChannelModel = require('../../database/models/addChannel');
 const onTwitchStreamersSchema = require('../../database/models/streamers');
 const onYoutubeChannelSchema = require('../../database/models/youtubeChannel');
@@ -43,6 +40,58 @@ const PANEL_CONFIG = {
   ACCENT_COLOR: 0xffffff,
   MAX_LISTENERS: 20,
 };
+
+// =====================================================
+// VERIFICAÇÃO DE PERMISSÕES ESPECÍFICA DO PAINEL
+// =====================================================
+
+/**
+ * Verifica se o usuário tem permissão para executar o comando /painel
+ * Permite: Dono do servidor, Administradores, ou cargo de Moderador configurado no painel
+ * @param {CommandInteraction} interaction - A interação do comando
+ * @returns {Promise<boolean>} - true se autorizado, false caso contrário
+ */
+async function checkPainelPermissions(interaction) {
+  const { guild, member, user } = interaction;
+
+  // 1. Verificar se é o dono do servidor
+  if (guild.ownerId === user.id) {
+    Logger.info(`[PAINEL] Acesso autorizado: ${user.tag} é o dono do servidor ${guild.name}`);
+    return true;
+  }
+
+  // 2. Verificar se tem permissão de Administrador
+  if (member.permissions.has(PermissionFlagsBits.Administrator)) {
+    Logger.info(`[PAINEL] Acesso autorizado: ${user.tag} tem permissão de Administrador`);
+    return true;
+  }
+
+  // 3. Verificar se tem o cargo de moderador configurado no painel
+  try {
+    const roleConfig = await RolePermissionsModel.findOne({ guildId: guild.id });
+    
+    if (roleConfig && roleConfig.moderatorRoleId) {
+      const hasModeratoRole = member.roles.cache.has(roleConfig.moderatorRoleId);
+      
+      if (hasModeratoRole) {
+        Logger.info(`[PAINEL] Acesso autorizado: ${user.tag} possui o cargo de moderador configurado`);
+        return true;
+      }
+    }
+  } catch (error) {
+    Logger.error(`[PAINEL] Erro ao verificar cargo de moderador: ${error}`);
+  }
+
+  // Se não passou em nenhuma verificação, acesso negado
+  Logger.warn(`[PAINEL] Acesso negado: ${user.tag} não possui permissões necessárias em ${guild.name}`);
+  
+  await interaction.reply({
+    content: '❌ **Acesso Negado**\n\nVocê não tem permissão para executar este comando.\n\n**Permissões necessárias:**\n• Ser o dono do servidor\n• Ter permissão de Administrador\n• Possuir o cargo de Moderador configurado no painel',
+    flags: [64],
+  });
+  
+  return false;
+}
 
 const EMBED_COLORS = {
   SUCCESS: 'Green',
@@ -882,8 +931,10 @@ const handleYoutubeModal = async (interaction) => {
 const handleTwitchModalSubmit = async (interaction) => {
   const streamerName =
     interaction.fields.getTextInputValue('twitch_streamer_name');
+  const guildId = interaction.guild.id;
 
   const existingStreamer = await onTwitchStreamersSchema.findOne({
+    guildId: guildId,
     name: streamerName,
   });
 
@@ -891,18 +942,21 @@ const handleTwitchModalSubmit = async (interaction) => {
     const embed = createResponseEmbed(
       EMBED_COLORS.ERROR,
       'Streamer já cadastrado',
-      `O streamer ${streamerName} já está cadastrado no banco de dados.`
+      `O streamer ${streamerName} já está cadastrado neste servidor.`
     ).setAuthor({
       name: client.user.username,
       iconURL: client.user.displayAvatarURL({ dynamic: true }),
     });
 
     await interaction.reply({ embeds: [embed], ephemeral: true });
-    Logger.warn(`Streamer já cadastrado: ${streamerName}`);
+    Logger.warn(`Streamer já cadastrado: ${streamerName} (Guild: ${guildId})`);
     return;
   }
 
-  await onTwitchStreamersSchema.create({ name: streamerName });
+  await onTwitchStreamersSchema.create({ 
+    guildId: guildId,
+    name: streamerName 
+  });
 
   const embed = createResponseEmbed(
     EMBED_COLORS.SUCCESS,
@@ -914,7 +968,7 @@ const handleTwitchModalSubmit = async (interaction) => {
   });
 
   await interaction.reply({ embeds: [embed], ephemeral: true });
-  Logger.info(`Streamer Twitch adicionado: ${streamerName}`);
+  Logger.info(`Streamer Twitch adicionado: ${streamerName} (Guild: ${guildId})`);
 };
 
 /**
@@ -923,8 +977,10 @@ const handleTwitchModalSubmit = async (interaction) => {
 const handleYoutubeModalSubmit = async (interaction) => {
   const channelName =
     interaction.fields.getTextInputValue('youtube_channel_name');
+  const guildId = interaction.guild.id;
 
   const existingChannel = await onYoutubeChannelSchema.findOne({
+    guildId: guildId,
     name: channelName,
   });
 
@@ -932,18 +988,21 @@ const handleYoutubeModalSubmit = async (interaction) => {
     const embed = createResponseEmbed(
       EMBED_COLORS.ERROR,
       'Canal já cadastrado',
-      `O canal ${channelName} já está cadastrado no banco de dados.`
+      `O canal ${channelName} já está cadastrado neste servidor.`
     ).setAuthor({
       name: client.user.username,
       iconURL: client.user.displayAvatarURL({ dynamic: true }),
     });
 
     await interaction.reply({ embeds: [embed], ephemeral: true });
-    Logger.warn(`Canal YouTube já cadastrado: ${channelName}`);
+    Logger.warn(`Canal YouTube já cadastrado: ${channelName} (Guild: ${guildId})`);
     return;
   }
 
-  await onYoutubeChannelSchema.create({ name: channelName });
+  await onYoutubeChannelSchema.create({ 
+    guildId: guildId,
+    name: channelName 
+  });
 
   const embed = createResponseEmbed(
     EMBED_COLORS.SUCCESS,
@@ -955,7 +1014,7 @@ const handleYoutubeModalSubmit = async (interaction) => {
   });
 
   await interaction.reply({ embeds: [embed], ephemeral: true });
-  Logger.info(`Canal YouTube adicionado: ${channelName}`);
+  Logger.info(`Canal YouTube adicionado: ${channelName} (Guild: ${guildId})`);
 };
 
 // =====================================================
@@ -1135,12 +1194,9 @@ function registerPainelListeners() {
 async function Painel(interaction) {
   if (!interaction.isCommand()) return;
 
-  // Verificações de autorização
-  const authorizedChannel = await checkingComandChannelBlocked(interaction);
-  if (!authorizedChannel) return;
-
-  const authorizedModerador = await checkingComandExecuntionModerador(interaction);
-  if (!authorizedModerador) return;
+  // Verificação de permissões específica do painel
+  const hasPermission = await checkPainelPermissions(interaction);
+  if (!hasPermission) return;
 
   try {
     // Registra listeners uma única vez

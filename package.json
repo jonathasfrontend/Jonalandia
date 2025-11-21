@@ -1,7 +1,7 @@
 {
   "name": "jonalandia",
   "nameSpace": "Jonalandia_bot",
-  "version": "10.2.1",
+  "version": "2.0.0",
   "description": "bot para Discord Jonalandia feito com Discord.js e Node.js por Jonathas Oliveira",
   "main": "index.js",
   "license": "SEE LICENSE IN LICENSE",
@@ -11,7 +11,9 @@
   },
   "author": {
     "name": "Jonathas Oliveira",
-    "email": "jonathass56778@gmail.com"
+    "email": "jonathass56778@gmail.com",
+    "url": "https://github.com/jonathasfrontend.com",
+    "github": "https://github.com/jonathasfrontend"
   },
   "scripts": {
     "start": "node src/index.js",

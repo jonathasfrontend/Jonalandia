@@ -1,10 +1,15 @@
 const mongoose = require('mongoose');
 
 const UserSchemaInfraction = new mongoose.Schema({
-    userId: { 
+    guildId: {
         type: String,
         required: true,
-        unique: true
+        index: true,
+        description: 'ID do servidor Discord'
+    },
+    userId: { 
+        type: String,
+        required: true
     },
     username: {
         type: String,
@@ -88,6 +93,11 @@ const UserSchemaInfraction = new mongoose.Schema({
             }
         }
     ]
+}, {
+    timestamps: true
 });
+
+// Índice composto: cada usuário é único por guild
+UserSchemaInfraction.index({ guildId: 1, userId: 1 }, { unique: true });
 
 module.exports = mongoose.model('infractionsUsers', UserSchemaInfraction);

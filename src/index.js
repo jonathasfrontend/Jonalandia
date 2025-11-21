@@ -24,7 +24,7 @@ const { blockFileTypes } = require('./functions/checkPunishments/blockFileTypes'
 const { onMemberAdd } = require('./functions/public/onMemberAdd');
 const { ruleMembreAdd } = require('./functions/public/ruleMembreAdd');
 const { onMemberRemove } = require('./functions/public/onMemberRemove');
-const { Status } = require('./functions/public/statusBot');
+const { Status } = require('./functions/system/statusBot');
 const { scheduleNotificationYoutubeCheck } = require('./functions/public/onNotificationYoutube');
 const { scheduleNotificationTwitchCheck } = require('./functions/public/onNotificationTwitch');
 const { scheduleonNotificationFreeGamesCheck } = require('./functions/public/onNotificationFreeGames');
@@ -64,6 +64,10 @@ const { excluirComando } = require('./commands/moderador/deleteCommand');
 */
 const { bdServerConect } = require('./database/bdServerConect');
 const { ApplicationCommandType } = require('discord.js');
+/*
+  // System
+*/
+require('./functions/system/guildManager'); // Carrega gerenciador de guilds (eventos guildCreate, guildDelete, guildUpdate)
 
 client.once('ready', () => {
   try {
@@ -88,6 +92,7 @@ client.once('ready', () => {
     botEvent('TEMP_BAN_CHECKER_STARTED', 'Verificador de bans temporários iniciado');
 
     logger.info('Bot Jonalandia está online e todos os sistemas foram inicializados!', { module: 'BOT' });
+    logger.info(`Bot está em ${client.guilds.cache.size} servidor(es)`, { module: 'BOT' });
   } catch (error) {
     logger.error('Erro durante inicialização do bot', { module: 'BOT' }, error);
   }

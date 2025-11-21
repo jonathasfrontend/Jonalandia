@@ -3,177 +3,242 @@ const { logger, botEvent, databaseEvent } = require('../../logger');
 const onNotificationTwitchSchema = require("../../database/models/notificationTwitch");
 const onTwitchStreamersSchema = require("../../database/models/streamers");
 const NotificationChannelsModel = require("../../database/models/notificationChannels");
+const GuildConfig = require("../../database/models/guildConfig");
 const axios = require('axios');
 const { EmbedBuilder } = require("discord.js");
 const cron = require('node-cron');
 
+/**
+ * Verifica notificações Twitch para todas as guilds ativas
+ * Itera por cada guild e processa streamers cadastrados isoladamente
+ */
 async function onNotificationTwitch() {
     const context = { module: 'TWITCH_NOTIFICATIONS' };
 
-    logger.debug('Iniciando verificação de notificações Twitch', context);
+    logger.debug('Iniciando verificação de notificações Twitch multi-guild', context);
 
     try {
-        const streamersData = await onTwitchStreamersSchema.find({});
-        databaseEvent('SELECT', 'TwitchStreamers', true, `Buscando streamers cadastrados`);
-
-        if (streamersData.length === 0) {
-            logger.debug('Nenhum streamer cadastrado para monitoramento', context);
+        // Busca todas as guilds ativas
+        const activeGuilds = await GuildConfig.find({ isActive: true });
+        
+        if (activeGuilds.length === 0) {
+            logger.debug('Nenhuma guild ativa encontrada', context);
             return;
         }
 
-        logger.info(`Verificando ${streamersData.length} streamer(s) Twitch`, context);
+        logger.info(`Processando notificações Twitch para ${activeGuilds.length} guild(s) ativa(s)`, context);
 
-        for (let streamerData of streamersData) {
-            const streamer = streamerData.name;
-            const streamerContext = {
-                ...context,
-                streamer
-            };
-
-            try {
-                logger.debug(`Verificando status do streamer: ${streamer}`, streamerContext);
-
-                const uptimeResponse = await axios.get(`https://decapi.me/twitch/uptime/${streamer}`);
-                const avatarResponse = await axios.get(`https://decapi.me/twitch/avatar/${streamer}`);
-                const titleResponse = await axios.get(`https://decapi.me/twitch/title/${streamer}`);
-                const gameResponse = await axios.get(`https://decapi.me/twitch/game/${streamer}`);
-                // const imageResponse = `https://static-cdn.jtvnw.net/previews-ttv/live_user_${streamer}-440x248.jpg`;
-
-                if (uptimeResponse.data === `${streamer} is offline`) {
-                    logger.silly(`${streamer} está offline`, streamerContext);
-                    continue;
-                }
-
-                if (streamer === 'undefined') {
-                    logger.error('Streamer com nome inválido encontrado', streamerContext);
-                    continue;
-                }
-
-                // verifica de o erro teve estatus 429 do erro "Request failed with status code 429"
-                if (uptimeResponse.status === 429) {
-                    logger.warn(`Limite de requisições excedido para o streamer ${streamer}`, streamerContext);
-                    botEvent('TWITCH_RATE_LIMIT', `Limite de requisições excedido para ${streamer}`);
-                    continue;
-                }
-
-                if (uptimeResponse.data !== `${streamer} is offline`) {
-                    logger.info(`${streamer} está online - verificando se já foi notificado`, {
-                        ...streamerContext,
-                        title: titleResponse.data,
-                        game: gameResponse.data
-                    });
-
-                    const embed = new EmbedBuilder()
-                        .setColor('Blurple')
-                        .setAuthor({
-                            name: `<:icon:1402690522375520378> ┃ Twitch - ${streamer}`,
-                            iconURL: `${avatarResponse.data}`,
-                        })
-                        .setTitle(`${titleResponse.data}`)
-                        .setThumbnail(`${avatarResponse.data}`)
-                        .setDescription(`${streamer} está online **Vá Ve-lo**`)
-                        .addFields(
-                            { name: 'Game', value: `${gameResponse.data}` },
-                        )
-                        // .setImage(imageResponse)
-                        .setTimestamp()
-                        .setFooter({ text: `Por: ${client.user.tag}`, iconURL: `${client.user.displayAvatarURL({ dynamic: true })}` });
-
-                    // Buscar canal de notificação do banco de dados
-                    let discordChannel = null;
-                    
-                    try {
-                        const notificationChannelData = await NotificationChannelsModel.findOne({ 
-                            notificationType: 'twitch' 
-                        });
-                        
-                        if (notificationChannelData) {
-                            discordChannel = client.channels.cache.get(notificationChannelData.channelId);
-                            databaseEvent('SELECT', 'NotificationChannels', true, `Canal Twitch encontrado: ${notificationChannelData.channelId}`);
-                        }
-                    } catch (dbError) {
-                        logger.error('Erro ao buscar canal de notificação Twitch no banco de dados', streamerContext, dbError);
-                        databaseEvent('SELECT', 'NotificationChannels', false, dbError.message);
-                    }
-
-                    // Fallback para variável de ambiente se não encontrar no banco
-                    if (!discordChannel && process.env.CHANNEL_ID_NOTIFICATION_TWITCH) {
-                        discordChannel = client.channels.cache.get(process.env.CHANNEL_ID_NOTIFICATION_TWITCH);
-                        logger.debug('Usando canal Twitch da variável de ambiente como fallback', streamerContext);
-                    }
-
-                    if (!discordChannel) {
-                        logger.error('Canal de notificações Twitch não encontrado no banco de dados nem nas variáveis de ambiente', streamerContext);
-                        continue;
-                    }
-
-                    // Verificar se já existe notificação para este título
-                    const existingNotification = await onNotificationTwitchSchema.findOne({ title: titleResponse.data });
-                    databaseEvent('SELECT', 'TwitchNotifications', true, `Verificando notificação existente para: ${titleResponse.data}`);
-
-                    if (existingNotification) {
-                        logger.debug(`Notificação Twitch para "${titleResponse.data}" já existe no banco de dados`, streamerContext);
-                    } else {
-                        try {
-                            await discordChannel.send({ embeds: [embed] });
-                            logger.info(`Notificação Twitch enviada para ${streamer}`, {
-                                ...streamerContext,
-                                title: titleResponse.data,
-                                game: gameResponse.data
-                            });
-
-                            botEvent('TWITCH_NOTIFICATION_SENT', `${streamer} está online: ${titleResponse.data}`);
-
-                            const newNotification = new onNotificationTwitchSchema({
-                                title: titleResponse.data,
-                                streamer: streamer,
-                                image: "imageResponse",
-                                gamer: gameResponse.data,
-                            });
-
-                            await newNotification.save();
-                            databaseEvent('INSERT', 'TwitchNotifications', true, `Notificação salva para ${streamer}: ${titleResponse.data}`);
-
-                            logger.info(`Notificação Twitch para "${titleResponse.data}" armazenada no banco de dados`, streamerContext);
-
-                        } catch (notificationError) {
-                            logger.error('Erro ao enviar/salvar notificação Twitch', streamerContext, notificationError);
-                            databaseEvent('INSERT', 'TwitchNotifications', false, notificationError.message);
-                        }
-                    }
-                }
-
-            } catch (streamerError) {
-                logger.error(`Erro ao verificar streamer ${streamer}`);
-                botEvent('TWITCH_CHECK_ERROR', `Erro ao verificar ${streamer}: ${streamerError.message}`);
-            }
+        // Processa cada guild isoladamente
+        for (const guildConfig of activeGuilds) {
+            await processGuildTwitchNotifications(guildConfig);
         }
 
-        logger.debug('Verificação de notificações Twitch concluída', context);
+        logger.debug('Verificação de notificações Twitch multi-guild concluída', context);
 
     } catch (error) {
         logger.error('Erro na verificação de notificações Twitch', context, error);
-        databaseEvent('SELECT', 'TwitchStreamers', false, error.message);
         botEvent('TWITCH_NOTIFICATIONS_ERROR', `Erro geral: ${error.message}`);
     }
 }
 
+/**
+ * Processa notificações Twitch para uma guild específica
+ * @param {GuildConfig} guildConfig - Configuração da guild
+ */
+async function processGuildTwitchNotifications(guildConfig) {
+    const context = { 
+        module: 'TWITCH_NOTIFICATIONS', 
+        guildId: guildConfig.guildId,
+        guildName: guildConfig.guildName
+    };
+
+    try {
+        logger.debug(`Verificando notificações Twitch para guild ${guildConfig.guildName}`, context);
+
+        // Busca streamers cadastrados para esta guild
+        const streamersData = await onTwitchStreamersSchema.find({ guildId: guildConfig.guildId });
+        
+        if (streamersData.length === 0) {
+            logger.silly(`Nenhum streamer cadastrado para ${guildConfig.guildName}`, context);
+            return;
+        }
+
+        logger.info(`Verificando ${streamersData.length} streamer(s) para guild ${guildConfig.guildName}`, context);
+
+        // Busca canal de notificação configurado para esta guild
+        const notificationChannelData = await NotificationChannelsModel.findOne({ 
+            guildId: guildConfig.guildId,
+            notificationType: 'twitch' 
+        });
+
+        if (!notificationChannelData) {
+            logger.warn(`Canal de notificação Twitch não configurado para ${guildConfig.guildName}`, context);
+            return;
+        }
+
+        const discordChannel = client.channels.cache.get(notificationChannelData.channelId);
+        
+        if (!discordChannel) {
+            logger.error(`Canal de notificação Twitch não encontrado ou inacessível para ${guildConfig.guildName}`, {
+                ...context,
+                channelId: notificationChannelData.channelId
+            });
+            return;
+        }
+
+        // Verifica cada streamer
+        for (const streamerData of streamersData) {
+            await checkStreamerStatus(streamerData, guildConfig, discordChannel, context);
+        }
+
+    } catch (error) {
+        logger.error(`Erro ao processar notificações Twitch para guild ${guildConfig.guildName}`, context, error);
+    }
+}
+
+/**
+ * Verifica status de um streamer e envia notificação se necessário
+ * @param {Object} streamerData - Dados do streamer
+ * @param {GuildConfig} guildConfig - Configuração da guild
+ * @param {TextChannel} discordChannel - Canal onde enviar notificação
+ * @param {Object} baseContext - Contexto base para logs
+ */
+async function checkStreamerStatus(streamerData, guildConfig, discordChannel, baseContext) {
+    const streamer = streamerData.name;
+    const streamerContext = {
+        ...baseContext,
+        streamer
+    };
+
+    try {
+        logger.silly(`Verificando status do streamer: ${streamer}`, streamerContext);
+
+        // Requisições à API do Twitch via DecAPI
+        const [uptimeResponse, avatarResponse, titleResponse, gameResponse] = await Promise.all([
+            axios.get(`https://decapi.me/twitch/uptime/${streamer}`),
+            axios.get(`https://decapi.me/twitch/avatar/${streamer}`),
+            axios.get(`https://decapi.me/twitch/title/${streamer}`),
+            axios.get(`https://decapi.me/twitch/game/${streamer}`)
+        ]);
+
+        // Validações básicas
+        if (uptimeResponse.data === `${streamer} is offline`) {
+            logger.silly(`${streamer} está offline`, streamerContext);
+            return;
+        }
+
+        if (streamer === 'undefined' || !streamer) {
+            logger.error('Streamer com nome inválido encontrado', streamerContext);
+            return;
+        }
+
+        // Verifica rate limit
+        if (uptimeResponse.status === 429) {
+            logger.warn(`Limite de requisições excedido para o streamer ${streamer}`, streamerContext);
+            botEvent('TWITCH_RATE_LIMIT', `Limite de requisições excedido para ${streamer}`);
+            return;
+        }
+
+        // Streamer está online
+        logger.info(`${streamer} está online - verificando se já foi notificado para guild ${guildConfig.guildName}`, {
+            ...streamerContext,
+            title: titleResponse.data,
+            game: gameResponse.data
+        });
+
+        // Verifica se já existe notificação para este título NESTA GUILD
+        const existingNotification = await onNotificationTwitchSchema.findOne({ 
+            guildId: guildConfig.guildId,
+            title: titleResponse.data,
+            streamer: streamer
+        });
+
+        if (existingNotification) {
+            logger.silly(`Notificação Twitch para "${titleResponse.data}" já enviada para ${guildConfig.guildName}`, streamerContext);
+            return;
+        }
+
+        // Cria embed de notificação
+        const embed = new EmbedBuilder()
+            .setColor('Blurple')
+            .setAuthor({
+                name: `🟣 Twitch - ${streamer}`,
+                iconURL: avatarResponse.data,
+            })
+            .setTitle(titleResponse.data)
+            .setURL(`https://twitch.tv/${streamer}`)
+            .setThumbnail(avatarResponse.data)
+            .setDescription(`**${streamer}** está online agora! 🎮\n\n[Clique aqui para assistir](https://twitch.tv/${streamer})`)
+            .addFields(
+                { name: '🎮 Jogando', value: gameResponse.data || 'Não definido', inline: true },
+                { name: '⏱️ Tempo Online', value: uptimeResponse.data, inline: true }
+            )
+            .setTimestamp()
+            .setFooter({ 
+                text: `${guildConfig.guildName} | Notificação Twitch`, 
+                iconURL: client.user.displayAvatarURL({ dynamic: true })
+            });
+
+        // Envia notificação
+        await discordChannel.send({ embeds: [embed] });
+        
+        logger.info(`Notificação Twitch enviada para ${streamer} em ${guildConfig.guildName}`, {
+            ...streamerContext,
+            title: titleResponse.data,
+            game: gameResponse.data
+        });
+
+        botEvent('TWITCH_NOTIFICATION_SENT', `${streamer} online em ${guildConfig.guildName}: ${titleResponse.data}`);
+
+        // Salva registro da notificação com guildId
+        const newNotification = new onNotificationTwitchSchema({
+            guildId: guildConfig.guildId,
+            title: titleResponse.data,
+            streamer: streamer,
+            image: avatarResponse.data,
+            gamer: gameResponse.data,
+            notifiedAt: new Date()
+        });
+
+        await newNotification.save();
+        databaseEvent('INSERT', 'TwitchNotifications', true, `Notificação salva para ${streamer} em ${guildConfig.guildName}`);
+
+    } catch (streamerError) {
+        // Tratamento específico de erro 404 (streamer não existe)
+        if (streamerError.response?.status === 404) {
+            logger.warn(`Streamer ${streamer} não encontrado (404) - pode ter sido deletado`, streamerContext);
+            return;
+        }
+
+        logger.error(`Erro ao verificar streamer ${streamer}`, streamerContext, streamerError);
+        botEvent('TWITCH_CHECK_ERROR', `Erro ao verificar ${streamer} em ${guildConfig.guildName}: ${streamerError.message}`);
+    }
+}
+
+/**
+ * Agenda verificação automática de notificações Twitch
+ */
 function scheduleNotificationTwitchCheck() {
     const context = { module: 'TWITCH_NOTIFICATIONS' };
 
     try {
+        // Executa a cada 3 minutos
         cron.schedule('*/3 * * * *', () => {
-            logger.debug('Executando verificação automática de Twitch', context);
+            logger.debug('Executando verificação automática de Twitch multi-guild', context);
             botEvent('TWITCH_CHECK_SCHEDULED', 'Verificação automática de Twitch executada');
             onNotificationTwitch();
         });
 
-        logger.info('Agendador de notificações Twitch configurado com sucesso (a cada 5 minutos)', context);
-        botEvent('TWITCH_SCHEDULER_CONFIGURED', 'Agendador configurado para executar a cada 5 minutos');
+        logger.info('Agendador de notificações Twitch multi-guild configurado (a cada 3 minutos)', context);
+        botEvent('TWITCH_SCHEDULER_CONFIGURED', 'Agendador configurado para executar a cada 3 minutos');
 
     } catch (error) {
         logger.error('Erro ao configurar agendador de notificações Twitch', context, error);
     }
 }
 
-module.exports = { scheduleNotificationTwitchCheck };
+module.exports = { 
+    scheduleNotificationTwitchCheck,
+    onNotificationTwitch,
+    processGuildTwitchNotifications 
+};

@@ -48,11 +48,8 @@ async function checkingComandExecuntionModerador(interaction) {
         
         if (roleConfig && roleConfig.moderatorRoleId) {
             moderatorRoleId = roleConfig.moderatorRoleId;
-        } else if (process.env.CARGO_MODERADOR) {
-            // Fallback para variável de ambiente (compatibilidade com sistema antigo)
-            moderatorRoleId = process.env.CARGO_MODERADOR;
-        }
-
+        } 
+        
         if (moderatorRoleId && !member.roles.cache.has(moderatorRoleId)) {
             await interaction.deferReply( { ephemeral: true } );
 

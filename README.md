@@ -4,21 +4,22 @@
 
 ![Jonalandia](jonalandia.png)
 
-**Um bot Discord para Gerenciamento do servidor Jonalandia**
+**Um bot Discord Multi-Guild para Gerenciamento Completo de Servidores**
 
-[![Version](https://img.shields.io/badge/version-10.2.4-blue.svg)](https://github.com/jonathasfrontend/jonalandia)
+[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/jonathasfrontend/jonalandia)
 [![Node.js](https://img.shields.io/badge/node.js-16%2B-green.svg)](https://nodejs.org/)
-[![Discord.js](https://img.shields.io/badge/discord.js-14.14.1-7289da.svg)](https://discord.js.org/)
+[![Discord.js](https://img.shields.io/badge/discord.js-14.23.2-7289da.svg)](https://discord.js.org/)
 [![MongoDB](https://img.shields.io/badge/mongodb-8.8.0-green.svg)](https://mongodb.com/)
 [![License](https://img.shields.io/badge/license-Custom-red.svg)](./LICENSE)
+[![Multi-Guild](https://img.shields.io/badge/Multi--Guild-Ready-brightgreen.svg)](./docs/refactor-multi-guild.md)
 </div>
 
 
 ## 📋 Sumário
 
 - [🚀 Introdução](#-introdução)
-  - [🆕 Novidades da Versão 10.2.4](#-novidades-da-versão-1021)
 - [⚡ Visão Geral](#-visão-geral)
+- [🌐 Arquitetura Multi-Guild](#-arquitetura-multi-guild)
 - [📦 Instalação e Configuração](#-instalação-e-configuração)
 - [🏗️ Estrutura do Projeto](#️-estrutura-do-projeto)
 - [🎯 Comandos Disponíveis](#-comandos-disponíveis)
@@ -29,7 +30,8 @@
 - [🗄️ Estrutura do Banco de Dados (MongoDB)](#️-estrutura-do-banco-de-dados-mongodb)
 - [🔔 Sistema de Notificações](#-sistema-de-notificações)
 - [⚙️ Configuração Avançada](#️-configuração-avançada)
-- [🐛 Resolução de Problemas](#-resolução-de-problemas)
+- [� Migração de Dados](#-migração-de-dados)
+- [�🐛 Resolução de Problemas](#-resolução-de-problemas)
   - [❓ Perguntas Frequentes (FAQ)](#-perguntas-frequentes-faq)
 - [🤝 Contribuição](#-contribuição)
 
@@ -37,16 +39,9 @@
 
 ## 🚀 Introdução
 
-O **Bot Jonalandia** é uma solução completa e avançada para servidores Discord, desenvolvida com foco na automação de tarefas de moderação, engajamento da comunidade e experiência personalizada. Criado por **Jonathas Oliveira**, o bot combina mais de 25 comandos especializados, sistema de logs avançado e funcionalidades de segurança.
+O **Bot Jonalandia** é uma solução completa e avançada para servidores Discord, desenvolvida com foco na automação de tarefas de moderação, engajamento da comunidade e experiência personalizada. Criado por **Jonathas Oliveira**, o bot combina mais de 20 comandos especializados, sistema de logs avançado e **arquitetura multi-guild** que permite uso simultâneo em múltiplos servidores com configurações isoladas.
 
-### � Novidades da Versão 10.2.4
 
-- ✨ **Painel de Configuração Unificado** - Novo comando `/painel` com interface moderna usando Containers V2
-- 🎫 **Sistema de Tickets Completo** - Configuração integrada através do painel
-- ⏰ **Banimentos Temporários** - Gerenciamento automático de bans com tempo definido
-- 🔔 **Gerenciamento Centralizado de Notificações** - Configuração de todos os canais em um só lugar
-- 📊 **Interface Aprimorada** - Navegação por páginas com componentes visuais avançados
-- 🗄️ **Novos Schemas de Banco** - `notificationChannels`, `tempBan` e `ticketConfig`
 
 ### �🎯 Principais Características
 
@@ -66,21 +61,24 @@ O **Bot Jonalandia** é uma solução completa e avançada para servidores Disco
 | Componente | Tecnologia | Versão |
 |------------|------------|--------|
 | **Runtime** | Node.js | 16+ |
-| **Framework Discord** | Discord.js | 14.14.1 |
+| **Framework Discord** | Discord.js | 14.23.2 |
 | **Banco de Dados** | MongoDB | 8.8.0 |
 | **Sistema de Logs** | Winston | 3.17.0 |
 | **Agendador** | Node-Cron | 3.0.3 |
+| **Arquitetura** | Multi-Guild | v2.0 |
 
 ### 🏆 Recursos Principais
 
-- ✅ **25+ Comandos Especializados** - Cobrindo moderação, configuração e utilidades
+- ✅ **20+ Comandos Especializados** - Cobrindo moderação, configuração e utilidades
+- ✅ **Arquitetura Multi-Guild** - Suporte a múltiplos servidores com dados isolados
 - ✅ **Painel de Configuração Interativo** - Setup completo através de interface visual moderna
 - ✅ **Sistema de Logs Avançado** - 6 níveis de log com rotação automática
 - ✅ **Segurança Multicamadas** - Proteção contra spam, links e conteúdo inadequado
-- ✅ **Notificações Inteligentes** - Monitoramento de plataformas externas (Twitch, YouTube)
+- ✅ **Notificações Inteligentes** - Monitoramento de plataformas externas (Twitch, YouTube) por servidor
 - ✅ **Interface Moderna** - Embeds responsivos e componentes interativos (Containers V2)
 - ✅ **Sistema de Tickets** - Suporte organizado através de tickets
 - ✅ **Banimentos Temporários** - Gerenciamento automático de bans temporários
+- ✅ **Auto-Registro de Guilds** - Configuração automática ao entrar em novos servidores
 
 ---
 
@@ -117,36 +115,33 @@ cp .env.example .env
 TOKEN=seu_token_do_discord_bot
 MONGO_URI=mongodb://localhost:27017/jonalandia
 
-# Channel IDs
-CHANNEL_ID_LOGS_INFO_BOT=id_do_canal_logs_info
-CHANNEL_ID_LOGS_ERRO_BOT=id_do_canal_logs_erro
-CHANNEL_ID_CARGOS=id_do_canal_cargos
-
-# Role IDs
-CARGO_MODERADOR=id_do_cargo_moderador
-CARGO_MEMBRO=id_do_cargo_membro
-CARGO_MEMBRO_PLUS=id_do_cargo_membro_plus
-
 # External APIs
 OPENWEATHER_API_KEY=sua_chave_api_clima
 YOUTUBE_API_KEY=sua_chave_api_youtube
 TWITCH_CLIENT_ID=seu_client_id_twitch
 TWITCH_CLIENT_SECRET=seu_client_secret_twitch
 
+# Migration (opcional - apenas se migrando de versão anterior)
+DEFAULT_GUILD_ID=seu_guild_id_principal
 ```
+
+> **⚠️ IMPORTANTE**: A partir da v2.0, **canais e cargos não são mais configurados via `.env`**!  
+> Use o comando `/painel` em cada servidor para configurar canais de notificação, cargos e outras preferências.
 
 5. **Inicie o bot:**
 ```bash
 npm start
 ```
 
-6. **Configure o bot através do painel:**
+6. **Configure o bot em cada servidor:**
 ```
-Após o bot estar online em seu servidor:
-1. Execute o comando /painel
-2. Configure os canais de notificação
-3. Adicione streamers e canais do YouTube (opcional)
-4. Configure o sistema de tickets (opcional)
+1. Adicione o bot ao seu servidor Discord
+2. O bot enviará uma DM automática ao dono do servidor
+3. Execute o comando /painel
+4. Configure os canais de notificação (Páginas 1-4)
+5. Adicione streamers e canais do YouTube (Página 3)
+6. Configure o sistema de tickets (Página 5)
+7. Configure cargos e permissões (Página 6)
 ```
 
 ### 🔒 Configuração de Segurança
@@ -250,41 +245,50 @@ O bot foi projetado com arquitetura modular para facilitar manutenção e expans
 
 | Comando | Descrição | Uso |
 |---------|-----------|-----|
-| `/oi` | Saudação amigável | `/oi` |
-| `/help` | Lista todos os comandos disponíveis | `/help` |
-| `/server` | Informações detalhadas do servidor | `/server` |
-| `/aniversario` | Registra data de aniversário | `/aniversario dia: 15 mes: 8` |
-| `/clima` | Previsão do tempo para cidade | `/clima cidade: São Paulo` |
-| `/sorteio` | Participa de sorteios ativos | `/sorteio` |
-| `/infosorteio` | Informações sobre sorteios | `/infosorteio` |
+| `/oi` | Saudação amigável do bot | `/oi` |
+| `/help` | Lista todos os comandos disponíveis com descrições detalhadas | `/help` |
+| `/server` | Exibe informações detalhadas do servidor (membros, canais, cargos) | `/server` |
+| `/clima` | Previsão do tempo para uma cidade específica | `/clima cidade: São Paulo` |
 
 ### 🛡️ Comandos de Moderação
 
 | Comando | Descrição | Uso | Permissão |
 |---------|-----------|-----|-----------|
-| `/regra` | Exibe regras do servidor | `/regra` | Moderador |
-| `/clean` | Sistema unificado de limpeza de mensagens | Ver exemplos abaixo | Moderador |
-| `/timeout` | Aplica timeout de 3 minutos | `/timeout usuario: @user` | Moderador |
-| `/banir` | Bane usuário do servidor | `/banir usuario: @user` | Moderador |
+| `/clean` | Sistema unificado de limpeza de mensagens | Ver detalhes abaixo | Moderador |
+| `/timeout` | Aplica timeout de 10 minutos em um usuário | `/timeout usuario: @user` | Moderador |
+| `/banir` | Bane usuário do servidor (temporário ou permanente) | `/banir usuario: @user duracao: 1d` | Moderador |
 | `/desbanir` | Remove ban de usuário | `/desbanir usuario: @user` | Moderador |
-| `/listarbanstemporarios` | Lista todos os bans temporários ativos | `/listarbanstemporarios` | Moderador |
-| `/expulsar` | Expulsa usuário de canal de voz | `/expulsar usuario: @user` | Moderador |
+| `/listbans` | Lista todos os bans temporários ativos no servidor | `/listbans` | Moderador |
+| `/expulsar` | Expulsa usuário do servidor | `/expulsar usuario: @user` | Moderador |
 | `/kickuser` | Remove usuário de canal de voz | `/kickuser usuario: @user` | Moderador |
-| `/embed` | Cria embed personalizado | `/embed titulo: "Título" descrição: "Texto"` | Moderador |
-| `/ficha` | Informações detalhadas do usuário | `/ficha usuario: @user` | Moderador |
-| `/voteparaban` | Inicia votação para banimento | `/voteparaban usuario: @user` | Moderador |
-| `/backup` | Gera backup completo do banco de dados | `/backup` | Moderador |
+| `/embed` | Cria embed personalizado com múltiplas opções | `/embed canal: #geral titulo: "Título"` | Moderador |
+| `/ficha` | Exibe informações detalhadas do usuário no servidor | `/ficha usuario: @user` | Moderador |
+| `/voteparaban` | Inicia votação democrática para banir usuário | `/voteparaban usuario: @user` | Moderador |
+| `/excluicomando` | Exclui um comando específico do bot | `/excluicomando comando: nome` | Moderador |
+
+### 🛠️ Comandos de Gerenciamento
+
+| Comando | Descrição | Uso | Permissão |
+|---------|-----------|-----|-----------|
+| `/cargo` | Exibe painel interativo de seleção de cargos | `/cargo` | Moderador |
+| `/ticket` | Exibe painel para criação de tickets de suporte | `/ticket` | Moderador |
+
+### 🔧 Comando de Configuração
+
+| Comando | Descrição | Uso | Permissão |
+|---------|-----------|-----|-----------|
+| `/painel` | Painel centralizado de configuração do bot (6 páginas) | `/painel` | Owner/Admin/Moderador |
 
 #### 🧹 Comando `/clean` - Sistema Unificado de Limpeza
 
-O comando `/clean` combina as funcionalidades dos antigos comandos `/clearall` e `/clearuser` em uma interface moderna e intuitiva:
+O comando `/clean` oferece duas formas de limpeza de mensagens em uma interface moderna:
 
 **📋 Parâmetros:**
-- `tipo` - Escolha o tipo de limpeza:
+- `tipo` (obrigatório) - Escolha o tipo de limpeza:
   - `🗑️ Limpar mensagens de um usuário específico`
   - `🧹 Limpar últimas mensagens do canal`
-- `quantidade` - Número de mensagens a deletar (1-100)
-- `usuario` - Usuário alvo (obrigatório apenas se tipo = usuário)
+- `quantidade` (obrigatório) - Número de mensagens a deletar (1-100)
+- `usuario` (condicional) - Usuário alvo (obrigatório apenas se tipo = usuário)
 
 **💡 Exemplos de Uso:**
 
@@ -292,7 +296,7 @@ O comando `/clean` combina as funcionalidades dos antigos comandos `/clearall` e
    ```
    /clean tipo: usuário quantidade: 10 usuario: @JohnDoe
    ```
-   *Remove as últimas 10 mensagens do usuário @JohnDoe*
+   *Remove as últimas 10 mensagens do usuário @JohnDoe no canal atual*
 
 2. **Limpar mensagens do canal:**
    ```
@@ -307,59 +311,61 @@ O comando `/clean` combina as funcionalidades dos antigos comandos `/clearall` e
 - ⚡ Tratamento inteligente de erros
 - 🛡️ Validação de mensagens com menos de 14 dias
 
-#### 💾 Comando `/backup` - Sistema de Backup Completo
+#### 🏛️ Comando `/banir` - Sistema de Banimento Flexível
 
-O comando `/backup` permite aos moderadores gerar um backup completo de todas as coleções do banco de dados MongoDB.
+O comando `/banir` oferece opções de banimento temporário ou permanente:
 
-**📋 Funcionalidades:**
-- 🗄️ Backup de todas as coleções do MongoDB
-- 📁 Geração de arquivo JSON com dados organizados
-- 📊 Informações detalhadas de cada coleção
-- 🔐 Acesso restrito a moderadores
-- 📤 Envio automático do arquivo por DM
+**📋 Parâmetros:**
+- `usuario` (obrigatório) - Usuário a ser banido
+- `duracao` (opcional) - Duração do ban (vazio = permanente)
+  - `1m` - 1 minuto
+  - `1h` - 1 hora
+  - `5h` - 5 horas
+  - `1d` - 1 dia
+  - `10d` - 10 dias
 
-**💡 Exemplo de Uso:**
+**💡 Exemplos de Uso:**
+
+1. **Ban permanente:**
+   ```
+   /banir usuario: @user
+   ```
+
+2. **Ban temporário:**
+   ```
+   /banir usuario: @user duracao: 1d
+   ```
+   *Usuário será desbanido automaticamente após 1 dia*
+
+**✅ Recursos:**
+- ⏰ Desbanimento automático para bans temporários
+- 📊 Registro completo no sistema de infrações
+- 🔔 Sistema de verificação a cada minuto
+- 📝 Logs detalhados de todas as ações
+
+#### 📝 Comando `/embed` - Criação de Embeds Personalizados
+
+O comando `/embed` permite criar embeds ricos com múltiplas opções de personalização:
+
+**📋 Parâmetros Disponíveis:**
+- `canal` (obrigatório) - Canal onde o embed será enviado
+- `titulo` - Título do embed
+- `descricao` - Descrição/conteúdo principal
+- `cor` - Cor do embed (hex ou nome)
+- `imagem` - URL da imagem principal
+- `thumbnail` - URL da imagem miniatura
+- `footer` - Texto do rodapé
+- `footer_icon` - Ícone do rodapé
+- `author_name` - Nome do autor
+- `author_icon` - Ícone do autor
+- `author_url` - URL do autor
+- `url` - URL principal do embed
+- `timestamp` - Incluir timestamp (true/false)
+
+**💡 Exemplo Completo:**
 ```
-/backup
+/embed canal: #anuncios titulo: "Novo Evento" descricao: "Participe!" cor: Blue timestamp: true
 ```
-*Gera backup completo e envia por mensagem privada*
-
-**✅ Coleções Incluídas:**
-- ✓ channelsServer - Canais cadastrados
-- ✓ gameNotification - Notificações de jogos
-- ✓ infractionsUsers - Infrações de usuários
-- ✓ notificationBirthday - Aniversários cadastrados
-- ✓ notificationChannels - Configurações de canais
-- ✓ notificationTwitch - Cache de Twitch
-- ✓ notificationYoutube - Cache de YouTube
-- ✓ streamers - Streamers monitorados
-- ✓ tempBan - Banimentos temporários
-- ✓ ticketConfig - Configurações de tickets
-- ✓ votoBanUser - Votações de banimento
-- ✓ youtubeChannel - Canais YouTube monitorados
-
-### 🎲 Comandos de Sorteio
-
-| Comando | Descrição | Uso | Permissão |
-|---------|-----------|-----|-----------|
-| `/premiosorteio` | Define prêmio do sorteio | `/premiosorteio premio: "Discord Nitro"` | Moderador |
-| `/sortear` | Realiza sorteio entre participantes | `/sortear` | Moderador |
-| `/limpasorteio` | Limpa dados do sorteio atual | `/limpasorteio` | Moderador |
-
-### 🛠️ Comandos de Gerenciamento
-
-| Comando | Descrição | Uso | Permissão |
-|---------|-----------|-----|-----------|
-| `/cargo` | Exibe seletor de cargos | `/cargo` | Moderador |
-| `/ticket` | Sistema de tickets de suporte | `/ticket` | Moderador |
-| `/manutencao` | Aviso de manutenção | `/manutencao` | Moderador |
-| `/excluicomando` | Remove comando do bot | `/excluicomando comando: nome` | Moderador |
-
-### 🔧 Comandos de Inicialização
-
-| Comando | Descrição | Uso | Permissão |
-|---------|-----------|-----|-----------|
-| `/painel` | Painel de configuração completo do bot | `/painel` | Moderador |
 
 #### 🎛️ Comando `/painel` - Central de Configuração do Bot
 
@@ -368,11 +374,12 @@ O comando `/painel` é uma interface centralizada e moderna para configurar toda
 **📋 Características do Painel:**
 
 - 🎨 **Interface Moderna**: Utiliza Containers V2 do Discord com design profissional
-- 📑 **5 Páginas de Configuração**: Organizado por categorias funcionais
+- 📑 **6 Páginas de Configuração**: Organizado por categorias funcionais
 - 🔄 **Navegação Intuitiva**: Botões de anterior/próximo para navegar entre páginas
-- 🔒 **Acesso Restrito**: Disponível apenas para moderadores
-- 💾 **Configuração Persistente**: Todas as configurações são salvas no MongoDB
+- 🔒 **Controle de Acesso**: Disponível para Owner, Administradores ou Moderadores configurados
+- 💾 **Configuração Persistente**: Todas as configurações são salvas no MongoDB por servidor
 - 🎯 **Interface Unificada**: Substitui múltiplos comandos de configuração individuais
+- 🌐 **Multi-Guild**: Cada servidor possui suas próprias configurações isoladas
 
 **📄 Páginas do Painel:**
 
@@ -386,8 +393,8 @@ O comando `/painel` é uma interface centralizada e moderna para configurar toda
 - ✅ **Enviar embed de manutenção**: Envia notificação de manutenção programada
 
 **Página 3 - 🎮 Configuração de Streamers**
-- ✅ **Cadastrar streamer Twitch**: Adiciona streamer para monitoramento de lives
-- ✅ **Cadastrar canal YouTube**: Adiciona canal para notificação de novos vídeos
+- ✅ **Cadastrar streamer Twitch**: Adiciona streamer para monitoramento de lives (isolado por servidor)
+- ✅ **Cadastrar canal YouTube**: Adiciona canal para notificação de novos vídeos (isolado por servidor)
 - ✅ **Configurar canais de notificação**: Define onde as notificações serão enviadas
 
 **Página 4 - 🔔 Notificações e Eventos**
@@ -400,7 +407,12 @@ O comando `/painel` é uma interface centralizada e moderna para configurar toda
 - ✅ **Categoria dos tickets**: Seleciona categoria onde tickets serão criados
 - ✅ **Cargo de suporte**: Define qual cargo terá acesso aos tickets
 
-**💡 Exemplo de Uso:**
+**Página 6 - � Configuração de Cargos**
+- ✅ **Cargo de Moderador**: Define cargo com permissões de moderação do bot
+- ✅ **Cargo Imune a Punições**: Define cargo imune às punições automáticas
+- ✅ **Cargo de Novo Membro**: Cargo dado automaticamente aos novos membros
+
+**�💡 Exemplo de Uso:**
 
 ```
 /painel
@@ -414,6 +426,7 @@ O comando `/painel` é uma interface centralizada e moderna para configurar toda
 - **Sistema de Logs**: Registro detalhado de todas as configurações realizadas
 - **Gerenciamento de Estado**: Controle eficiente de listeners para evitar duplicações
 - **Error Handling**: Tratamento robusto de erros com feedback ao usuário
+- **Isolamento Multi-Guild**: Cada servidor possui configurações completamente independentes
 
 **✅ Benefícios do Painel:**
 
@@ -422,51 +435,14 @@ O comando `/painel` é uma interface centralizada e moderna para configurar toda
 - 🔄 **Fácil Manutenção**: Atualize configurações a qualquer momento
 - 👁️ **Transparência**: Feedback imediato sobre cada ação realizada
 - 🛡️ **Segurança**: Validações em todas as operações para prevenir erros
+- 🌐 **Multi-Guild**: Configurações isoladas por servidor
 
-> **📝 Nota Importante**: O comando `/painel` substitui os antigos comandos individuais de configuração (`/addchannels`, `/removechannels`, `/addtwitch`, `/addyoutube`). Todas essas funcionalidades agora estão centralizadas em uma interface única e mais intuitiva.
+**� Permissões de Acesso:**
 
----
-
-## 📋 Verificação de Conformidade
-
-### ✅ Comandos Verificados e Funcionais
-
-**👥 Comandos Gerais:**
-- ✅ `/oi` - Saudação amigável
-- ✅ `/help` - Lista de comandos
-- ✅ `/server` - Informações do servidor  
-- ✅ `/aniversario` - Registro de aniversário
-- ✅ `/clima` - Previsão do tempo
-- ✅ `/sorteio` - Participação em sorteios
-- ✅ `/infosorteio` - Informações de sorteios
-
-**🛡️ Comandos de Moderação:**
-- ✅ `/regra` - Exibição de regras
-- ✅ `/clean` - Sistema unificado de limpeza
-- ✅ `/timeout` - Aplicação de timeout
-- ✅ `/banir` - Banimento de usuários
-- ✅ `/desbanir` - Remoção de banimento
-- ✅ `/listarbanstemporarios` - Listagem de bans temporários ativos
-- ✅ `/expulsar` - Expulsão do servidor
-- ✅ `/kickuser` - Remoção de canal de voz
-- ✅ `/embed` - Criação de embeds
-- ✅ `/ficha` - Informações de usuário
-- ✅ `/voteparaban` - Sistema de votação
-- ✅ `/backup` - Sistema de backup completo
-
-**🎲 Comandos de Sorteio:**
-- ✅ `/premiosorteio` - Definição de prêmios
-- ✅ `/sortear` - Realização de sorteios
-- ✅ `/limpasorteio` - Limpeza de participantes
-
-**🛠️ Comandos de Gerenciamento:**
-- ✅ `/cargo` - Seletor de cargos
-- ✅ `/ticket` - Sistema de tickets
-- ✅ `/manutencao` - Avisos de manutenção
-- ✅ `/excluicomando` - Remoção de comandos
-
-**🔧 Comandos de Inicialização:**
-- ✅ `/painel` - Central de configuração completa do bot
+O comando `/painel` pode ser executado por:
+- ✅ Dono do servidor (Owner)
+- ✅ Usuários com permissão de Administrador
+- ✅ Usuários com cargo de Moderador configurado no painel
 
 ---
 
@@ -474,36 +450,37 @@ O comando `/painel` é uma interface centralizada e moderna para configurar toda
 
 ### 🔄 Sistemas Ativos 24/7
 
-#### 🎂 Notificações de Aniversário
-- **Horário**: Verificação diária às 08:00
-- **Funcionalidade**: Parabeniza membros que fazem aniversário
-- **Personalização**: Mensagens personalizadas com menções
-
-#### 📹 Monitoramento YouTube
-- **Frequência**: Verificação a cada 10 minutos
+#### 📹 Monitoramento YouTube (Multi-Guild)
+- **Frequência**: Verificação a cada 5 minutos
 - **Funcionalidade**: Notifica sobre novos vídeos de canais cadastrados
+- **Isolamento**: Cada servidor monitora seus próprios canais
 - **Formato**: Embeds com thumbnail e informações do vídeo
 
-#### 🎮 Monitoramento Twitch
-- **Frequência**: Verificação a cada 5 minutos
+#### 🎮 Monitoramento Twitch (Multi-Guild)
+- **Frequência**: Verificação a cada 3 minutos
 - **Funcionalidade**: Notifica quando streamers entram/saem ao vivo
+- **Isolamento**: Cada servidor monitora seus próprios streamers
 - **Detalhes**: Informações de categoria, espectadores e duração
 
-#### 🆓 Notificação de Jogos Gratuitos
-- **Frequência**: Verificação diária
-- **Funcionalidade**: Monitora promoções Epic Games, Steam, etc.
+#### 🆓 Notificação de Jogos Gratuitos (Multi-Guild)
+- **Frequência**: Verificação a cada 6 horas
+- **Funcionalidade**: Monitora promoções Epic Games, Steam, GOG, etc.
+- **Isolamento**: Notifica todos os servidores que configuraram canal
 - **Alertas**: Notificações automáticas de jogos gratuitos
 
-#### 📊 Atualização de Cargos
-- **Frequência**: Verificação semanal
-- **Funcionalidade**: Promove membros após 30 dias no servidor
-- **Automação**: Adiciona cargo "Membro Plus" automaticamente
-
-#### ⏰ Gerenciamento de Banimentos Temporários
-- **Frequência**: Verificação contínua a cada minuto
+#### ⏰ Gerenciamento de Banimentos Temporários (Multi-Guild)
+- **Frequência**: Verificação contínua a cada 1 minuto
 - **Funcionalidade**: Desbanimento automático quando o tempo expira
+- **Isolamento**: Gerenciado independentemente por servidor
 - **Registro**: Logs detalhados de banimentos e desbanimentos
 - **Segurança**: Sistema de verificação dupla para evitar erros
+
+#### 👋 Eventos de Membros (Multi-Guild)
+- **Boas-vindas**: Mensagens automáticas ao entrar no servidor
+- **Despedida**: Mensagens automáticas ao sair do servidor
+- **Regras**: Envio automático de regras para novos membros (se configurado)
+- **Configuração**: Via `/painel` - Página 4
+- **Isolamento**: Cada servidor possui suas próprias mensagens e canais
 
 ---
 
@@ -516,7 +493,7 @@ O comando `/painel` é uma interface centralizada e moderna para configurar toda
 - Avisos Progressivos: 2 avisos antes do timeout
 - Penalidade: Timeout automático de 5 minutos
 - Usuários Imunes: Donos, administradores e moderadores
-- Registro: Infrações salvas no banco de dados
+- Registro: Infrações salvas no banco de dados por servidor
 - Cooldown: 30 segundos entre avisos para evitar spam
 - Limpeza Automática: Remove dados antigos periodicamente
 - Logs Detalhados: Monitoramento completo de todas as ações
@@ -524,39 +501,51 @@ O comando `/painel` é uma interface centralizada e moderna para configurar toda
 
 ### 🔗 Bloqueio de Links
 ```javascript
-// Links bloqueados incluem:
+// Sistema de bloqueio de links maliciosos
 - Links de Discord não autorizados
-- Encurtadores de URL suspeitos
-- Domínios em lista negra
+- Encurtadores de URL suspeitos (bit.ly, tinyurl.com, etc.)
+- Domínios em lista negra (configurável via blockedLinks.json)
 - Links de phishing conhecidos
+- Whitelist customizável por servidor
 ```
 
 ### 🤬 Detecção de Palavras Inadequadas
 ```javascript
-// Sistema inteligente que detecta:
+// Sistema inteligente de filtragem
 - Palavrões e linguagem ofensiva
 - Conteúdo discriminatório
 - Spam e flood de caracteres
 - Variações e evasões de filtro
+- Lista personalizável via InappropriateWords.json
+- Registro de infrações por servidor
 ```
 
 ### 📎 Bloqueio de Tipos de Arquivo
 ```javascript
-// Arquivos bloqueados:
+// Proteção contra arquivos perigosos
 - Executáveis (.exe, .bat, .cmd)
 - Scripts maliciosos (.js, .vbs, .ps1)
 - Arquivos de configuração suspeitos
 - Extensões potencialmente perigosas
+- Configurável via blockedFileExtensions.json
 ```
 
 ### 👤 Proteção Contra Novos Membros
 ```javascript
-// Sistema automático que:
+// Sistema automático de detecção
 - Monitora comportamento de contas novas
 - Detecta padrões de bot/spam
-- Aplica medidas preventivas
+- Aplica medidas preventivas automáticas (kick)
 - Mantém logs de atividade suspeita
+- Proteção contra raid de bots
 ```
+
+### 🔐 Recursos de Segurança Adicionais
+
+- **Verificação de Imunidade**: Cargos configurados ficam imunes às punições automáticas
+- **Sistema de Infrações**: Registro completo de todas as violações por usuário e servidor
+- **Logs Detalhados**: Todas as ações de segurança são registradas com timestamp e contexto
+- **Configuração Flexível**: Arquivos JSON para personalizar regras de segurança
 
 ---
 
@@ -925,9 +914,60 @@ As seguintes coleções são automaticamente gerenciadas através do comando `/p
 
 ---
 
+## 🔄 Migração de Dados
+
+### 📦 Migrando de Versão Anterior (< 2.0)
+
+Se você está atualizando de uma versão single-guild para a v2.0 multi-guild, siga este processo:
+
+#### ⚙️ Pré-Requisitos
+
+1. **Backup completo** do banco de dados atual
+```bash
+mongodump --db jonalandia --out backup/
+```
+
+2. **Configure o `.env`** com o ID do servidor principal:
+```env
+DEFAULT_GUILD_ID=123456789012345678
+```
+
+#### 🚀 Executando a Migração
+
+```bash
+# 1. Execute o script interativo de migração
+node scripts/migrateToMultiGuild.js
+
+# 2. Siga as instruções na tela
+```
+
+#### ✅ O que o Script Faz
+
+- ✅ Valida conexão com MongoDB
+- ✅ Verifica configuração do `DEFAULT_GUILD_ID`
+- ✅ Migra 7 coleções principais
+- ✅ Adiciona campo `guildId` a todos os documentos
+- ✅ Cria índices compostos para performance
+- ✅ Gera relatório detalhado
+- ✅ Suporta rollback em caso de erro
+
+#### 📚 Documentação Completa
+
+- 📖 [Guia de Migração Completo](./scripts/README_MIGRATION.md)
+- 📖 [Checklist de QA](./tests/QA_CHECKLIST.md)
+- 📖 [Recursos Multi-Guild](./docs/MULTI_GUILD_FEATURES.md)
+
+### 🆕 Instalação Limpa
+
+Se está instalando o bot pela primeira vez, **não precisa migrar nada!** Apenas siga a [Instalação Rápida](#-instalação-rápida).
+
+---
+
 ## ⚙️ Configuração Avançada
 
 ### 🔧 Variáveis de Ambiente Detalhadas
+
+#### ✅ Variáveis Necessárias (v2.0)
 
 ```env
 # ====================================
@@ -937,43 +977,61 @@ TOKEN=seu_token_discord_bot
 MONGO_URI=mongodb://localhost:27017/jonalandia
 
 # ====================================
-# IDS DOS CANAIS
+# APIS EXTERNAS
 # ====================================
-CHANNEL_ID_LOGS_INFO_BOT=123456789012345678
-CHANNEL_ID_LOGS_ERRO_BOT=123456789012345678
-CHANNEL_ID_CARGOS=123456789012345678
-CHANNEL_ID_REGRAS=123456789012345678
-CHANNEL_ID_ANIVERSARIOS=123456789012345678
+OPENWEATHER_API_KEY=sua_chave_api_clima
+YOUTUBE_API_KEY=sua_chave_api_youtube
+TWITCH_CLIENT_ID=seu_client_id_twitch
+TWITCH_CLIENT_SECRET=seu_client_secret_twitch
 
 # ====================================
-# IDS DOS CARGOS
+# MIGRAÇÃO (Opcional - apenas para migração de dados)
 # ====================================
-CARGO_MODERADOR=123456789012345678
-CARGO_MEMBRO=123456789012345678
-CARGO_MEMBRO_PLUS=123456789012345678
-CARGO_MASCULINO=123456789012345678
-CARGO_FEMININO=123456789012345678
+DEFAULT_GUILD_ID=123456789012345678
+```
 
-# Cargos de Jogos
-CARGO_FREE_FIRE=123456789012345678
-CARGO_MINECRAFT=123456789012345678
-CARGO_VALORANT=123456789012345678
-CARGO_FORTNIT=123456789012345678
-CARGO_LOL=123456789012345678
-CARGO_CS=123456789012345678
-CARGO_ROBLOX=123456789012345678
-CARGO_GTAV=123456789012345678
-CARGO_CLASH_ROYALE=123456789012345678
-CARGO_CLASH_OF_CLANS=123456789012345678
-CARGO_BLOCK_SQUAD=123456789012345678
-CARGO_ROCKET_LEAGUE=123456789012345678
-CARGO_AMONG_US=123456789012345678
-CARGO_RED_DEAD=123456789012345678
+> **🎉 Novidade v2.0**: IDs de canais e cargos **não são mais necessários no `.env`**!  
+> Todas as configurações agora são feitas via `/painel` em cada servidor.
 
-# Cargos de Identidade
-CARGO_NAO_BINARIO=123456789012345678
-CARGO_13_A_15ANOS=123456789012345678
-CARGO_16_A_17ANOS=123456789012345678
+#### ❌ Variáveis Descontinuadas
+
+As seguintes variáveis **não são mais utilizadas** a partir da v2.0:
+
+```env
+# ❌ Descontinuadas - Configure via /painel:
+CHANNEL_ID_LOGS_INFO_BOT
+CHANNEL_ID_LOGS_ERRO_BOT
+CHANNEL_ID_CARGOS
+CHANNEL_ID_REGRAS
+CHANNEL_ID_ANIVERSARIOS
+CHANNEL_ID_NOTIFICATION_TWITCH
+CHANNEL_ID_NOTIFICATION_YOUTUBE
+CHANNEL_ID_NOTIFICATION_FREE_GAMES
+CHANNEL_ID_WELCOME
+CHANNEL_ID_GOODBYE
+
+CARGO_MODERADOR
+CARGO_MEMBRO
+CARGO_MEMBRO_PLUS
+CARGO_IMUNE
+
+# Cargos de jogos e identidade também não são mais necessários
+# (Configure sistemas de cargos via comando /cargo no servidor)
+```
+
+#### 🔄 Como Configurar Agora
+
+| Antes (< v2.0) | Agora (v2.0) |
+|----------------|--------------|
+| `CHANNEL_ID_NOTIFICATION_TWITCH` no `.env` | Página 3 do `/painel` |
+| `CHANNEL_ID_NOTIFICATION_YOUTUBE` no `.env` | Página 3 do `/painel` |
+| `CHANNEL_ID_NOTIFICATION_FREE_GAMES` no `.env` | Página 4 do `/painel` |
+| `CHANNEL_ID_WELCOME` no `.env` | Página 4 do `/painel` |
+| `CHANNEL_ID_GOODBYE` no `.env` | Página 4 do `/painel` |
+| `CARGO_MODERADOR` no `.env` | Página 6 do `/painel` |
+| `CARGO_IMUNE` no `.env` | Página 6 do `/painel` |
+
+> 💡 **Vantagem**: Cada servidor pode ter configurações diferentes!
 CARGO_18ANOS=123456789012345678
 CARGO_TRABALHANDO=123456789012345678
 CARGO_ESTUDANDO=123456789012345678
@@ -1193,23 +1251,79 @@ grep "ERROR" src/logs/error.log
 ### ❓ Perguntas Frequentes (FAQ)
 
 #### **Como configurar o bot pela primeira vez?**
-1. Execute `/painel` no seu servidor
-2. Navegue pelas 5 páginas usando os botões ◀ ▶
-3. Configure os canais nas páginas 1, 2 e 4
-4. Configure streamers/YouTube na página 3 (opcional)
-5. Configure o sistema de tickets na página 5 (opcional)
+1. Adicione o bot ao seu servidor Discord
+2. Você receberá automaticamente uma DM com instruções
+3. Execute `/painel` no seu servidor
+4. Navegue pelas 6 páginas usando os botões ◀ ▶
+5. Configure os canais nas páginas 1-4
+6. Configure streamers/YouTube na página 3 (opcional)
+7. Configure tickets e cargos nas páginas 5-6 (opcional)
+
+#### **O bot funciona em múltiplos servidores?**
+**Sim!** O bot v2.0 possui arquitetura multi-guild. Cada servidor tem:
+- ✅ Configurações completamente isoladas
+- ✅ Seus próprios streamers e canais monitorados
+- ✅ Histórico de infrações independente
+- ✅ Canais de notificação personalizados
+
+#### **Como funciona o isolamento de dados?**
+```javascript
+// Exemplo prático:
+Servidor A: streamers = ["gaules", "alanzoka"]
+Servidor B: streamers = ["loud_coringa", "nobru"]
+
+// Quando gaules entra ao vivo:
+// ✅ Notificação enviada apenas para Servidor A
+// ❌ Servidor B não recebe notificação
+
+// Os dados NUNCA se misturam entre servidores!
+```
 
 #### **O que acontece se eu mudar um canal de notificação?**
-Você pode atualizar a qualquer momento através do `/painel`. Basta selecionar o novo canal no menu apropriado.
+Você pode atualizar a qualquer momento através do `/painel`. Basta selecionar o novo canal no menu apropriado. As configurações são salvas imediatamente no banco de dados.
 
 #### **Como faço backup do banco de dados?**
-Use o comando `/backup` - ele enviará um arquivo JSON completo por DM.
+Use o comando `/backup` - ele enviará um arquivo JSON completo por DM com todas as coleções do MongoDB.
 
 #### **Os banimentos temporários são confiáveis?**
-Sim! O sistema verifica a cada minuto e possui logs detalhados de todas as ações.
+Sim! O sistema verifica a cada minuto e possui logs detalhados de todas as ações. Bans temporários são desbanidos automaticamente quando o tempo expira.
 
-#### **Posso usar o bot em múltiplos servidores?**
-Sim! Cada servidor tem suas próprias configurações isoladas no banco de dados.
+#### **Preciso configurar IDs no arquivo .env?**
+**Não mais!** A partir da v2.0, canais e cargos são configurados via `/painel` em cada servidor. O `.env` agora contém apenas:
+- Token do bot
+- Conexão MongoDB
+- Chaves de APIs externas (YouTube, Twitch, OpenWeather)
+
+#### **O que acontece com meus dados se eu remover o bot?**
+Quando você remove o bot de um servidor:
+- ✅ Dados são marcados como inativos (`isActive: false`)
+- ✅ Dados são **preservados** no banco
+- ✅ Se readicionar o bot, os dados são **reativados**
+- ✅ Nada é deletado automaticamente
+
+#### **Como migro de uma versão anterior?**
+Se você usava o bot em um único servidor (versão < 2.0):
+1. Configure `DEFAULT_GUILD_ID` no `.env` com o ID do seu servidor
+2. Execute o script de migração: `node scripts/migrateToMultiGuild.js`
+3. Siga as instruções interativas
+4. Consulte o [Guia de Migração](./scripts/README_MIGRATION.md) para detalhes
+
+#### **Quem pode usar o comando /painel?**
+O comando `/painel` pode ser executado por:
+- ✅ Dono do servidor (owner)
+- ✅ Usuários com permissão de Administrador
+- ✅ Usuários com o cargo de Moderador (configurado no próprio painel)
+
+#### **O sistema de permissões é diferente para /painel?**
+Sim! O `/painel` tem verificação **independente** dos comandos de moderação:
+- Comandos de moderação (`/ban`, `/kick`, etc): Usam `checkingComandsExecution.js`
+- Comando `/painel`: Usa `checkPainelPermissions()` com três níveis de acesso
+
+#### **Quantos servidores o bot suporta?**
+Não há limite técnico! A arquitetura foi projetada para escalar infinitamente. Cada servidor adiciona:
+- ~1 documento em `guildConfigs`
+- N documentos em coleções específicas (streamers, canais, etc)
+- Performance otimizada com índices compostos por `guildId`
 
 ---
 
@@ -1260,7 +1374,7 @@ Para reportar bugs, inclua:
 - [📋 Licença](./LICENSE)
 
 ### 🔄 Versionamento
-- **Versão Atual**: 10.2.4
+- **Versão Atual**: 2.0.0
 - **Sistema**: Semantic Versioning (SemVer)
 - **Changelog**: [CHANGELOG.md](./CHANGELOG.md)
 

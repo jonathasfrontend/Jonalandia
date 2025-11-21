@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 
 const VoteSchema = new mongoose.Schema({
+  guildId: {
+    type: String,
+    required: true,
+    index: true,
+    description: 'ID do servidor Discord'
+  },
   targetUserId: {
     type: String,
     required: true
@@ -41,6 +47,11 @@ const VoteSchema = new mongoose.Schema({
         required: true },
     },
   ],
+}, {
+  timestamps: true
 });
+
+// Índice composto para evitar múltiplas votações para o mesmo usuário em uma guild
+VoteSchema.index({ guildId: 1, targetUserId: 1 });
 
 module.exports = mongoose.model('votoBanUser', VoteSchema);

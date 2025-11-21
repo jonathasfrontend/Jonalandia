@@ -3,13 +3,17 @@ const { EmbedBuilder } = require('discord.js');
 const cron = require('node-cron');
 const GameNotification = require('../../database/models/gameNotification');
 const NotificationChannelsModel = require('../../database/models/notificationChannels');
+const GuildConfig = require('../../database/models/guildConfig');
 const { client } = require('../../Client');
 const { logger, botEvent, databaseEvent } = require('../../logger');
 
+/**
+ * Verifica jogos gratuitos e notifica todas as guilds ativas configuradas
+ */
 async function onNotificationFreeGames() {
     const context = { module: 'FREE_GAMES_NOTIFICATIONS' };
     
-    logger.debug('Iniciando verificação de jogos gratuitos', context);
+    logger.debug('Iniciando verificação de jogos gratuitos multi-guild', context);
 
     try {
         logger.debug('Fazendo requisição para API de jogos gratuitos', context);
@@ -23,96 +27,26 @@ async function onNotificationFreeGames() {
 
         logger.info(`${games.length} jogos encontrados na API`, context);
 
-        // Seleciona 3 jogos aleatórios
+        // Busca todas as guilds ativas que têm notificação de jogos gratuitos configurada
+        const activeGuilds = await GuildConfig.find({ isActive: true });
+        
+        if (activeGuilds.length === 0) {
+            logger.debug('Nenhuma guild ativa encontrada', context);
+            return;
+        }
+
+        logger.info(`Processando jogos gratuitos para ${activeGuilds.length} guild(s) ativa(s)`, context);
+
+        // Seleciona 3 jogos aleatórios para verificar
         const selectedGames = games.sort(() => 0.5 - Math.random()).slice(0, 3);
         logger.debug(`${selectedGames.length} jogos selecionados para verificação`, context);
 
+        // Processa cada jogo
         for (const game of selectedGames) {
-            const gameContext = {
-                ...context,
-                gameId: game.id,
-                gameTitle: game.title
-            };
-
-            try {
-                logger.debug(`Verificando se jogo já foi notificado: ${game.title}`, gameContext);
-                
-                const gameExists = await GameNotification.findOne({ id: game.id });
-                databaseEvent('SELECT', 'GameNotifications', true, `Verificando jogo existente: ${game.title}`);
-
-                if (!gameExists) {
-                    logger.info(`Novo jogo gratuito detectado: ${game.title}`, gameContext);
-                    botEvent('FREE_GAME_DETECTED', `Novo jogo: ${game.title}`);
-
-                    try {
-                        // Salva no banco de dados
-                        await GameNotification.create({
-                            id: game.id,
-                            title: game.title,
-                            genre: game.genre,
-                            platform: game.platform,
-                            release_date: game.release_date,
-                        });
-
-                        databaseEvent('INSERT', 'GameNotifications', true, `Jogo salvo: ${game.title}`);
-                        logger.debug(`Jogo ${game.title} salvo no banco de dados`, gameContext);
-
-                        // Busca o canal de notificação configurado no banco de dados
-                        // Procura em todas as guilds que têm o canal configurado
-                        const notificationChannels = await NotificationChannelsModel.find({ notificationType: 'free_games' });
-                        databaseEvent('SELECT', 'NotificationChannels', true, 'Buscando canais de notificação de jogos gratuitos');
-
-                        if (!notificationChannels || notificationChannels.length === 0) {
-                            logger.warn('Nenhum canal de notificação de jogos gratuitos configurado', gameContext);
-                            botEvent('FREE_GAMES_CHANNEL_NOT_CONFIGURED', 'Nenhum canal configurado para jogos gratuitos');
-                            continue;
-                        }
-
-                        // Envia notificação para cada guild que tem o canal configurado
-                        for (const notificationConfig of notificationChannels) {
-                            const channel = client.channels.cache.get(notificationConfig.channelId);
-                            
-                            if (!channel) {
-                                logger.warn(`Canal de notificação não encontrado: ${notificationConfig.channelId}`, gameContext);
-                                botEvent('FREE_GAMES_CHANNEL_NOT_FOUND', `Canal ${notificationConfig.channelId} não encontrado`);
-                                continue;
-                            }
-
-                            const embed = new EmbedBuilder()
-                                .setColor('Green')
-                                .setTitle(`<:icon:1402690522375520378> ${game.title}`)
-                                .setDescription(game.short_description)
-                                .addFields(
-                                    { name: 'Gênero', value: game.genre, inline: true },
-                                    { name: 'Plataforma', value: game.platform, inline: true },
-                                    { name: 'Lançamento', value: game.release_date, inline: true },
-                                )
-                                .setURL(game.game_url)
-                                .setImage(game.thumbnail)
-                                .setFooter({ text: 'Jogo gratuito disponível!' });
-
-                            await channel.send({ embeds: [embed] });
-                            
-                            logger.info(`Notificação de jogo gratuito enviada para guild ${notificationConfig.guildId}: ${game.title}`, gameContext);
-                            botEvent('FREE_GAME_NOTIFICATION_SENT', `Notificação enviada: ${game.title} para ${notificationConfig.guildName || notificationConfig.guildId}`);
-                        }
-
-                    } catch (saveError) {
-                        logger.error(`Erro ao salvar/notificar jogo: ${game.title}`, gameContext, saveError);
-                        databaseEvent('INSERT', 'GameNotifications', false, saveError.message);
-                        botEvent('FREE_GAME_SAVE_ERROR', `Erro ao salvar ${game.title}: ${saveError.message}`);
-                    }
-                } else {
-                    logger.debug(`Jogo já foi notificado anteriormente: ${game.title}`, gameContext);
-                }
-
-            } catch (gameError) {
-                logger.error(`Erro ao processar jogo: ${game.title}`, gameContext, gameError);
-                botEvent('FREE_GAME_PROCESS_ERROR', `Erro ao processar ${game.title}: ${gameError.message}`);
-            }
+            await processGameNotification(game, activeGuilds, context);
         }
 
-        logger.debug('Verificação de jogos gratuitos concluída', context);
+        logger.debug('Verificação de jogos gratuitos multi-guild concluída', context);
 
     } catch (error) {
         logger.error('Erro na verificação de jogos gratuitos', context, error);
@@ -120,22 +54,139 @@ async function onNotificationFreeGames() {
     }
 }
 
-function scheduleonNotificationFreeGamesCheck(){
+/**
+ * Processa notificação de um jogo para todas as guilds ativas
+ * @param {Object} game - Dados do jogo da API
+ * @param {Array<GuildConfig>} activeGuilds - Lista de guilds ativas
+ * @param {Object} baseContext - Contexto base para logs
+ */
+async function processGameNotification(game, activeGuilds, baseContext) {
+    const gameContext = {
+        ...baseContext,
+        gameId: game.id,
+        gameTitle: game.title
+    };
+
+    try {
+        logger.debug(`Processando jogo: ${game.title}`, gameContext);
+
+        // Processa cada guild que tem canal de notificação configurado
+        for (const guildConfig of activeGuilds) {
+            const guildContext = {
+                ...gameContext,
+                guildId: guildConfig.guildId,
+                guildName: guildConfig.guildName
+            };
+
+            try {
+                // Busca canal de notificação para esta guild
+                const notificationChannelData = await NotificationChannelsModel.findOne({ 
+                    guildId: guildConfig.guildId,
+                    notificationType: 'free_games' 
+                });
+
+                if (!notificationChannelData) {
+                    logger.silly(`Canal de notificação de jogos gratuitos não configurado para ${guildConfig.guildName}`, guildContext);
+                    continue;
+                }
+
+                const discordChannel = client.channels.cache.get(notificationChannelData.channelId);
+                
+                if (!discordChannel) {
+                    logger.warn(`Canal de notificação não encontrado ou inacessível para ${guildConfig.guildName}`, {
+                        ...guildContext,
+                        channelId: notificationChannelData.channelId
+                    });
+                    continue;
+                }
+
+                // Verifica se jogo já foi notificado NESTA GUILD
+                const existingNotification = await GameNotification.findOne({ 
+                    guildId: guildConfig.guildId,
+                    title: game.title
+                });
+
+                if (existingNotification) {
+                    logger.silly(`Jogo "${game.title}" já notificado para ${guildConfig.guildName}`, guildContext);
+                    continue;
+                }
+
+                logger.info(`Novo jogo gratuito para notificar em ${guildConfig.guildName}: ${game.title}`, guildContext);
+                botEvent('FREE_GAME_DETECTED', `Novo jogo em ${guildConfig.guildName}: ${game.title}`);
+
+                // Cria embed de notificação
+                const embed = new EmbedBuilder()
+                    .setColor('Green')
+                    .setTitle(`🎮 ${game.title}`)
+                    .setDescription(game.short_description || 'Jogo gratuito disponível!')
+                    .addFields(
+                        { name: '🎯 Gênero', value: game.genre || 'Não especificado', inline: true },
+                        { name: '💻 Plataforma', value: game.platform || 'PC', inline: true },
+                        { name: '📅 Lançamento', value: game.release_date || 'Não especificado', inline: true },
+                    )
+                    .setURL(game.game_url || 'https://www.freetogame.com')
+                    .setImage(game.thumbnail || null)
+                    .setTimestamp()
+                    .setFooter({ 
+                        text: `${guildConfig.guildName} | Jogo Gratuito!`,
+                        iconURL: client.user.displayAvatarURL({ dynamic: true })
+                    });
+
+                // Envia notificação
+                await discordChannel.send({ embeds: [embed] });
+                
+                logger.info(`Notificação de jogo gratuito enviada em ${guildConfig.guildName}: ${game.title}`, guildContext);
+                botEvent('FREE_GAME_NOTIFICATION_SENT', `${game.title} notificado em ${guildConfig.guildName}`);
+
+                // Salva registro da notificação com guildId
+                const newNotification = new GameNotification({
+                    guildId: guildConfig.guildId,
+                    title: game.title,
+                    genre: game.genre || 'Não especificado',
+                    platform: game.platform || 'PC',
+                    release_date: game.release_date || 'Não especificado',
+                    createdAt: new Date()
+                });
+
+                await newNotification.save();
+                databaseEvent('INSERT', 'GameNotifications', true, `Jogo salvo para ${guildConfig.guildName}: ${game.title}`);
+
+            } catch (guildError) {
+                logger.error(`Erro ao processar jogo para guild ${guildConfig.guildName}`, guildContext, guildError);
+                botEvent('FREE_GAME_GUILD_ERROR', `Erro em ${guildConfig.guildName}: ${guildError.message}`);
+            }
+        }
+
+    } catch (gameError) {
+        logger.error(`Erro ao processar jogo: ${game.title}`, gameContext, gameError);
+        botEvent('FREE_GAME_PROCESS_ERROR', `Erro ao processar ${game.title}: ${gameError.message}`);
+    }
+}
+
+/**
+ * Agenda verificação automática de jogos gratuitos
+ */
+function scheduleonNotificationFreeGamesCheck() {
     const context = { module: 'FREE_GAMES_NOTIFICATIONS' };
     
     try {
-        cron.schedule('*/5 * * * *', () => { 
-            logger.debug('Executando verificação automática de jogos gratuitos', context);
+        // Executa a cada 6 horas para evitar spam (jogos gratuitos não mudam tão frequentemente)
+        cron.schedule('0 */6 * * *', () => { 
+            logger.debug('Executando verificação automática de jogos gratuitos multi-guild', context);
             botEvent('FREE_GAMES_CHECK_SCHEDULED', 'Verificação automática de jogos gratuitos executada');
             onNotificationFreeGames();
         });
 
-        logger.info('Agendador de notificações de jogos gratuitos configurado com sucesso (a cada 5 minutos)', context);
-        botEvent('FREE_GAMES_SCHEDULER_CONFIGURED', 'Agendador configurado para executar a cada 5 minutos');
+        logger.info('Agendador de notificações de jogos gratuitos multi-guild configurado (a cada 6 horas)', context);
+        botEvent('FREE_GAMES_SCHEDULER_CONFIGURED', 'Agendador configurado para executar a cada 6 horas');
 
     } catch (error) {
         logger.error('Erro ao configurar agendador de notificações de jogos gratuitos', context, error);
     }
 }
 
-module.exports = { scheduleonNotificationFreeGamesCheck };
+module.exports = { 
+    scheduleonNotificationFreeGamesCheck,
+    onNotificationFreeGames,
+    processGameNotification
+};
