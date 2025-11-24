@@ -48,7 +48,6 @@ const { getWeather } = require('./commands/public/weather');
 */
 const { createEmbed } = require('./commands/moderador/createEmbed');
 const { clean } = require('./commands/moderador/clean');
-const { cargo } = require('./commands/moderador/cargo');
 const { ticket } = require('./commands/moderador/ticket');
 const { timeout } = require('./commands/moderador/timeout');
 const { expulsar } = require('./commands/moderador/expulsar');
@@ -141,10 +140,6 @@ client.once('ready', () => {
     ],
   });
 
-  client.application?.commands.create({
-    name: 'cargo',
-    description: "Comando para mostrar botões dos cargos! (Moderador)",
-  })
 
   client.application?.commands.create({
     name: 'ticket',
@@ -408,8 +403,6 @@ client.on('interactionCreate', async (interaction) => {
     await Help(interaction);
   } else if (commandName === 'server') {
     await searchGuild(interaction)
-  } else if (commandName === 'cargo') {
-    await cargo(interaction)
   } else if (commandName === 'ticket') {
     await ticket(interaction)
   } else if (commandName === 'embed') {
