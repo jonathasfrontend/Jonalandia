@@ -11,7 +11,7 @@ function Status() {
         client.user.setPresence({
             "since": 91879201,
             activities: [{
-                name: '🎮 • Jonalandia The Games',
+                name: '🎮⠂Jonalandia The Games',
                 type: 0
             }],
             status: PresenceUpdateStatus.Online,
