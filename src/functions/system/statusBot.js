@@ -4,18 +4,18 @@ const { logger, botEvent } = require('../../logger');
 
 function Status() {
     const context = { module: 'BOT' };
-    
+
     try {
         logger.info('Configurando status do bot', context);
-        
+
         client.user.setPresence({
-            activities: [
-                {
-                    name: 'Jonalandia The Games',
-                    status: PresenceUpdateStatus.Online,
-                    type: 'PLAYING'
-                }
-            ]
+            "since": 91879201,
+            activities: [{
+                name: '🎮 • Jonalandia The Games',
+                type: 0
+            }],
+            status: PresenceUpdateStatus.Online,
+            "afk": false
         });
 
         logger.info('Status do bot configurado com sucesso', {
@@ -23,7 +23,7 @@ function Status() {
             status: 'Online',
             activity: 'Jonalandia The Games'
         });
-        
+
         botEvent('BOT_STATUS_SET', 'Status configurado: Online - Jonalandia The Games');
 
     } catch (error) {
