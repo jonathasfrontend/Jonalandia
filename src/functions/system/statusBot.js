@@ -13,7 +13,7 @@ function Status() {
                 {
                     name: 'Jonalandia The Games',
                     status: PresenceUpdateStatus.Online,
-                    url: 'https://github.com/jonathasfrontend',
+                    type: 'PLAYING'
                 }
             ]
         });
