@@ -9,7 +9,6 @@ function Status() {
         logger.info('Configurando status do bot', context);
 
         client.user.setPresence({
-            "since": 91879201,
             activities: [{
                 name: '🎮⠂Jonalandia The Games',
                 type: 0

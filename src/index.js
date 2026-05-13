@@ -77,7 +77,6 @@ client.once('ready', () => {
     Status();
     botEvent('STATUS_SET', 'Status do bot configurado');
 
-
     scheduleNotificationYoutubeCheck();
     botEvent('YOUTUBE_NOTIFICATION_STARTED', 'Monitoramento de YouTube iniciado');
 
