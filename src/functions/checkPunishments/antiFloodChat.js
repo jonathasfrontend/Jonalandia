@@ -221,9 +221,10 @@ function createTimeoutEmbed(user, infractionId = null) {
  * @param {string} reason - Motivo da infração
  * @returns {string|null} UUID da infração ou null se falhou
  */
-async function registerInfraction(user, member, type, reason) {
+async function registerInfraction(guildId, user, member, type, reason) {
     try {
         const infractionId = await saveUserInfractions(
+            guildId,
             user.id,
             user.tag,
             user.displayAvatarURL({ dynamic: true }),
@@ -341,9 +342,9 @@ async function antiFloodChat(message) {
                 const reasonWarns = `O usuário ${message.author.tag} recebeu um aviso.`;
                 const typeWarns = 'warns';
 
-                const floodId = await registerInfraction(author, member, typeFlood, reasonFlood);
-                const timeoutId = await registerInfraction(message.author, message.member, typeTimeout, reasonTimeout);
-                const warnsId = await registerInfraction(message.author, message.member, typeWarns, reasonWarns);
+                const floodId = await registerInfraction(guild.id, author, member, typeFlood, reasonFlood);
+                const timeoutId = await registerInfraction(message.guild.id, message.author, message.member, typeTimeout, reasonTimeout);
+                const warnsId = await registerInfraction(message.guild.id, message.author, message.member, typeWarns, reasonWarns);
 
 
                 try {
@@ -391,7 +392,7 @@ async function antiFloodChat(message) {
 
                     // Registrar infração de aviso
                     const warningReason = `Aviso por flood de mensagens (${messageCount} mensagens em ${config.timeWindow / 1000}s)`;
-                    const warningId = await registerInfraction(author, member, 'floodWarning', warningReason);
+                    const warningId = await registerInfraction(guild.id, author, member, 'floodWarning', warningReason);
 
                     try {
                         // Criar e enviar embed de aviso

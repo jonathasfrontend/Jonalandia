@@ -1,104 +1,47 @@
 const { EmbedBuilder } = require("discord.js");
 const { client } = require("../../Client");
-const { logger, botEvent } = require('../../logger');
-const NotificationChannelsModel = require('../../database/models/notificationChannels');
+const { logger } = require('../../logger');
+const { db } = require('../../database/service');
 
 async function onMemberRemove(member) {
-    const context = {
-        module: 'MEMBER_EVENTS',
-        user: member.user.tag,
-        guild: member.guild?.name
-    };
+  const context = { module: 'MEMBER_EVENTS', user: member.user.tag, guild: member.guild?.name };
 
-    logger.info(`Membro saiu do servidor: ${member.user.tag}`, context);
-    botEvent('MEMBER_LEFT', `${member.user.tag} saiu do servidor`);
+  try {
+    const goodbyeConfig = await db.notificationChannels.findOne({ guildId: member.guild.id, notificationType: 'goodbye' });
+    let channel;
 
-    try {
-        // Busca o canal de despedida configurado no banco de dados
-        const goodbyeChannelConfig = await NotificationChannelsModel.findOne({ 
-            guildId: member.guild.id, 
-            notificationType: 'goodbye' 
-        });
-
-        let discordChannel;
-        
-        if (goodbyeChannelConfig) {
-            discordChannel = member.guild.channels.cache.get(goodbyeChannelConfig.channelId);
-            logger.debug(`Canal de despedida encontrado no banco: ${goodbyeChannelConfig.channelId}`, context);
-        } else {
-            // Fallback para variável de ambiente se não houver configuração no banco
-            discordChannel = member.guild.channels.cache.get(process.env.CHANNEL_ID_ATE_LOGO);
-            logger.debug('Usando canal de despedida da variável de ambiente (fallback)', context);
-        }
-
-        if (discordChannel) {
-            const embed = new EmbedBuilder()
-                .setColor(0xffffff)
-                .setAuthor({
-                    name: member.user.username,
-                    iconURL: member.user.displayAvatarURL({ dynamic: true }),
-                })
-                .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
-                .setTitle('<:affs:1402695937175846912> ahhhhh!')
-                .setDescription(`⚰ **${member.user}** saiu do servidor...`)
-                .setImage('https://i.pinimg.com/originals/81/2d/e9/812de920c0c7076356699d644418e326.gif')
-                .setFooter({ text: `${member.user.username}`, iconURL: member.user.displayAvatarURL({ dynamic: true }) });
-
-            try {
-                discordChannel.send({ embeds: [embed] });
-                logger.debug('Embed de despedida enviado no canal público', context);
-            } catch (embedError) {
-                logger.error('Erro ao enviar embed de despedida', context, embedError);
-            }
-        } else {
-            logger.warn('Canal de despedida não encontrado', context);
-        }
-
-        // Log no canal de logs
-        const discordChannel2 = client.channels.cache.get(process.env.CHANNEL_ID_LOGS_INFO_BOT);
-        if (discordChannel2) {
-            try {
-                discordChannel2.send(`${member.user} Acabou de sair no servidor ${member.guild}.`);
-                logger.debug('Log de saída enviado para canal de logs', context);
-            } catch (logError) {
-                logger.warn('Erro ao enviar log para canal', context, logError);
-            }
-        } else {
-            logger.warn('Canal de logs não encontrado', context);
-        }
-
-        // Tentativa de enviar DM de despedida
-        const embed = new EmbedBuilder()
-            .setColor(0xffffff)
-            .setAuthor({
-                name: member.user.username,
-                iconURL: member.user.displayAvatarURL({ dynamic: true }),
-            })
-            .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
-            .setTitle('😭 ahhhhh!')
-            .setDescription(`⚰ **${member.user}** saiu do servidor...`)
-            .setImage('https://i.pinimg.com/originals/81/2d/e9/812de920c0c7076356699d644418e326.gif')
-            .setFooter({ text: `${member.user.username}`, iconURL: member.user.displayAvatarURL({ dynamic: true }) });
-
-        member.user.send({ embeds: [embed] })
-            .then(() => {
-                logger.debug(`DM de despedida enviada para ${member.user.tag}`, context);
-                botEvent('FAREWELL_DM_SENT', `DM enviada para ${member.user.tag}`);
-            })
-            .catch(error => {
-                if (error.code === 50007) {
-                    logger.info(`Não foi possível enviar DM para ${member.user.tag} - DMs desativadas ou bot bloqueado`, context);
-                    botEvent('FAREWELL_DM_BLOCKED', `DMs bloqueadas para ${member.user.tag}`);
-                } else {
-                    logger.warn(`Erro ao enviar DM de despedida para ${member.user.tag}`, context, error);
-                    botEvent('FAREWELL_DM_FAILED', `Falha ao enviar DM para ${member.user.tag}: ${error.message}`);
-                }
-            });
-
-    } catch (error) {
-        logger.error('Erro ao processar saída de membro', context, error);
-        botEvent('MEMBER_REMOVE_ERROR', `Erro ao processar saída de ${member.user.tag}: ${error.message}`);
+    if (goodbyeConfig) {
+      channel = member.guild.channels.cache.get(goodbyeConfig.channelId);
+    } else {
+      channel = member.guild.channels.cache.get(process.env.CHANNEL_ID_ATE_LOGO);
     }
+
+    if (channel) {
+      const embed = new EmbedBuilder()
+        .setColor(0xffffff)
+        .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
+        .setTitle('<:affs:1402695937175846912> ahhhhh!')
+        .setDescription(`⚰ **${member.user}** saiu do servidor...`)
+        .setImage('https://i.pinimg.com/originals/81/2d/e9/812de920c0c7076356699d644418e326.gif')
+        .setFooter({ text: member.user.username, iconURL: member.user.displayAvatarURL({ dynamic: true }) });
+
+      channel.send({ embeds: [embed] });
+    }
+
+    const logChannel = client.channels.cache.get(process.env.CHANNEL_ID_LOGS_INFO_BOT);
+    if (logChannel) logChannel.send(`${member.user} saiu do servidor.`);
+
+    const farewellEmbed = new EmbedBuilder()
+      .setColor(0xffffff).setTitle('😭 ahhhhh!')
+      .setDescription(`⚰ **${member.user}** saiu do servidor...`)
+      .setImage('https://i.pinimg.com/originals/81/2d/e9/812de920c0c7076356699d644418e326.gif');
+
+    member.user.send({ embeds: [farewellEmbed] })
+      .then(() => logger.debug(`DM de despedida enviada para ${member.user.tag}`))
+      .catch(() => logger.warn(`DM bloqueada para ${member.user.tag}`));
+  } catch (error) {
+    logger.error('Erro no onMemberRemove', context, error);
+  }
 }
 
 module.exports = { onMemberRemove };

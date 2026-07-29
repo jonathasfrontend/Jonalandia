@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require('discord.js');
 const { client } = require("../../Client");
-const { info, erro } = require('../../logger');
+const { logger } = require('../../logger');
 const { saveUserInfractions } = require('../../utils/saveUserInfractions');
 const { checkingComandChannelBlocked, checkingComandExecuntionModerador } = require('../../utils/checkingComandsExecution');
 
@@ -9,58 +9,47 @@ async function expulsar(interaction) {
 
     const { options } = interaction;
 
-    const authorizedExecutionComand = await checkingComandChannelBlocked(interaction);
-    if (!authorizedExecutionComand) return;
-
-    const authorizedExecutionComandModerador = await checkingComandExecuntionModerador(interaction);
-    if (!authorizedExecutionComandModerador) return;
+    const authorized = await checkingComandChannelBlocked(interaction);
+    if (!authorized) return;
+    const modAuthorized = await checkingComandExecuntionModerador(interaction);
+    if (!modAuthorized) return;
 
     try {
         await interaction.deferReply({ ephemeral: true });
-
         const userToKick = options.getUser('usuario');
         const targetMember = await interaction.guild.members.fetch(userToKick.id);
 
         try {
             await userToKick.send("Você foi expulso do servidor Jonalandia.");
         } catch (dmError) {
-            console.error(`Não foi possível enviar mensagem direta para ${userToKick.tag}:`, dmError.message);
+            logger.warn(`DM não enviada para ${userToKick.tag}`);
         }
 
-        const reason = `O usuário ${userToKick.tag} foi expulso do servidor.`;
-        const type = 'expulsion';
-
         saveUserInfractions(
-            userToKick.id,
-            userToKick.tag,
-            userToKick.displayAvatarURL({ dynamic: true }),
-            userToKick.createdAt,
-            targetMember.joinedAt,
-            type,
-            reason,
-            client.user.tag
-        )
+            interaction.guild.id, userToKick.id, userToKick.tag, userToKick.displayAvatarURL({ dynamic: true }),
+            userToKick.createdAt, targetMember.joinedAt, 'expulsion',
+            `Expulso do servidor`, client.user.tag
+        );
 
         await targetMember.kick("Para dúvidas, fale com o dono do servidor.");
 
         const embed = new EmbedBuilder()
-            .setColor('#ff0000')
-            .setTitle('Expulsão aplicada')
-            .setDescription(`O usuário ${userToKick.tag} foi expulso do servidor.`)
+            .setColor('#ff0000').setTitle('Expulsão aplicada')
+            .setDescription(`${userToKick.tag} foi expulso.`)
             .setTimestamp()
             .setFooter({ text: `Por: ${client.user.tag}`, iconURL: client.user.displayAvatarURL({ dynamic: true }) });
 
         await interaction.editReply({ embeds: [embed] });
 
         const logChannel = client.channels.cache.get(process.env.CHANNEL_ID_LOGS_INFO_BOT);
-        await logChannel.send(`Expulsão aplicada com sucesso no usuário ${userToKick.tag}.`);
+        if (logChannel) logChannel.send(`🚪 Expulsão aplicada em ${userToKick.tag}.`);
 
-        info.info(`Expulsão aplicada com sucesso no usuário ${userToKick.tag}.`);
+        logger.info(`Expulsão aplicada em ${userToKick.tag}.`);
     } catch (error) {
-        erro.error('Erro ao aplicar a expulsão:', error);
+        logger.error('Erro ao expulsar:', error);
         const logChannel = client.channels.cache.get(process.env.CHANNEL_ID_LOGS_ERRO_BOT);
-        await logChannel.send(`Erro ao aplicar a expulsão: ${error}`);
+        if (logChannel) logChannel.send(`Erro ao expulsar: ${error.message}`);
     }
-};
+}
 
 module.exports = { expulsar };

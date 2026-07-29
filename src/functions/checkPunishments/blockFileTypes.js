@@ -9,9 +9,10 @@ const configData = require('../../config/punishmentConfig.json');
 
 const config = configData.antiFlood || {};
 
-async function registerInfraction(user, member, type, reason) {
+async function registerInfraction(guildId, user, member, type, reason) {
     try {
         const infractionId = await saveUserInfractions(
+            guildId,
             user.id,
             user.tag,
             user.displayAvatarURL({ dynamic: true }),
@@ -86,9 +87,9 @@ async function blockFileTypes(message) {
                         const reasonWarns = `O usuário ${message.author.tag} recebeu um aviso.`;
                         const typeWarns = 'warns';
 
-                        const blockedFileId = await registerInfraction(message.author, message.member, typeBlockedFiles, reasonBlockedFiles);
-                        const timeoutId = await registerInfraction(message.author, message.member, typeTimeout, reasonTimeout);
-                        const warnsId = await registerInfraction(message.author, message.member, typeWarns, reasonWarns);
+                        const blockedFileId = await registerInfraction(message.guild.id, message.author, message.member, typeBlockedFiles, reasonBlockedFiles);
+                        const timeoutId = await registerInfraction(message.guild.id, message.author, message.member, typeTimeout, reasonTimeout);
+                        const warnsId = await registerInfraction(message.guild.id, message.author, message.member, typeWarns, reasonWarns);
                         databaseEvent('INSERT', 'UserInfractions', true, `Infração por arquivo bloqueado para ${message.author.tag}`);
 
 

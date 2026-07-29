@@ -1,40 +1,41 @@
-const mongoose = require('mongoose');
 const { logger, databaseEvent, botEvent } = require('../logger');
+const { testConnection, runMigrations, closePool } = require('./supabase');
 
-function bdServerConect() {
-    const context = { module: 'DATABASE' };
-    
-    logger.info('Iniciando conexão com MongoDB...', context);
-    
-    mongoose.connect(process.env.MONGO_SERVER)
-        .then(() => {
-            logger.info('Conectado ao MongoDB com sucesso', {
-                ...context,
-            });
-            databaseEvent('CONNECT', 'MongoDB', true);
-        })
-        .catch(err => {
-            logger.error('Erro ao conectar ao MongoDB', context, err);
-            databaseEvent('CONNECT', 'MongoDB', false, err.message);
-            botEvent('DATABASE_CONNECTION_FAILED', `Falha na conexão: ${err.message}`);
-        });
+async function bdServerConect() {
+  const context = { module: 'DATABASE' };
 
-    // Log de eventos de conexão do MongoDB
-    mongoose.connection.on('connected', () => {
-        logger.info('Mongoose conectado ao MongoDB', context);
-        databaseEvent('MONGOOSE_CONNECTED', 'MongoDB', true);
-    });
+  logger.info('Iniciando conexão com Supabase...', context);
 
-    mongoose.connection.on('error', (err) => {
-        logger.error('Erro de conexão do Mongoose', context, err);
-        databaseEvent('MONGOOSE_ERROR', 'MongoDB', false, err.message);
-    });
+  if (!process.env.SUPABASE_URL) {
+    const envError = 'Variável de ambiente SUPABASE_URL não foi definida';
+    logger.error('Erro ao conectar ao Supabase', context, new Error(envError));
+    databaseEvent('CONNECT', 'Supabase', false, envError);
+    botEvent('DATABASE_CONNECTION_FAILED', envError);
+    return;
+  }
 
-    mongoose.connection.on('disconnected', () => {
-        logger.warn('Mongoose desconectado do MongoDB', context);
-        databaseEvent('MONGOOSE_DISCONNECTED', 'MongoDB', false);
-        botEvent('DATABASE_DISCONNECTED', 'MongoDB desconectado');
-    });
+  try {
+    const connected = await testConnection();
+    if (!connected) {
+      databaseEvent('CONNECT', 'Supabase', false, 'Falha no teste de conexão');
+      botEvent('DATABASE_CONNECTION_FAILED', 'Falha no teste de conexão com Supabase');
+      return;
+    }
+
+    await runMigrations();
+
+    logger.info('Conectado ao Supabase com sucesso', context);
+    databaseEvent('CONNECT', 'Supabase', true);
+    botEvent('DATABASE_CONNECTION_SUCCESS', 'Conectado ao Supabase');
+  } catch (err) {
+    logger.error('Erro ao conectar ao Supabase', context, err);
+    databaseEvent('CONNECT', 'Supabase', false, err.message);
+    botEvent('DATABASE_CONNECTION_FAILED', err.message);
+  }
 }
 
-module.exports = { bdServerConect };
+async function bdServerDisconnect() {
+  await closePool();
+}
+
+module.exports = { bdServerConect, bdServerDisconnect };

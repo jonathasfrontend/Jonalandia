@@ -1,9 +1,10 @@
 const { logger } = require('../logger');
 const { client } = require('../Client');
-const Infractions = require('../database/models/infracoesUsers');
+const { db } = require('../database/service');
 const { v4: uuidv4 } = require('uuid');
 
 async function saveUserInfractions(
+    guildId,
     userId,
     username,
     avatarUrl,
@@ -15,36 +16,48 @@ async function saveUserInfractions(
 ) {
     try {
         const infractionId = uuidv4();
-        let userData = await Infractions.findOne({ username });
+        let userData = await db.infractions.findOne({ guildId, userId });
 
         if (!userData) {
-            userData = new Infractions({
+            const infractions = {};
+            infractions[type] = 1;
+
+            await db.infractions.create({
+                guildId,
                 userId,
                 username,
                 avatarUrl,
                 accountCreatedDate,
                 joinedServerDate,
-                infractions: { [type]: 1 },
-                logs: [{
+                infractions: JSON.stringify(infractions),
+                logs: JSON.stringify([{
                     id: infractionId,
                     type,
                     reason,
-                    date: new Date(),
+                    date: new Date().toISOString(),
                     moderator,
-                }]
+                }]),
             });
         } else {
-            userData.infractions[type] = (userData.infractions[type] || 0) + 1;
-            userData.logs.push({
+            const infractions = typeof userData.infractions === 'object'
+                ? { ...userData.infractions }
+                : {};
+            infractions[type] = (infractions[type] || 0) + 1;
+
+            const logs = Array.isArray(userData.logs) ? [...userData.logs] : [];
+            logs.push({
                 id: infractionId,
                 type,
                 reason,
-                date: new Date(),
+                date: new Date().toISOString(),
                 moderator,
             });
-        }
 
-        await userData.save();
+            await db.infractions.update(userData.id, {
+                infractions: JSON.stringify(infractions),
+                logs: JSON.stringify(logs),
+            });
+        }
 
         const logChannel = client.channels.cache.get(process.env.CHANNEL_ID_LOGS_INFO_BOT);
         if (logChannel) {
@@ -53,13 +66,10 @@ async function saveUserInfractions(
             } catch (sendError) {
                 logger.error('Erro ao enviar mensagem para canal de logs', { username, reason }, sendError);
             }
-        } else {
-            logger.warn('Canal de logs não encontrado', { channelId: process.env.CHANNEL_ID_LOGS_INFO_BOT });
         }
 
         logger.info(`Infração registrada no banco com sucesso no usuário ${username} ${reason}.`);
         return infractionId;
-
     } catch (error) {
         logger.error('Erro ao aplicar ao cadastrar a infração no banco de dados:', { username, reason }, error);
         const logChannel = client.channels.cache.get(process.env.CHANNEL_ID_LOGS_ERRO_BOT);
@@ -69,8 +79,6 @@ async function saveUserInfractions(
             } catch (sendError) {
                 logger.error('Erro ao enviar mensagem de erro para canal de logs', { username, reason }, sendError);
             }
-        } else {
-            logger.warn('Canal de logs de erro não encontrado', { channelId: process.env.CHANNEL_ID_LOGS_ERRO_BOT });
         }
         return null;
     }

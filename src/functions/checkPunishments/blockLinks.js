@@ -9,9 +9,10 @@ const configData = require('../../config/punishmentConfig.json');
 
 const config = configData.antiFlood || {};
 
-async function registerInfraction(user, member, type, reason) {
+async function registerInfraction(guildId, user, member, type, reason) {
     try {
         const infractionId = await saveUserInfractions(
+            guildId,
             user.id,
             user.tag,
             user.displayAvatarURL({ dynamic: true }),
@@ -83,9 +84,9 @@ async function blockLinks(message) {
                     const typeWarns = 'warns';
 
                     // Salvar infração
-                    const blockedLinkId = await registerInfraction(message.author, message.member, typeBlockedLinks, reasonBlockedLinks);
-                    const timeoutId = await registerInfraction(message.author, message.member, typeTimeout, reasonTimeout);
-                    const warnsId = await registerInfraction(message.author, message.member, typeWarns, reasonWarns);
+                    const blockedLinkId = await registerInfraction(message.guild.id, message.author, message.member, typeBlockedLinks, reasonBlockedLinks);
+                    const timeoutId = await registerInfraction(message.guild.id, message.author, message.member, typeTimeout, reasonTimeout);
+                    const warnsId = await registerInfraction(message.guild.id, message.author, message.member, typeWarns, reasonWarns);
 
                     databaseEvent('INSERT', 'UserInfractions', true, `Infração por link bloqueado para ${message.author.tag}`);
 

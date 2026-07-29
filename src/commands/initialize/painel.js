@@ -1,12 +1,7 @@
 const {
   ActionRowBuilder,
   ButtonBuilder,
-  TextDisplayBuilder,
-  SeparatorBuilder,
   ButtonStyle,
-  SeparatorSpacingSize,
-  ContainerBuilder,
-  SectionBuilder,
   ComponentType,
   AttachmentBuilder,
   ChannelSelectMenuBuilder,
@@ -18,80 +13,19 @@ const {
   PermissionFlagsBits,
 } = require('discord.js');
 const { Logger } = require('../../logger');
-const ChannelModel = require('../../database/models/addChannel');
-const onTwitchStreamersSchema = require('../../database/models/streamers');
-const onYoutubeChannelSchema = require('../../database/models/youtubeChannel');
-const NotificationChannelsModel = require('../../database/models/notificationChannels');
-const TicketConfigModel = require('../../database/models/ticketConfig');
-const RolePermissionsModel = require('../../database/models/rolePermissions');
+const { db } = require('../../database/service');
+const { invalidateGuildCache } = require('../../utils/cache');
 const path = require('path');
 const { client } = require('../../Client');
 const { embedRegra } = require('../../embedsDefault/embedRegra');
 const { embedManutencao } = require('../../embedsDefault/embedManutencao');
-
-// =====================================================
-// CONFIGURAÇÕES E CONSTANTES
-// =====================================================
 
 const PANEL_CONFIG = {
   TOTAL_PAGES: 6,
   IMAGE_PATH: path.join(__dirname, '..', '..', '..', 'jonalandia.png'),
   IMAGE_NAME: 'jonalandia.png',
   ACCENT_COLOR: 0xffffff,
-  MAX_LISTENERS: 20,
 };
-
-// =====================================================
-// VERIFICAÇÃO DE PERMISSÕES ESPECÍFICA DO PAINEL
-// =====================================================
-
-/**
- * Verifica se o usuário tem permissão para executar o comando /painel
- * Permite: Dono do servidor, Administradores, ou cargo de Moderador configurado no painel
- * @param {CommandInteraction} interaction - A interação do comando
- * @returns {Promise<boolean>} - true se autorizado, false caso contrário
- */
-async function checkPainelPermissions(interaction) {
-  const { guild, member, user } = interaction;
-
-  // 1. Verificar se é o dono do servidor
-  if (guild.ownerId === user.id) {
-    Logger.info(`[PAINEL] Acesso autorizado: ${user.tag} é o dono do servidor ${guild.name}`);
-    return true;
-  }
-
-  // 2. Verificar se tem permissão de Administrador
-  if (member.permissions.has(PermissionFlagsBits.Administrator)) {
-    Logger.info(`[PAINEL] Acesso autorizado: ${user.tag} tem permissão de Administrador`);
-    return true;
-  }
-
-  // 3. Verificar se tem o cargo de moderador configurado no painel
-  try {
-    const roleConfig = await RolePermissionsModel.findOne({ guildId: guild.id });
-    
-    if (roleConfig && roleConfig.moderatorRoleId) {
-      const hasModeratoRole = member.roles.cache.has(roleConfig.moderatorRoleId);
-      
-      if (hasModeratoRole) {
-        Logger.info(`[PAINEL] Acesso autorizado: ${user.tag} possui o cargo de moderador configurado`);
-        return true;
-      }
-    }
-  } catch (error) {
-    Logger.error(`[PAINEL] Erro ao verificar cargo de moderador: ${error}`);
-  }
-
-  // Se não passou em nenhuma verificação, acesso negado
-  Logger.warn(`[PAINEL] Acesso negado: ${user.tag} não possui permissões necessárias em ${guild.name}`);
-  
-  await interaction.reply({
-    content: '❌ **Acesso Negado**\n\nVocê não tem permissão para executar este comando.\n\n**Permissões necessárias:**\n• Ser o dono do servidor\n• Ter permissão de Administrador\n• Possuir o cargo de Moderador configurado no painel',
-    flags: [64],
-  });
-  
-  return false;
-}
 
 const EMBED_COLORS = {
   SUCCESS: 'Green',
@@ -102,1143 +36,344 @@ const EMBED_COLORS = {
   YOUTUBE: 'Red',
 };
 
-// Variável de controle para registro único de listeners
 let painelListenersRegistered = false;
 
-// =====================================================
-// FACTORY: CRIAÇÃO DE COMPONENTES REUTILIZÁVEIS
-// =====================================================
+async function checkPainelPermissions(interaction) {
+  const { guild, member, user } = interaction;
+  if (guild.ownerId === user.id) return true;
+  if (member.permissions.has(PermissionFlagsBits.Administrator)) return true;
 
-/**
- * Cria separadores reutilizáveis para economia de memória
- */
-const createSeparators = () => ({
-  small: new SeparatorBuilder({ spacing: SeparatorSpacingSize.Small }),
-  large: new SeparatorBuilder({ spacing: SeparatorSpacingSize.Large }),
-  smallInvisible: new SeparatorBuilder({
-    spacing: SeparatorSpacingSize.Small,
-    divider: false,
-  }),
-  largeInvisible: new SeparatorBuilder({
-    spacing: SeparatorSpacingSize.Large,
-    divider: false,
-  }),
-});
+  try {
+    const roleConfig = await db.rolePermissions.findOne({ guildId: guild.id });
+    if (roleConfig?.moderatorRoleId && member.roles.cache.has(roleConfig.moderatorRoleId)) return true;
+  } catch (error) {
+    Logger.error(`[PAINEL] Erro ao verificar cargo de moderador: ${error}`);
+  }
 
-/**
- * Cria o cabeçalho do painel (fixo em todas as páginas)
- */
-const createHeaderSection = (imageName) => {
-  return new SectionBuilder({
-    components: [
-      { type: ComponentType.TextDisplay, content: '# 🛡️ Painel Jonalandia' },
-      {
-        type: ComponentType.TextDisplay,
-        content: '### Painel de gerenciamento do bot Jonalandia.',
-      },
-    ],
-    accessory: {
-      type: ComponentType.Thumbnail,
-      media: { url: `attachment://${imageName}` },
-    },
+  await interaction.reply({
+    content: '❌ **Acesso Negado**\n\nVocê não tem permissão para executar este comando.\n\n**Permissões necessárias:**\n• Ser o dono do servidor\n• Ter permissão de Administrador\n• Possuir o cargo de Moderador configurado no painel',
+    flags: [64],
   });
-};
+  return false;
+}
 
-/**
- * Cria a seção de registro de canais
- */
-const createChannelsSection = () => {
-  return new SectionBuilder({
-    components: [
-      {
-        type: ComponentType.TextDisplay,
-        content:
-          'Ao clicar no botão você registra todos os canais de texto do seu servidor no banco de dados para o gerenciamento do bot.',
-      },
-    ],
-    accessory: {
-      type: ComponentType.Button,
-      style: ButtonStyle.Success,
-      custom_id: 'add_channels_db',
-      label: 'Adicionar Canais',
-    },
-  });
-};
-
-/**
- * Cria seção de streamers
- */
-const createStreamersSection = (platform) => {
-  const config = {
-    twitch: {
-      title: '### Cadastrar streamer da Twitch',
-      description: 'Configure o canal de notificação e o streamer da Twitch.',
-      style: ButtonStyle.Primary,
-      customId: 'open_modal_twitch',
-      label: 'Adicionar Twitch',
-    },
-    youtube: {
-      title: '### Cadastrar canal do YouTube',
-      description: 'Configure o canal de notificação e o canal do YouTube.',
-      style: ButtonStyle.Danger,
-      customId: 'open_modal_youtube',
-      label: 'Adicionar YouTube',
-    },
-  };
-
-  const { title, description, style, customId, label } = config[platform];
-
-  return new SectionBuilder({
-    components: [
-      { type: ComponentType.TextDisplay, content: title },
-      { type: ComponentType.TextDisplay, content: description },
-    ],
-    accessory: {
-      type: ComponentType.Button,
-      style,
-      custom_id: customId,
-      label,
-    },
-  });
-};
-
-/**
- * Cria menus de seleção de canal com configuração unificada
- */
-const createChannelSelectMenu = (customId, placeholder) => {
-  const menu = new ChannelSelectMenuBuilder({ customId, placeholder });
-  return new ActionRowBuilder({ components: [menu] });
-};
-
-/**
- * Cria controles de paginação
- */
-const createPaginationControls = (currentPage, totalPages) => {
-  const hasPrev = currentPage > 1;
-  const hasNext = currentPage < totalPages;
-
-  const prevButton = new ButtonBuilder({
-    custom_id: hasPrev
-      ? `goto_page:${currentPage - 1}`
-      : 'goto_page:disabled_prev',
-    style: ButtonStyle.Secondary,
-    label: '◀',
-    disabled: !hasPrev,
-  });
-
-  const nextButton = new ButtonBuilder({
-    custom_id: hasNext
-      ? `goto_page:${currentPage + 1}`
-      : 'goto_page:disabled_next',
-    style: ButtonStyle.Secondary,
-    label: '▶',
-    disabled: !hasNext,
-  });
-
-  return [
-    new TextDisplayBuilder({ content: `Página ${currentPage}/${totalPages}` }),
-    new ActionRowBuilder({ components: [prevButton, nextButton] }),
-  ];
-};
-
-/**
- * Cria embed de resposta padronizado
- */
-const createResponseEmbed = (color, title, description) => {
+function createResponseEmbed(color, title, description) {
   return new EmbedBuilder()
     .setColor(color)
     .setTitle(title)
     .setDescription(description)
     .setTimestamp();
-};
-
-// =====================================================
-// BUILDERS: CONSTRUÇÃO DE PÁGINAS DO PAINEL
-// =====================================================
-
-/**
- * Constrói componentes da página 1 (Canais)
- */
-const buildPage1Components = (selects) => [
-  new TextDisplayBuilder({ content: '## 🗨️ Registro de canais' }),
-  createChannelsSection(),
-  selects.separators.smallInvisible,
-  new TextDisplayBuilder({ content: '## Adicionar canal específico' }),
-  new TextDisplayBuilder({
-    content:
-      'Selecione um canal específico para adicionar ao banco de dados.',
-  }),
-  selects.addChannelEspecifico,
-  selects.separators.smallInvisible,
-  new TextDisplayBuilder({ content: '## Remover canal específico' }),
-  new TextDisplayBuilder({
-    content: 'Selecione um canal específico para remover do banco de dados.',
-  }),
-  selects.removeChannelEspecifico,
-];
-
-/**
- * Constrói componentes da página 2 (Embeds)
- */
-const buildPage2Components = (selects) => [
-  new TextDisplayBuilder({ content: '## 📦 Enviar embeds' }),
-  new TextDisplayBuilder({
-    content: 'Escolha um canal para enviar os embeds padrão.',
-  }),
-  new TextDisplayBuilder({ content: '### Enviar Regras' }),
-  selects.regras,
-  selects.separators.smallInvisible,
-  new TextDisplayBuilder({ content: '### Enviar Manutenção' }),
-  selects.manutencao,
-];
-
-/**
- * Constrói componentes da página 3 (Streamers)
- */
-const buildPage3Components = (selects) => [
-  new TextDisplayBuilder({ content: '## 🎮 Streamers' }),
-  new TextDisplayBuilder({
-    content:
-      'Adicione streamers da Twitch e canais do YouTube para receber notificações.',
-  }),
-  selects.separators.smallInvisible,
-  createStreamersSection('twitch'),
-  selects.notificationTwitch,
-  selects.separators.smallInvisible,
-  createStreamersSection('youtube'),
-  selects.notificationYoutube,
-];
-
-/**
- * Constrói componentes da página 4 (Notificações e Eventos)
- */
-const buildPage4Components = (selects) => [
-  new TextDisplayBuilder({ content: '## 🔔 Notificações e Eventos' }),
-  new TextDisplayBuilder({
-    content:
-      'Configure os canais para notificações automáticas e eventos do servidor.',
-  }),
-  selects.separators.smallInvisible,
-  new TextDisplayBuilder({ content: '### 🎮 Canal de Jogos Gratuitos' }),
-  new TextDisplayBuilder({
-    content: 'Receba notificações de novos jogos gratuitos disponíveis.',
-  }),
-  selects.notificationFreeGames,
-  selects.separators.smallInvisible,
-  new TextDisplayBuilder({ content: '### 👋 Canal de Boas-vindas' }),
-  new TextDisplayBuilder({
-    content:
-      'Canal onde serão enviadas mensagens de boas-vindas para novos membros.',
-  }),
-  selects.notificationWelcome,
-  selects.separators.smallInvisible,
-  new TextDisplayBuilder({ content: '### 👋 Canal de Despedida' }),
-  new TextDisplayBuilder({
-    content:
-      'Canal onde serão enviadas mensagens de despedida quando membros saírem.',
-  }),
-  selects.notificationGoodbye,
-];
-
-/**
- * Constrói componentes da página 5 (Tickets)
- */
-const buildPage5Components = (selects) => [
-  new TextDisplayBuilder({ content: '## 🎫 Configuração de Tickets' }),
-  new TextDisplayBuilder({
-    content: 'Configure o sistema de tickets do servidor.',
-  }),
-  selects.separators.smallInvisible,
-  new TextDisplayBuilder({ content: '### 📌 Canal do Painel de Tickets' }),
-  new TextDisplayBuilder({
-    content:
-      'Canal onde será enviado o painel para os usuários criarem tickets.',
-  }),
-  selects.ticketChannel,
-  selects.separators.smallInvisible,
-  new TextDisplayBuilder({ content: '### 📁 Categoria dos Tickets' }),
-  new TextDisplayBuilder({
-    content: 'Categoria onde os canais de tickets serão criados.',
-  }),
-  selects.ticketCategory,
-  selects.separators.smallInvisible,
-  new TextDisplayBuilder({ content: '### 👔 Cargo de Suporte' }),
-  new TextDisplayBuilder({
-    content: 'Cargo que terá acesso aos tickets criados.',
-  }),
-  selects.ticketSupportRole,
-];
-
-/**
- * Constrói componentes da página 6 (Cargos de Permissões)
- */
-const buildPage6Components = (selects) => [
-  new TextDisplayBuilder({ content: '## 🔐 Configuração de Cargos' }),
-  new TextDisplayBuilder({
-    content: 'Configure os cargos de moderação e imunidade do bot.',
-  }),
-  selects.separators.smallInvisible,
-  new TextDisplayBuilder({ content: '### 🛡️ Cargo de Moderador' }),
-  new TextDisplayBuilder({
-    content:
-      'Cargo que terá permissão para executar comandos de moderação do bot.',
-  }),
-  selects.moderatorRole,
-  selects.separators.smallInvisible,
-  new TextDisplayBuilder({ content: '### 🛡️ Cargo Imune a Punições' }),
-  new TextDisplayBuilder({
-    content:
-      'Cargo que será imune às punições automáticas do bot (anti-flood, anti-spam, etc).',
-  }),
-  selects.immuneRole,
-  selects.separators.smallInvisible,
-  new TextDisplayBuilder({ content: '### 👋 Cargo de Novo Membro' }),
-  new TextDisplayBuilder({
-    content:
-      'Cargo que será dado automaticamente aos novos membros quando entrarem no servidor.',
-  }),
-  selects.newMemberRole,
-];
-
-/**
- * Constrói o container completo de uma página
- */
-const buildPageContainer = (page, header, selects) => {
-  const components = [header, selects.separators.small];
-
-  // Adiciona componentes específicos por página
-  const pageBuilders = {
-    1: () => components.push(...buildPage1Components(selects)),
-    2: () => components.push(...buildPage2Components(selects)),
-    3: () => components.push(...buildPage3Components(selects)),
-    4: () => components.push(...buildPage4Components(selects)),
-    5: () => components.push(...buildPage5Components(selects)),
-    6: () => components.push(...buildPage6Components(selects)),
-  };
-
-  if (pageBuilders[page]) {
-    pageBuilders[page]();
-  }
-
-  // Adiciona controles de paginação
-  components.push(selects.separators.large);
-  components.push(
-    ...createPaginationControls(page, PANEL_CONFIG.TOTAL_PAGES)
-  );
-
-  return new ContainerBuilder({
-    accent_color: PANEL_CONFIG.ACCENT_COLOR,
-    components,
-  });
-};
-
-/**
- * Cria todos os menus de seleção necessários
- */
-const createAllSelects = () => {
-  const separators = createSeparators();
-
-  return {
-    separators,
-    regras: createChannelSelectMenu(
-      'select_regra_channel',
-      'Selecione o canal para enviar as regras'
-    ),
-    manutencao: createChannelSelectMenu(
-      'select_manutencao_channel',
-      'Selecione o canal para enviar manutenção'
-    ),
-    addChannelEspecifico: createChannelSelectMenu(
-      'select_add_channel_especifico',
-      'Selecione o canal para adicionar'
-    ),
-    removeChannelEspecifico: createChannelSelectMenu(
-      'select_remove_channel_especifico',
-      'Selecione o canal para remover'
-    ),
-    notificationTwitch: createChannelSelectMenu(
-      'select_add_channel_notification_twitch',
-      'Selecione o canal para notificações da Twitch'
-    ),
-    notificationYoutube: createChannelSelectMenu(
-      'select_add_channel_notification_youtuber',
-      'Selecione o canal para notificações do YouTube'
-    ),
-    notificationFreeGames: createChannelSelectMenu(
-      'select_add_channel_notification_free_games',
-      'Selecione o canal para jogos gratuitos'
-    ),
-    notificationWelcome: createChannelSelectMenu(
-      'select_add_channel_notification_welcome',
-      'Selecione o canal de boas-vindas'
-    ),
-    notificationGoodbye: createChannelSelectMenu(
-      'select_add_channel_notification_goodbye',
-      'Selecione o canal de despedida'
-    ),
-    ticketChannel: createChannelSelectMenu(
-      'select_ticket_channel',
-      'Selecione o canal para o painel de tickets'
-    ),
-    ticketCategory: createChannelSelectMenu(
-      'select_ticket_category',
-      'Selecione a categoria para criar os tickets'
-    ),
-    ticketSupportRole: new ActionRowBuilder({
-      components: [
-        new RoleSelectMenuBuilder({
-          customId: 'select_ticket_support_role',
-          placeholder: 'Selecione o cargo de suporte',
-        }),
-      ],
-    }),
-    moderatorRole: new ActionRowBuilder({
-      components: [
-        new RoleSelectMenuBuilder({
-          customId: 'select_moderator_role',
-          placeholder: 'Selecione o cargo de moderador',
-        }),
-      ],
-    }),
-    immuneRole: new ActionRowBuilder({
-      components: [
-        new RoleSelectMenuBuilder({
-          customId: 'select_immune_role',
-          placeholder: 'Selecione o cargo imune a punições',
-        }),
-      ],
-    }),
-    newMemberRole: new ActionRowBuilder({
-      components: [
-        new RoleSelectMenuBuilder({
-          customId: 'select_new_member_role',
-          placeholder: 'Selecione o cargo de novo membro',
-        }),
-      ],
-    }),
-  };
-};
-
-// =====================================================
-// HANDLERS: PROCESSAMENTO DE INTERAÇÕES
-// =====================================================
-
-/**
- * Handler para seleção de canal de regras
- */
-const handleRegrasChannel = async (interaction) => {
-  const channelId = interaction.values[0];
-  const channel = interaction.guild.channels.cache.get(channelId);
-
-  if (channel) {
-    await channel.send({ embeds: [embedRegra()] });
-  }
-
-  await interaction.reply({
-    content: `Mensagem de regras enviada para o canal <#${channelId}> com sucesso!`,
-    flags: [64],
-  });
-};
-
-/**
- * Handler para seleção de canal de manutenção
- */
-const handleManutencaoChannel = async (interaction) => {
-  const channelId = interaction.values[0];
-  const channel = interaction.guild.channels.cache.get(channelId);
-
-  if (channel) {
-    await channel.send({ embeds: [embedManutencao()] });
-  }
-
-  await interaction.reply({
-    content: `Mensagem de manutenção enviada para o canal <#${channelId}> com sucesso!`,
-    flags: [64],
-  });
-};
-
-/**
- * Handler para adicionar todos os canais ao banco de dados
- */
-const handleAddAllChannels = async (interaction) => {
-  await interaction.deferReply({ flags: [64] });
-
-  const guild = interaction.guild;
-  const textChannels = guild.channels.cache.filter(
-    (channel) => channel.type === 0
-  );
-
-  const channelsToAdd = textChannels.map((channel) => ({
-    channelId: channel.id,
-    guildId: guild.id,
-    channelName: channel.name,
-    channelType: channel.type,
-    guildName: guild.name,
-  }));
-
-  try {
-    await ChannelModel.insertMany(channelsToAdd, { ordered: false });
-  } catch (err) {
-    if (err.code !== 11000) throw err; // Ignora duplicados
-  }
-
-  const addedChannels = await ChannelModel.find({ guildId: guild.id });
-  if (addedChannels.length !== textChannels.size) {
-    Logger.warn(
-      `Nem todos os canais foram adicionados. Esperado: ${textChannels.size}, Adicionado: ${addedChannels.length}`
-    );
-  }
-
-  const embed = createResponseEmbed(
-    EMBED_COLORS.SUCCESS,
-    'Canais Adicionados',
-    `Foram adicionados ${textChannels.size} canais de texto ao banco de dados.`
-  );
-
-  await interaction.editReply({ embeds: [embed] });
-};
-
-/**
- * Handler para adicionar canal específico
- */
-const handleAddSpecificChannel = async (interaction) => {
-  await interaction.deferReply({ flags: [64] });
-
-  const guild = interaction.guild;
-  const channelId = interaction.values[0];
-  const specificChannel = guild.channels.cache.get(channelId);
-
-  if (!specificChannel || specificChannel.type !== 0) {
-    await interaction.editReply('Por favor, selecione um canal de texto válido.');
-    Logger.warn(
-      `Tentativa de registrar canal inválido: ${
-        specificChannel ? specificChannel.id : 'Nenhum'
-      }`
-    );
-    return;
-  }
-
-  try {
-    const channelData = {
-      channelId: specificChannel.id,
-      guildId: guild.id,
-      channelName: specificChannel.name,
-      channelType: specificChannel.type,
-      guildName: guild.name,
-    };
-
-    await ChannelModel.create(channelData);
-
-    const embed = createResponseEmbed(
-      EMBED_COLORS.SUCCESS,
-      'Canal Adicionado',
-      `O canal <#${specificChannel.id}> foi adicionado ao banco de dados.`
-    );
-
-    await interaction.editReply({ embeds: [embed] });
-    Logger.info(`Canal adicionado: ${specificChannel.name} (${specificChannel.id})`);
-  } catch (err) {
-    if (err.code === 11000) {
-      await interaction.editReply('Este canal já está registrado.');
-      Logger.warn(`Canal já existente: ${specificChannel.id}`);
-    } else {
-      throw err;
-    }
-  }
-};
-
-/**
- * Handler para remover canal específico
- */
-const handleRemoveSpecificChannel = async (interaction) => {
-  await interaction.deferReply({ flags: [64] });
-
-  const guild = interaction.guild;
-  const channelId = interaction.values[0];
-  const specificChannel = guild.channels.cache.get(channelId);
-
-  if (!specificChannel || specificChannel.type !== 0) {
-    await interaction.editReply('Por favor, selecione um canal de texto válido.');
-    Logger.warn(
-      `Tentativa de remover canal inválido: ${
-        specificChannel ? specificChannel.id : 'Nenhum'
-      }`
-    );
-    return;
-  }
-
-  const deleteResult = await ChannelModel.deleteOne({
-    channelId: specificChannel.id,
-    guildId: guild.id,
-  });
-
-  if (deleteResult.deletedCount === 0) {
-    await interaction.editReply('Este canal não está registrado no banco de dados.');
-    Logger.warn(`Canal não existente: ${specificChannel.id}`);
-    return;
-  }
-
-  const embed = createResponseEmbed(
-    EMBED_COLORS.SUCCESS,
-    'Canal Removido',
-    `O canal <#${specificChannel.id}> foi removido do banco de dados.`
-  );
-
-  await interaction.editReply({ embeds: [embed] });
-  Logger.info(`Canal removido: ${specificChannel.name} (${specificChannel.id})`);
-};
-
-/**
- * Handler genérico para configurar canais de notificação
- */
-const handleNotificationChannelConfig = async (
-  interaction,
-  notificationType,
-  config
-) => {
-  await interaction.deferReply({ flags: [64] });
-
-  const guild = interaction.guild;
-  const channelId = interaction.values[0];
-  const selectedChannel = guild.channels.cache.get(channelId);
-
-  if (!selectedChannel || selectedChannel.type !== 0) {
-    await interaction.editReply('Por favor, selecione um canal de texto válido.');
-    Logger.warn(
-      `Canal de notificação ${notificationType} inválido: ${
-        selectedChannel ? selectedChannel.id : 'Nenhum'
-      }`
-    );
-    return;
-  }
-
-  try {
-    await NotificationChannelsModel.findOneAndUpdate(
-      { guildId: guild.id, notificationType },
-      {
-        channelId: selectedChannel.id,
-        channelName: selectedChannel.name,
-        guildId: guild.id,
-        notificationType,
-      },
-      { upsert: true, new: true }
-    );
-
-    const embed = createResponseEmbed(
-      config.color,
-      config.title,
-      `O canal <#${selectedChannel.id}> foi configurado para ${config.description}.`
-    );
-
-    await interaction.editReply({ embeds: [embed] });
-    Logger.info(
-      `Canal de notificação ${notificationType} configurado: ${selectedChannel.id}`
-    );
-  } catch (error) {
-    Logger.error(`Erro ao configurar canal de notificação ${notificationType}: ${error}`);
-    await interaction.editReply('Ocorreu um erro ao configurar o canal de notificação.');
-  }
-};
-
-/**
- * Handler para configuração de tickets
- */
-const handleTicketConfig = async (interaction, configType, value) => {
-  await interaction.deferReply({ flags: [64] });
-
-  const guild = interaction.guild;
-
-  try {
-    let ticketConfig = await TicketConfigModel.findOne({ guildId: guild.id });
-
-    if (!ticketConfig) {
-      ticketConfig = new TicketConfigModel({
-        guildId: guild.id,
-        channelId: '0',
-        categoryId: '0',
-        supportRoleId: '0',
-      });
-    }
-
-    ticketConfig[configType] = value;
-    await ticketConfig.save();
-
-    const configs = {
-      channelId: {
-        color: EMBED_COLORS.INFO,
-        title: 'Canal do Painel de Tickets Configurado',
-        description: `O canal <#${value}> foi configurado para o painel de tickets.`,
-      },
-      categoryId: {
-        color: EMBED_COLORS.TWITCH,
-        title: 'Categoria dos Tickets Configurada',
-        description: `A categoria foi configurada para criar os tickets.`,
-      },
-      supportRoleId: {
-        color: EMBED_COLORS.SUCCESS,
-        title: 'Cargo de Suporte Configurado',
-        description: `O cargo <@&${value}> foi configurado para ter acesso aos tickets.`,
-      },
-    };
-
-    const config = configs[configType];
-    const embed = createResponseEmbed(
-      config.color,
-      config.title,
-      config.description
-    );
-
-    await interaction.editReply({ embeds: [embed] });
-    Logger.info(`Ticket ${configType} configurado: ${value}`);
-  } catch (error) {
-    Logger.error(`Erro ao configurar ticket ${configType}: ${error}`);
-    await interaction.editReply('Ocorreu um erro ao configurar o ticket.');
-  }
-};
-
-/**
- * Handler para configuração de cargos de permissões
- */
-const handleRolePermissionsConfig = async (interaction, roleType, roleId) => {
-  await interaction.deferReply({ flags: [64] });
-
-  const guild = interaction.guild;
-  const role = guild.roles.cache.get(roleId);
-
-  if (!role) {
-    await interaction.editReply('Cargo inválido selecionado.');
-    Logger.warn(`Cargo inválido selecionado: ${roleId}`);
-    return;
-  }
-
-  try {
-    let roleConfig = await RolePermissionsModel.findOne({ guildId: guild.id });
-
-    if (!roleConfig) {
-      roleConfig = new RolePermissionsModel({
-        guildId: guild.id,
-        guildName: guild.name,
-      });
-    }
-
-    if (roleType === 'moderator') {
-      roleConfig.moderatorRoleId = roleId;
-      roleConfig.moderatorRoleName = role.name;
-    } else if (roleType === 'immune') {
-      roleConfig.immuneRoleId = roleId;
-      roleConfig.immuneRoleName = role.name;
-    } else if (roleType === 'newMember') {
-      roleConfig.newMemberRoleId = roleId;
-      roleConfig.newMemberRoleName = role.name;
-    }
-
-    await roleConfig.save();
-
-    const configs = {
-      moderator: {
-        color: EMBED_COLORS.SUCCESS,
-        title: 'Cargo de Moderador Configurado',
-        description: `O cargo <@&${roleId}> foi configurado como cargo de moderador.`,
-      },
-      immune: {
-        color: EMBED_COLORS.WARNING,
-        title: 'Cargo Imune Configurado',
-        description: `O cargo <@&${roleId}> foi configurado como cargo imune a punições.`,
-      },
-      newMember: {
-        color: EMBED_COLORS.INFO,
-        title: 'Cargo de Novo Membro Configurado',
-        description: `O cargo <@&${roleId}> será dado automaticamente aos novos membros.`,
-      },
-    };
-
-    const config = configs[roleType];
-    const embed = createResponseEmbed(
-      config.color,
-      config.title,
-      config.description
-    );
-
-    await interaction.editReply({ embeds: [embed] });
-    Logger.info(`Cargo de ${roleType} configurado: ${role.name} (${roleId})`);
-  } catch (error) {
-    Logger.error(`Erro ao configurar cargo de ${roleType}: ${error}`);
-    await interaction.editReply('Ocorreu um erro ao configurar o cargo.');
-  }
-};
-
-/**
- * Handler para navegação entre páginas
- */
-const handlePageNavigation = async (interaction) => {
-  const pageStr = interaction.customId.split(':')[1];
-  const targetPage = parseInt(pageStr, 10);
-
-  if (isNaN(targetPage)) return;
-
-  const header = createHeaderSection(PANEL_CONFIG.IMAGE_NAME);
-  const selects = createAllSelects();
-  const container = buildPageContainer(targetPage, header, selects);
-
-  await interaction.update({ components: [container] });
-};
-
-/**
- * Handler para modal de Twitch
- */
-const handleTwitchModal = async (interaction) => {
-  const modal = new ModalBuilder()
-    .setCustomId('modal_add_twitch')
-    .setTitle('Adicionar Streamer Twitch');
-
-  const streamerNameInput = new TextInputBuilder()
-    .setCustomId('twitch_streamer_name')
-    .setLabel('Nome do streamer na Twitch')
-    .setPlaceholder('Ex: gaules')
-    .setStyle(TextInputStyle.Short)
-    .setRequired(true);
-
-  const row = new ActionRowBuilder().addComponents(streamerNameInput);
-  modal.addComponents(row);
-
-  await interaction.showModal(modal);
-};
-
-/**
- * Handler para modal de YouTube
- */
-const handleYoutubeModal = async (interaction) => {
-  const modal = new ModalBuilder()
-    .setCustomId('modal_add_youtube')
-    .setTitle('Adicionar Canal YouTube');
-
-  const channelNameInput = new TextInputBuilder()
-    .setCustomId('youtube_channel_name')
-    .setLabel('Nome/ID do canal no YouTube')
-    .setPlaceholder('Ex: @CanalExemplo ou UCxxxxx')
-    .setStyle(TextInputStyle.Short)
-    .setRequired(true);
-
-  const row = new ActionRowBuilder().addComponents(channelNameInput);
-  modal.addComponents(row);
-
-  await interaction.showModal(modal);
-};
-
-/**
- * Handler para submit do modal Twitch
- */
-const handleTwitchModalSubmit = async (interaction) => {
-  const streamerName =
-    interaction.fields.getTextInputValue('twitch_streamer_name');
-  const guildId = interaction.guild.id;
-
-  const existingStreamer = await onTwitchStreamersSchema.findOne({
-    guildId: guildId,
-    name: streamerName,
-  });
-
-  if (existingStreamer) {
-    const embed = createResponseEmbed(
-      EMBED_COLORS.ERROR,
-      'Streamer já cadastrado',
-      `O streamer ${streamerName} já está cadastrado neste servidor.`
-    ).setAuthor({
-      name: client.user.username,
-      iconURL: client.user.displayAvatarURL({ dynamic: true }),
-    });
-
-    await interaction.reply({ embeds: [embed], ephemeral: true });
-    Logger.warn(`Streamer já cadastrado: ${streamerName} (Guild: ${guildId})`);
-    return;
-  }
-
-  await onTwitchStreamersSchema.create({ 
-    guildId: guildId,
-    name: streamerName 
-  });
-
-  const embed = createResponseEmbed(
-    EMBED_COLORS.SUCCESS,
-    'Streamer cadastrado com sucesso',
-    `Streamer: ${streamerName}`
-  ).setAuthor({
-    name: client.user.username,
-    iconURL: client.user.displayAvatarURL({ dynamic: true }),
-  });
-
-  await interaction.reply({ embeds: [embed], ephemeral: true });
-  Logger.info(`Streamer Twitch adicionado: ${streamerName} (Guild: ${guildId})`);
-};
-
-/**
- * Handler para submit do modal YouTube
- */
-const handleYoutubeModalSubmit = async (interaction) => {
-  const channelName =
-    interaction.fields.getTextInputValue('youtube_channel_name');
-  const guildId = interaction.guild.id;
-
-  const existingChannel = await onYoutubeChannelSchema.findOne({
-    guildId: guildId,
-    name: channelName,
-  });
-
-  if (existingChannel) {
-    const embed = createResponseEmbed(
-      EMBED_COLORS.ERROR,
-      'Canal já cadastrado',
-      `O canal ${channelName} já está cadastrado neste servidor.`
-    ).setAuthor({
-      name: client.user.username,
-      iconURL: client.user.displayAvatarURL({ dynamic: true }),
-    });
-
-    await interaction.reply({ embeds: [embed], ephemeral: true });
-    Logger.warn(`Canal YouTube já cadastrado: ${channelName} (Guild: ${guildId})`);
-    return;
-  }
-
-  await onYoutubeChannelSchema.create({ 
-    guildId: guildId,
-    name: channelName 
-  });
-
-  const embed = createResponseEmbed(
-    EMBED_COLORS.SUCCESS,
-    'Canal cadastrado com sucesso',
-    `Canal: ${channelName}`
-  ).setAuthor({
-    name: client.user.username,
-    iconURL: client.user.displayAvatarURL({ dynamic: true }),
-  });
-
-  await interaction.reply({ embeds: [embed], ephemeral: true });
-  Logger.info(`Canal YouTube adicionado: ${channelName} (Guild: ${guildId})`);
-};
-
-// =====================================================
-// REGISTRO DE LISTENERS (UMA ÚNICA VEZ)
-// =====================================================
-
-/**
- * Registra todos os listeners de interação do painel
- * Utiliza um Map para otimizar o roteamento de handlers
- */
-function registerPainelListeners() {
-  if (painelListenersRegistered) return;
-  painelListenersRegistered = true;
-
-  client.setMaxListeners(PANEL_CONFIG.MAX_LISTENERS);
-
-  // Map de handlers por tipo de interação
-  const channelSelectHandlers = new Map([
-    ['select_regra_channel', handleRegrasChannel],
-    ['select_manutencao_channel', handleManutencaoChannel],
-    ['select_add_channel_especifico', handleAddSpecificChannel],
-    ['select_remove_channel_especifico', handleRemoveSpecificChannel],
-    [
-      'select_add_channel_notification_twitch',
-      (i) =>
-        handleNotificationChannelConfig(i, 'twitch', {
-          color: EMBED_COLORS.TWITCH,
-          title: 'Canal de Notificação Twitch Configurado',
-          description: 'receber notificações da Twitch',
-        }),
-    ],
-    [
-      'select_add_channel_notification_youtuber',
-      (i) =>
-        handleNotificationChannelConfig(i, 'youtube', {
-          color: EMBED_COLORS.YOUTUBE,
-          title: 'Canal de Notificação YouTube Configurado',
-          description: 'receber notificações do YouTube',
-        }),
-    ],
-    [
-      'select_add_channel_notification_free_games',
-      (i) =>
-        handleNotificationChannelConfig(i, 'free_games', {
-          color: EMBED_COLORS.SUCCESS,
-          title: 'Canal de Jogos Gratuitos Configurado',
-          description: 'receber notificações de jogos gratuitos',
-        }),
-    ],
-    [
-      'select_add_channel_notification_welcome',
-      (i) =>
-        handleNotificationChannelConfig(i, 'welcome', {
-          color: EMBED_COLORS.INFO,
-          title: 'Canal de Boas-vindas Configurado',
-          description: 'receber mensagens de boas-vindas',
-        }),
-    ],
-    [
-      'select_add_channel_notification_goodbye',
-      (i) =>
-        handleNotificationChannelConfig(i, 'goodbye', {
-          color: EMBED_COLORS.WARNING,
-          title: 'Canal de Despedida Configurado',
-          description: 'receber mensagens de despedida',
-        }),
-    ],
-    [
-      'select_ticket_channel',
-      (i) => handleTicketConfig(i, 'channelId', i.values[0]),
-    ],
-    [
-      'select_ticket_category',
-      (i) => handleTicketConfig(i, 'categoryId', i.values[0]),
-    ],
-  ]);
-
-  const buttonHandlers = new Map([
-    ['add_channels_db', handleAddAllChannels],
-    ['open_modal_twitch', handleTwitchModal],
-    ['open_modal_youtube', handleYoutubeModal],
-  ]);
-
-  const modalHandlers = new Map([
-    ['modal_add_twitch', handleTwitchModalSubmit],
-    ['modal_add_youtube', handleYoutubeModalSubmit],
-  ]);
-
-  const roleSelectHandlers = new Map([
-    [
-      'select_ticket_support_role',
-      (i) => handleTicketConfig(i, 'supportRoleId', i.values[0]),
-    ],
-    [
-      'select_moderator_role',
-      (i) => handleRolePermissionsConfig(i, 'moderator', i.values[0]),
-    ],
-    [
-      'select_immune_role',
-      (i) => handleRolePermissionsConfig(i, 'immune', i.values[0]),
-    ],
-    [
-      'select_new_member_role',
-      (i) => handleRolePermissionsConfig(i, 'newMember', i.values[0]),
-    ],
-  ]);
-
-  // Handler unificado de interações
-  client.on('interactionCreate', async (interaction) => {
-    try {
-      // Channel Select Menus
-      if (interaction.isChannelSelectMenu()) {
-        const handler = channelSelectHandlers.get(interaction.customId);
-        if (handler) {
-          await handler(interaction);
-          return;
-        }
-      }
-
-      // Buttons
-      if (interaction.isButton()) {
-        // Navegação de páginas
-        if (interaction.customId.startsWith('goto_page:')) {
-          await handlePageNavigation(interaction);
-          return;
-        }
-
-        const handler = buttonHandlers.get(interaction.customId);
-        if (handler) {
-          await handler(interaction);
-          return;
-        }
-      }
-
-      // Modal Submits
-      if (interaction.isModalSubmit()) {
-        const handler = modalHandlers.get(interaction.customId);
-        if (handler) {
-          await handler(interaction);
-          return;
-        }
-      }
-
-      // Role Select Menus
-      if (interaction.isRoleSelectMenu()) {
-        const handler = roleSelectHandlers.get(interaction.customId);
-        if (handler) {
-          await handler(interaction);
-          return;
-        }
-      }
-    } catch (error) {
-      Logger.error(`Erro no handler de interações do painel: ${error}`);
-      
-      // Tenta responder ao usuário em caso de erro
-      const errorMessage = {
-        content: 'Ocorreu um erro ao processar sua solicitação.',
-        flags: [64],
-      };
-
-      if (interaction.deferred || interaction.replied) {
-        await interaction.editReply(errorMessage).catch(() => {});
-      } else {
-        await interaction.reply(errorMessage).catch(() => {});
-      }
-    }
+}
+
+function makeChannelSelect(customId, placeholder) {
+  return new ActionRowBuilder({
+    components: [new ChannelSelectMenuBuilder({ customId, placeholder })]
   });
 }
 
-// =====================================================
-// FUNÇÃO PRINCIPAL DO COMANDO PAINEL
-// =====================================================
+function makeRoleSelect(customId, placeholder) {
+  return new ActionRowBuilder({
+    components: [new RoleSelectMenuBuilder({ customId, placeholder })]
+  });
+}
 
-/**
- * Executa o comando /painel
- */
+function makePaginationRow(currentPage, totalPages) {
+  const hasPrev = currentPage > 1;
+  const hasNext = currentPage < totalPages;
+  return new ActionRowBuilder({
+    components: [
+      new ButtonBuilder({ custom_id: hasPrev ? `goto_page:${currentPage - 1}` : 'goto_page:disabled_prev', style: ButtonStyle.Secondary, label: '◀', disabled: !hasPrev }),
+      new ButtonBuilder({ custom_id: hasNext ? `goto_page:${currentPage + 1}` : 'goto_page:disabled_next', style: ButtonStyle.Secondary, label: '▶', disabled: !hasNext }),
+    ]
+  });
+}
+
+function buildPage(page, imageName) {
+  const rows = [];
+
+  const introRow = new ActionRowBuilder({
+    components: [
+      new ButtonBuilder({ custom_id: 'panel_header', style: ButtonStyle.Secondary, label: `🛡️ Painel Jonalandia - Página ${page}/6`, disabled: true }),
+    ]
+  });
+  rows.push(introRow);
+
+  switch (page) {
+    case 1:
+      rows.push(makeChannelSelect('select_regra_channel', '📦 Enviar Regras para...'));
+      rows.push(makeChannelSelect('select_manutencao_channel', '📦 Enviar Manutenção para...'));
+      rows.push(new ActionRowBuilder({
+        components: [new ButtonBuilder({ custom_id: 'add_channels_db', style: ButtonStyle.Success, label: '📝 Registrar Todos os Canais' })]
+      }));
+      rows.push(makeChannelSelect('select_add_channel_especifico', '➕ Adicionar Canal Específico'));
+      rows.push(makeChannelSelect('select_remove_channel_especifico', '➖ Remover Canal Específico'));
+      break;
+
+    case 2:
+      rows.push(makeChannelSelect('select_regra_channel', '📦 Enviar Regras para...'));
+      rows.push(makeChannelSelect('select_manutencao_channel', '📦 Enviar Manutenção para...'));
+      break;
+
+    case 3:
+      rows.push(new ActionRowBuilder({
+        components: [new ButtonBuilder({ custom_id: 'open_modal_twitch', style: ButtonStyle.Primary, label: '🎮 Adicionar Streamer Twitch' })]
+      }));
+      rows.push(makeChannelSelect('select_add_channel_notification_twitch', '📢 Canal Notif. Twitch'));
+      rows.push(new ActionRowBuilder({
+        components: [new ButtonBuilder({ custom_id: 'open_modal_youtube', style: ButtonStyle.Danger, label: '📺 Adicionar Canal YouTube' })]
+      }));
+      rows.push(makeChannelSelect('select_add_channel_notification_youtuber', '📢 Canal Notif. YouTube'));
+      break;
+
+    case 4:
+      rows.push(makeChannelSelect('select_add_channel_notification_free_games', '🎮 Canal Jogos Gratuitos'));
+      rows.push(makeChannelSelect('select_add_channel_notification_welcome', '👋 Canal de Boas-vindas'));
+      rows.push(makeChannelSelect('select_add_channel_notification_goodbye', '👋 Canal de Despedida'));
+      break;
+
+    case 5:
+      rows.push(makeChannelSelect('select_ticket_channel', '📌 Canal Painel de Tickets'));
+      rows.push(makeChannelSelect('select_ticket_category', '📁 Categoria dos Tickets'));
+      rows.push(makeRoleSelect('select_ticket_support_role', '👔 Cargo de Suporte'));
+      break;
+
+    case 6:
+      rows.push(makeRoleSelect('select_moderator_role', '🛡️ Cargo de Moderador'));
+      rows.push(makeRoleSelect('select_immune_role', '🛡️ Cargo Imune'));
+      rows.push(makeRoleSelect('select_new_member_role', '👋 Cargo Novo Membro'));
+      break;
+  }
+
+  rows.push(makePaginationRow(page, PANEL_CONFIG.TOTAL_PAGES));
+  return rows;
+}
+
 async function Painel(interaction) {
   if (!interaction.isCommand()) return;
 
-  // Verificação de permissões específica do painel
   const hasPermission = await checkPainelPermissions(interaction);
   if (!hasPermission) return;
 
   try {
-    // Registra listeners uma única vez
     registerPainelListeners();
 
-    // Cria componentes
-    const imagemBot = new AttachmentBuilder(PANEL_CONFIG.IMAGE_PATH, {
-      name: PANEL_CONFIG.IMAGE_NAME,
-    });
+    const imagemBot = new AttachmentBuilder(PANEL_CONFIG.IMAGE_PATH, { name: PANEL_CONFIG.IMAGE_NAME });
+    const rows = buildPage(1, PANEL_CONFIG.IMAGE_NAME);
 
-    const header = createHeaderSection(PANEL_CONFIG.IMAGE_NAME);
-    const selects = createAllSelects();
-    const container = buildPageContainer(1, header, selects);
-
-    // Responde com a página 1
     await interaction.reply({
       flags: ['IsComponentsV2'],
-      components: [container],
+      components: rows,
       files: [imagemBot],
     });
 
-    Logger.info(
-      `Painel aberto por ${interaction.user.tag} em ${interaction.guild.name}`
-    );
+    Logger.info(`Painel aberto por ${interaction.user.tag} em ${interaction.guild.name}`);
   } catch (error) {
     Logger.error(`Erro ao executar o comando Painel: ${error}`);
-    
-    const errorResponse = {
-      content: 'Ocorreu um erro ao executar o comando.',
-      flags: [64],
-    };
-
-    if (interaction.replied || interaction.deferred) {
-      await interaction.editReply(errorResponse);
-    } else {
-      await interaction.reply(errorResponse);
-    }
+    const msg = { content: 'Ocorreu um erro ao executar o comando.', flags: [64] };
+    if (interaction.replied || interaction.deferred) await interaction.editReply(msg);
+    else await interaction.reply(msg);
   }
 }
 
-// =====================================================
-// EXPORTAÇÃO
-// =====================================================
+function registerPainelListeners() {
+  if (painelListenersRegistered) return;
+  painelListenersRegistered = true;
+
+  client.on('interactionCreate', async (interaction) => {
+    try {
+      if (interaction.isButton()) {
+        if (interaction.customId.startsWith('goto_page:')) {
+          const page = parseInt(interaction.customId.split(':')[1], 10);
+          if (!isNaN(page)) {
+            await interaction.update({ components: buildPage(page, PANEL_CONFIG.IMAGE_NAME) });
+          }
+          return;
+        }
+
+        if (interaction.customId === 'add_channels_db') {
+          await interaction.deferReply({ flags: [64] });
+          const guild = interaction.guild;
+          const textChannels = guild.channels.cache.filter(ch => ch.type === 0);
+          const channelsToAdd = textChannels.map(ch => ({
+            channelId: ch.id,
+            guildId: guild.id,
+            channelName: ch.name,
+            channelType: ch.type,
+            guildName: guild.name,
+          }));
+          await db.channels.createMany(channelsToAdd);
+          invalidateGuildCache(guild.id);
+          const embed = createResponseEmbed(EMBED_COLORS.SUCCESS, 'Canais Adicionados', `${textChannels.size} canais de texto registrados.`);
+          await interaction.editReply({ embeds: [embed] });
+          return;
+        }
+
+        if (interaction.customId === 'open_modal_twitch') {
+          const modal = new ModalBuilder().setCustomId('modal_add_twitch').setTitle('Adicionar Streamer Twitch');
+          modal.addComponents(new ActionRowBuilder().addComponents(
+            new TextInputBuilder().setCustomId('twitch_streamer_name').setLabel('Nome do streamer').setPlaceholder('Ex: gaules').setStyle(TextInputStyle.Short).setRequired(true)
+          ));
+          await interaction.showModal(modal);
+          return;
+        }
+
+        if (interaction.customId === 'open_modal_youtube') {
+          const modal = new ModalBuilder().setCustomId('modal_add_youtube').setTitle('Adicionar Canal YouTube');
+          modal.addComponents(new ActionRowBuilder().addComponents(
+            new TextInputBuilder().setCustomId('youtube_channel_name').setLabel('Nome/ID do canal').setPlaceholder('Ex: @CanalExemplo').setStyle(TextInputStyle.Short).setRequired(true)
+          ));
+          await interaction.showModal(modal);
+          return;
+        }
+      }
+
+      if (interaction.isChannelSelectMenu()) {
+        await interaction.deferReply({ flags: [64] });
+        const channelId = interaction.values[0];
+        const channel = interaction.guild.channels.cache.get(channelId);
+
+        if (!channel) {
+          await interaction.editReply('Canal inválido.');
+          return;
+        }
+
+        if (interaction.customId !== 'select_ticket_category' && channel.type !== 0) {
+          await interaction.editReply('Selecione um canal de texto válido.');
+          return;
+        }
+
+        switch (interaction.customId) {
+          case 'select_regra_channel':
+            await channel.send({ embeds: [embedRegra()] });
+            await interaction.editReply(`Regras enviadas para <#${channelId}>.`);
+            break;
+
+          case 'select_manutencao_channel':
+            await channel.send({ embeds: [embedManutencao()] });
+            await interaction.editReply(`Manutenção enviada para <#${channelId}>.`);
+            break;
+
+          case 'select_add_channel_especifico': {
+            await db.channels.create({ channelId: channel.id, guildId: interaction.guild.id, channelName: channel.name, channelType: channel.type, guildName: interaction.guild.name });
+            invalidateGuildCache(interaction.guild.id);
+            await interaction.editReply({ embeds: [createResponseEmbed(EMBED_COLORS.SUCCESS, 'Canal Adicionado', `<#${channel.id}> adicionado.`)] });
+            break;
+          }
+
+          case 'select_remove_channel_especifico': {
+            const result = await db.channels.deleteOne({ channelId: channel.id, guildId: interaction.guild.id });
+            invalidateGuildCache(interaction.guild.id);
+            if (result.deletedCount === 0) await interaction.editReply('Este canal não está registrado.');
+            else await interaction.editReply({ embeds: [createResponseEmbed(EMBED_COLORS.SUCCESS, 'Canal Removido', `<#${channel.id}> removido.`)] });
+            break;
+          }
+
+          case 'select_add_channel_notification_twitch':
+          case 'select_add_channel_notification_youtuber':
+          case 'select_add_channel_notification_free_games':
+          case 'select_add_channel_notification_welcome':
+          case 'select_add_channel_notification_goodbye': {
+            const typeMap = {
+              select_add_channel_notification_twitch: 'twitch',
+              select_add_channel_notification_youtuber: 'youtube',
+              select_add_channel_notification_free_games: 'free_games',
+              select_add_channel_notification_welcome: 'welcome',
+              select_add_channel_notification_goodbye: 'goodbye',
+            };
+            const notifType = typeMap[interaction.customId];
+            await db.notificationChannels.upsert(interaction.guild.id, notifType, { channelId: channel.id, channelName: channel.name });
+            await interaction.editReply(`Canal <#${channel.id}> configurado para notificações de ${notifType}.`);
+            break;
+          }
+
+          case 'select_ticket_channel':
+            await db.tickets.upsert(interaction.guild.id, { channelId: channel.id });
+            await interaction.editReply(`Canal do painel de tickets configurado: <#${channel.id}>.`);
+            break;
+
+          case 'select_ticket_category':
+            await db.tickets.upsert(interaction.guild.id, { categoryId: channel.id });
+            await interaction.editReply('Categoria de tickets configurada.');
+            break;
+
+          default:
+            await interaction.editReply('Ação não reconhecida.');
+        }
+        return;
+      }
+
+      if (interaction.isRoleSelectMenu()) {
+        await interaction.deferReply({ flags: [64] });
+        const roleId = interaction.values[0];
+        const role = interaction.guild.roles.cache.get(roleId);
+
+        if (!role) {
+          await interaction.editReply('Cargo inválido.');
+          return;
+        }
+
+        const roleMap = {
+          select_ticket_support_role: { table: 'tickets', field: 'supportRoleId' },
+          select_moderator_role: { table: 'rolePermissions', field: 'moderatorRoleId', nameField: 'moderatorRoleName' },
+          select_immune_role: { table: 'rolePermissions', field: 'immuneRoleId', nameField: 'immuneRoleName' },
+          select_new_member_role: { table: 'rolePermissions', field: 'newMemberRoleId', nameField: 'newMemberRoleName' },
+        };
+
+        const config = roleMap[interaction.customId];
+        if (config) {
+          const updateData = { [config.field]: roleId };
+          if (config.nameField) updateData[config.nameField] = role.name;
+          if (config.table === 'rolePermissions') {
+            updateData.guildName = interaction.guild.name;
+            await db.rolePermissions.upsert(interaction.guild.id, updateData);
+            invalidateGuildCache(interaction.guild.id);
+          } else {
+            await db.tickets.upsert(interaction.guild.id, updateData);
+          }
+          await interaction.editReply(`Cargo <@&${roleId}> configurado com sucesso.`);
+        }
+        return;
+      }
+
+      if (interaction.isModalSubmit()) {
+        await interaction.deferReply({ flags: [64] });
+        const guildId = interaction.guild.id;
+
+        if (interaction.customId === 'modal_add_twitch') {
+          const name = interaction.fields.getTextInputValue('twitch_streamer_name');
+          const existing = await db.streamers.findOne({ guildId, name });
+          if (existing) {
+            await interaction.editReply({ embeds: [createResponseEmbed(EMBED_COLORS.ERROR, 'Streamer já cadastrado', `${name} já está cadastrado.`)] });
+            return;
+          }
+          await db.streamers.create({ guildId, name });
+          await interaction.editReply({ embeds: [createResponseEmbed(EMBED_COLORS.SUCCESS, 'Streamer Adicionado', `Streamer: ${name}`)] });
+          return;
+        }
+
+        if (interaction.customId === 'modal_add_youtube') {
+          const name = interaction.fields.getTextInputValue('youtube_channel_name');
+          const existing = await db.youtubeChannels.findOne({ guildId, name });
+          if (existing) {
+            await interaction.editReply({ embeds: [createResponseEmbed(EMBED_COLORS.ERROR, 'Canal já cadastrado', `${name} já está cadastrado.`)] });
+            return;
+          }
+          await db.youtubeChannels.create({ guildId, name });
+          await interaction.editReply({ embeds: [createResponseEmbed(EMBED_COLORS.SUCCESS, 'Canal Adicionado', `Canal: ${name}`)] });
+          return;
+        }
+      }
+    } catch (error) {
+      Logger.error(`Erro no handler do painel: ${error.message}`);
+      try {
+        if (interaction.deferred || interaction.replied) {
+          await interaction.editReply({ content: 'Ocorreu um erro.', flags: [64] }).catch(() => {});
+        } else {
+          await interaction.reply({ content: 'Ocorreu um erro.', flags: [64] }).catch(() => {});
+        }
+      } catch (e) {}
+    }
+  });
+}
 
 module.exports = { Painel };
