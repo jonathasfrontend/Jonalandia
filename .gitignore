@@ -5,10 +5,11 @@ src/logs/
 *.txt
 *.rar
 *.backup
+*.sh
 Servidor de Suporte Tecnico para bot Jonalandia - ATUALIZADO.md
 tests/
+docs/
 shard.json
-.sh
 
 # dependencies
 /node_modules
