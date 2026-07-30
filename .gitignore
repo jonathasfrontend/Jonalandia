@@ -6,6 +6,7 @@ src/logs/
 *.rar
 *.backup
 Servidor de Suporte Tecnico para bot Jonalandia - ATUALIZADO.md
+tests/
 
 # dependencies
 /node_modules
