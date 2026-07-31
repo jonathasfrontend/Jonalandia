@@ -44,7 +44,7 @@ function embedRegra() {
         Qualquer spoiler de qualquer filme ou série deverá ser mandado no ⁠Desconhecido, qualquer outra sala é sujeito de banimento.
       `)
         .setThumbnail(`${client.user.displayAvatarURL({ dynamic: true })}`)
-        .setImage('https://i.pinimg.com/originals/aa/b4/41/aab441520f83dbb4cbdaa6a61a9d76b4.jpg')
+        .setImage('https://raw.githubusercontent.com/jonathasfrontend/Jonalandia/refs/heads/main/bgregras.png')
         .setTimestamp()
         .setFooter({ text: `Por: ${client.user.tag}`, iconURL: `${client.user.displayAvatarURL({ dynamic: true })}` });
 }
