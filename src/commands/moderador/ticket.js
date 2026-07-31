@@ -120,6 +120,16 @@ client.on('interactionCreate', async (interaction) => {
     }
 
     if (interaction.customId === 'close_ticket') {
+        const ticketConfig = await db.tickets.findOne({ guildId: interaction.guild.id });
+        const supportRoleId = ticketConfig?.supportRoleId;
+
+        const member = interaction.member;
+        const hasSupportRole = supportRoleId && member?.roles.cache.has(supportRoleId);
+
+        if (!hasSupportRole) {
+            return interaction.reply({ content: '❌ Apenas quem possui o cargo de suporte pode fechar o ticket.', ephemeral: true });
+        }
+
         const channel = interaction.channel;
         await interaction.reply({ content: 'Fechando ticket em 5 segundos...', ephemeral: true });
         setTimeout(() => channel.delete(), 5000);
