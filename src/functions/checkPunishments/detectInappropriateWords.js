@@ -5,6 +5,7 @@ const inappropriateWordsData = require('../../config/InappropriateWords.json');
 const { getBlockedChannels } = require('../../utils/checkingComandsExecution');
 const { saveUserInfractions } = require('../../utils/saveUserInfractions');
 const { isUserImmune } = require('../../utils/checkUserImmune');
+const { setStandardFooter } = require('../../utils/embedFooter');
 const configData = require('../../config/punishmentConfig.json');
 
 const config = configData.antiFlood || {};
@@ -103,9 +104,8 @@ async function detectInappropriateWords(message) {
                     .addFields(
                         { name: 'Motivo', value: 'Uso de palavras inadequadas', inline: true },
                         { name: 'Canal', value: `<#${message.channel.id}>`, inline: true },
-                    )
-                    .setFooter({ text: `Envio de palavras inapropriadas monitorado por: ${client.user.tag}`, iconURL: `${client.user.displayAvatarURL({ dynamic: true })}` })
-                    .setTimestamp();
+                    );
+                setStandardFooter(channelEmbed, client, 'Palavras inapropriadas monitoradas');
 
                 const userEmbed = new EmbedBuilder()
                     .setColor('#FF0000')
@@ -115,9 +115,8 @@ async function detectInappropriateWords(message) {
                         { name: 'Motivo', value: 'Uso de palavras inadequadas', inline: true },
                         { name: 'Servidor', value: message.guild.name, inline: true },
                         { name: '🆔 ID da Infração', value: `\`${inappropriateId}\``, inline: true }
-                    )
-                    .setFooter({ text: `Envio de palavras inapropriadas monitorado por: ${client.user.tag}`, iconURL: `${client.user.displayAvatarURL({ dynamic: true })}` })
-                    .setTimestamp();
+                    );
+                setStandardFooter(userEmbed, client, 'Palavras inapropriadas monitoradas');
 
                 try {
                     await message.channel.send({ embeds: [channelEmbed], ephemeral: true });

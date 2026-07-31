@@ -3,6 +3,7 @@ const { client } = require("../../Client");
 const { logger, securityEvent, databaseEvent } = require('../../logger');
 const { saveUserInfractions } = require('../../utils/saveUserInfractions');
 const { isUserImmune } = require('../../utils/checkUserImmune');
+const { setStandardFooter } = require('../../utils/embedFooter');
 const configData = require('../../config/punishmentConfig.json');
 
 const config = configData.antiFlood || {};
@@ -198,12 +199,8 @@ function createWarningEmbed(user, warnings, infractionId = null) {
             `**Restam:** ${remainingWarnings} aviso(s) antes do timeout\n\n` +
             `Por favor, diminua a velocidade das suas mensagens.`
         )
-        .setThumbnail(user.displayAvatarURL({ dynamic: true }))
-        .setFooter({
-            text: `Sistema Anti-Flood • ${client.user.tag}`,
-            iconURL: client.user.displayAvatarURL({ dynamic: true })
-        })
-        .setTimestamp();
+        .setThumbnail(user.displayAvatarURL({ dynamic: true }));
+    setStandardFooter(embed, client, 'Sistema Anti-Flood');
 
     if (infractionId) {
         embed.addFields({ name: '🆔 ID da Infração', value: `\`${infractionId}\``, inline: true });
@@ -231,12 +228,8 @@ function createTimeoutEmbed(user, infractionId = null) {
             `**Duração:** ${timeoutMinutes} minutos\n\n` +
             `Leia as regras do servidor para evitar futuras punições.`
         )
-        .setThumbnail(user.displayAvatarURL({ dynamic: true }))
-        .setFooter({
-            text: `Sistema Anti-Flood • ${client.user.tag}`,
-            iconURL: client.user.displayAvatarURL({ dynamic: true })
-        })
-        .setTimestamp();
+        .setThumbnail(user.displayAvatarURL({ dynamic: true }));
+    setStandardFooter(embed, client, 'Sistema Anti-Flood');
 
     if (infractionId) {
         embed.addFields({ name: '🆔 ID da Infração', value: `\`${infractionId}\``, inline: true });
@@ -310,8 +303,8 @@ async function sendLogNotification(user, action, messageCount) {
                 { name: 'Ação', value: action === 'timeout' ? 'Timeout aplicado' : 'Aviso enviado', inline: true },
                 { name: 'Mensagens', value: `${messageCount} em ${config.timeWindow / 1000}s`, inline: true }
             )
-            .setThumbnail(user.displayAvatarURL({ dynamic: true }))
-            .setTimestamp();
+            .setThumbnail(user.displayAvatarURL({ dynamic: true }));
+        setStandardFooter(embed, client);
 
         await logChannel.send({ embeds: [embed] });
 

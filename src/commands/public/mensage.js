@@ -1,6 +1,7 @@
 const { EmbedBuilder } = require("discord.js");
 const { client } = require("../../Client");
 const { checkingComandChannelBlocked } = require("../../utils/checkingComandsExecution");
+const { setStandardFooter } = require("../../utils/embedFooter");
 
 async function menssageFile(interaction) {
   const authorizedExecutionComand = await checkingComandChannelBlocked(interaction);
@@ -12,6 +13,7 @@ async function menssageFile(interaction) {
       iconURL: client.user.displayAvatarURL({ dynamic: true }),
     })
     .setDescription(`**Oi **${interaction.user}`);
+  setStandardFooter(embed, client);
 
   await interaction.reply({ embeds: [embed] });
 };

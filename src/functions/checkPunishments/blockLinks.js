@@ -5,6 +5,7 @@ const { client } = require('../../Client');
 const { logger, securityEvent, databaseEvent } = require('../../logger');
 const { saveUserInfractions } = require('../../utils/saveUserInfractions');
 const { isUserImmune } = require('../../utils/checkUserImmune');
+const { setStandardFooter } = require('../../utils/embedFooter');
 const configData = require('../../config/punishmentConfig.json');
 
 const config = configData.antiFlood || {};
@@ -100,9 +101,8 @@ async function blockLinks(message) {
                         })
                         .setTitle('<:triste:1402690489462947981> Link bloqueado detectado! ❌')
                         .setDescription('Você não pode enviar certos links por aqui.')
-                        .setTimestamp()
-                        .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
-                        .setFooter({ text: `Envio de links monitorado por: ${client.user.tag}`, iconURL: `${client.user.displayAvatarURL({ dynamic: true })}` });
+                        .setThumbnail(client.user.displayAvatarURL({ dynamic: true }));
+                    setStandardFooter(embed, client, 'Envio de links monitorado');
 
                     const userEmbed = new EmbedBuilder()
                         .setColor('#FF0000')
@@ -113,9 +113,8 @@ async function blockLinks(message) {
                         .setTitle('<:triste:1402690489462947981> Link bloqueado detectado! ❌')
                         .setDescription('Você levou timeout de 5 minutos por enviar certos links nos canais do servidor jonalandia.')
                         .addFields({ name: '🆔 ID da Infração', value: `\`${blockedLinkId}\``, inline: true })
-                        .setTimestamp()
-                        .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
-                        .setFooter({ text: `Envio de links monitorado por: ${client.user.tag}`, iconURL: `${client.user.displayAvatarURL({ dynamic: true })}` });
+                        .setThumbnail(client.user.displayAvatarURL({ dynamic: true }));
+                    setStandardFooter(userEmbed, client, 'Envio de links monitorado');
 
                     try {
                         await message.channel.send({ content: `||${message.author}||`, embeds: [embed], ephemeral: true });

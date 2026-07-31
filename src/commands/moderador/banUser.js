@@ -5,6 +5,7 @@ const { saveUserInfractions } = require('../../utils/saveUserInfractions');
 const { checkingComandChannelBlocked, checkingComandExecuntionModerador } = require('../../utils/checkingComandsExecution');
 const { db } = require('../../database/service');
 const punishmentConfig = require('../../config/punishmentConfig.json');
+const { setStandardFooter } = require('../../utils/embedFooter');
 
 async function banUser(interaction) {
     if (!interaction.isCommand()) return;
@@ -39,8 +40,8 @@ async function banUser(interaction) {
             .setTitle('Você foi banido')
             .setDescription(unbanDate
                 ? `Banido temporariamente por **${durationText}**. Expira em ${unbanDate.toLocaleString('pt-BR')}.`
-                : 'Você foi banido permanentemente.')
-            .setFooter({ text: `Banido por ${member.user.tag}` });
+                : 'Você foi banido permanentemente.');
+        setStandardFooter(embed, client, `Banido por ${member.user.tag}`);
 
         try {
             await userToBan.send({ embeds: [embed] });
@@ -73,9 +74,8 @@ async function banUser(interaction) {
             .setTitle(unbanDate ? 'Banido Temporariamente' : 'Usuário Banido')
             .setDescription(unbanDate
                 ? `${userToBan.tag} banido por ${durationText}. Expira: ${unbanDate.toLocaleString('pt-BR')}`
-                : `${userToBan.tag} banido com sucesso.`)
-            .setTimestamp()
-            .setFooter({ text: `Ação: ${member.user.tag}` });
+                : `${userToBan.tag} banido com sucesso.`);
+        setStandardFooter(replyEmbed, client, `Ação: ${member.user.tag}`);
 
         await interaction.editReply({ embeds: [replyEmbed] });
 

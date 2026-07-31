@@ -5,6 +5,7 @@ const { getBlockedChannels } = require('../../utils/checkingComandsExecution')
 const { logger, securityEvent, databaseEvent } = require('../../logger');
 const { saveUserInfractions } = require('../../utils/saveUserInfractions');
 const { isUserImmune } = require('../../utils/checkUserImmune');
+const { setStandardFooter } = require('../../utils/embedFooter');
 const configData = require('../../config/punishmentConfig.json');
 
 const config = configData.antiFlood || {};
@@ -101,9 +102,8 @@ async function blockFileTypes(message) {
                                 iconURL: client.user.displayAvatarURL({ dynamic: true }),
                             })
                             .setTitle('<:triste:1402690489462947981> Arquivo Bloqueado')
-                            .setDescription(`${message.author}, o envio de arquivos com certas extensões é proibido neste servidor.`)
-                            .setTimestamp()
-                            .setFooter({ text: `Envio de arquivos monitorado por: ${client.user.tag}`, iconURL: `${client.user.displayAvatarURL({ dynamic: true })}` });
+                            .setDescription(`${message.author}, o envio de arquivos com certas extensões é proibido neste servidor.`);
+                        setStandardFooter(embed, client, 'Envio de arquivos monitorado');
 
                         const userEmbed = new EmbedBuilder()
                             .setColor('#FF0000')
@@ -113,9 +113,8 @@ async function blockFileTypes(message) {
                             })
                             .setTitle('<:triste:1402690489462947981> Arquivo Bloqueado')
                             .setDescription(`${message.author} voce levou timeout de 5 minutos por envio de arquivos com certas extensões é proibido neste servidor.`)
-                            .addFields({ name: '🆔 ID da Infração', value: `\`${blockedFileId}\``, inline: true })
-                            .setTimestamp()
-                            .setFooter({ text: `Envio de arquivos monitorado por: ${client.user.tag}`, iconURL: `${client.user.displayAvatarURL({ dynamic: true })}` });
+                            .addFields({ name: '🆔 ID da Infração', value: `\`${blockedFileId}\``, inline: true });
+                        setStandardFooter(userEmbed, client, 'Envio de arquivos monitorado');
 
                         try {
                             await message.author.send({ embeds: [userEmbed] });

@@ -3,6 +3,7 @@ const { client } = require("../../Client");
 const { logger } = require('../../logger');
 const { saveUserInfractions } = require('../../utils/saveUserInfractions');
 const { checkingComandChannelBlocked, checkingComandExecuntionModerador } = require('../../utils/checkingComandsExecution');
+const { setStandardFooter } = require('../../utils/embedFooter');
 
 async function expulsar(interaction) {
     if (!interaction.isCommand()) return;
@@ -35,9 +36,8 @@ async function expulsar(interaction) {
 
         const embed = new EmbedBuilder()
             .setColor('#ff0000').setTitle('Expulsão aplicada')
-            .setDescription(`${userToKick.tag} foi expulso.`)
-            .setTimestamp()
-            .setFooter({ text: `Por: ${client.user.tag}`, iconURL: client.user.displayAvatarURL({ dynamic: true }) });
+            .setDescription(`${userToKick.tag} foi expulso.`);
+        setStandardFooter(embed, client, `Por: ${client.user.tag}`);
 
         await interaction.editReply({ embeds: [embed] });
 

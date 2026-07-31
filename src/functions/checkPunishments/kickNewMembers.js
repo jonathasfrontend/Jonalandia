@@ -2,6 +2,7 @@ const { EmbedBuilder } = require('discord.js');
 const { logger, securityEvent, botEvent } = require('../../logger');
 const { client } = require("../../Client");
 const configData = require('../../config/punishmentConfig.json');
+const { setStandardFooter } = require('../../utils/embedFooter');
 
 const config = configData.antiFlood || {};
 
@@ -63,9 +64,8 @@ async function autoKickNewMembers() {
                             .addFields(
                                 { name: 'Motivo', value: 'Conta criada em menos de 7 dias', inline: true },
                                 { name: 'Data de criação da conta', value: `${accountCreatedAt.toLocaleDateString()}`, inline: true }
-                            )
-                            .setFooter({ text: `Expulsão realizada por ${guild.owner?.user.tag}`, iconURL: guild.iconURL() })
-                            .setTimestamp();
+                            );
+                        setStandardFooter(embed, client, `Expulsão realizada por ${guild.owner?.user.tag}`);
 
                         try {
                             await member.send({ embeds: [embed] });
@@ -89,9 +89,8 @@ async function autoKickNewMembers() {
                             .addFields(
                                 { name: 'Data de criação da conta', value: `${accountCreatedAt.toLocaleDateString()}`, inline: true },
                                 { name: 'Expulsão realizada por', value: `${guild.owner?.user.tag}`, inline: true }
-                            )
-                            .setFooter({ text: `Expulsão registrada em ${now.toLocaleString()}`, iconURL: guild.iconURL() })
-                            .setTimestamp();
+                            );
+                        setStandardFooter(logEmbed, client, `Expulsão registrada em ${now.toLocaleString()}`);
 
                         const discordChannel = client.channels.cache.get(process.env.CHANNEL_ID_LOGS_INFO_BOT);
                         if (discordChannel) {

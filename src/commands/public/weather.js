@@ -2,6 +2,7 @@ const { EmbedBuilder } = require("discord.js");
 const axios = require("axios");
 const { client } = require("../../Client");
 const { Logger } = require('../../logger');
+const { setStandardFooter } = require('../../utils/embedFooter');
 const { checkingComandChannelBlocked } = require('../../utils/checkingComandsExecution');
 
 async function getWeather(interaction) {
@@ -39,9 +40,8 @@ async function getWeather(interaction) {
                 { name: "🌐 Pressão", value: `${data.main.pressure} hPa`, inline: true },
                 { name: "🌐 Chuva (1h)", value: `${data.rain?.['1h'] || 0} mm`, inline: true },
                 { name: "☁️ Nuvens", value: `${data.clouds?.all || 0}%`, inline: true }
-            )
-            .setTimestamp()
-            .setFooter({ text: `Por: ${client.user.tag}`, iconURL: client.user.displayAvatarURL({ dynamic: true }) });
+            );
+        setStandardFooter(embed, client, `Por: ${client.user.tag}`);
 
         await interaction.editReply({ embeds: [embed], ephemeral: true });
 

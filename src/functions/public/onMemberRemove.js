@@ -2,6 +2,7 @@ const { EmbedBuilder } = require("discord.js");
 const { client } = require("../../Client");
 const { logger } = require('../../logger');
 const { db } = require('../../database/service');
+const { setStandardFooter } = require('../../utils/embedFooter');
 
 async function onMemberRemove(member) {
   const context = { module: 'MEMBER_EVENTS', user: member.user.tag, guild: member.guild?.name };
@@ -22,8 +23,8 @@ async function onMemberRemove(member) {
         .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
         .setTitle('<:affs:1402695937175846912> ahhhhh!')
         .setDescription(`⚰ **${member.user}** saiu do servidor...`)
-        .setImage('https://i.pinimg.com/originals/81/2d/e9/812de920c0c7076356699d644418e326.gif')
-        .setFooter({ text: member.user.username, iconURL: member.user.displayAvatarURL({ dynamic: true }) });
+        .setImage('https://i.pinimg.com/originals/81/2d/e9/812de920c0c7076356699d644418e326.gif');
+      setStandardFooter(embed, client, member.user.username);
 
       channel.send({ embeds: [embed] });
     }
@@ -35,6 +36,7 @@ async function onMemberRemove(member) {
       .setColor(0xffffff).setTitle('😭 ahhhhh!')
       .setDescription(`⚰ **${member.user}** saiu do servidor...`)
       .setImage('https://i.pinimg.com/originals/81/2d/e9/812de920c0c7076356699d644418e326.gif');
+    setStandardFooter(farewellEmbed, client);
 
     member.user.send({ embeds: [farewellEmbed] })
       .then(() => logger.debug(`DM de despedida enviada para ${member.user.tag}`))

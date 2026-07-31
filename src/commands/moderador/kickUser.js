@@ -3,6 +3,7 @@ const { client } = require("../../Client");
 const { logger, securityEvent } = require('../../logger');
 const { saveUserInfractions } = require("../../utils/saveUserInfractions");
 const { checkingComandChannelBlocked, checkingComandExecuntionModerador } = require("../../utils/checkingComandsExecution");
+const { setStandardFooter } = require("../../utils/embedFooter");
 
 async function kickUser(interaction) {
     if (!interaction.isCommand()) return;
@@ -39,8 +40,8 @@ async function kickUser(interaction) {
 
         const embed = new EmbedBuilder()
             .setColor('Red').setTitle('🚪 Usuário expulso do canal de voz')
-            .setDescription(`${userToKick.tag} foi expulso do canal de voz.`)
-            .setTimestamp().setFooter({ text: `Por ${member.user.tag}` });
+            .setDescription(`${userToKick.tag} foi expulso do canal de voz.`);
+        setStandardFooter(embed, client, `Por ${member.user.tag}`);
 
         await interaction.editReply({ embeds: [embed] });
         securityEvent('VOICE_KICK', userToKick, guild, `Expulso do canal de voz por ${member.user.tag}`);

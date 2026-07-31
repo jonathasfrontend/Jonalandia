@@ -3,6 +3,7 @@ const { db } = require('../../database/service');
 const { client } = require("../../Client");
 const { Logger } = require('../../logger');
 const { checkingComandChannelBlocked, checkingComandExecuntionModerador } = require('../../utils/checkingComandsExecution');
+const { setStandardFooter } = require('../../utils/embedFooter');
 
 async function Ficha(interaction) {
     const { options, guild } = interaction;
@@ -64,6 +65,8 @@ async function Ficha(interaction) {
         } else {
             embed.addFields({ name: '📊 Infrações', value: 'Nenhum registro.', inline: false });
         }
+
+        setStandardFooter(embed, client);
 
         await interaction.editReply({ embeds: [embed] });
         Logger.info(`Ficha executada para ${user.tag}`);

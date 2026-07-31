@@ -4,6 +4,7 @@ const cron = require('node-cron');
 const { db } = require('../../database/service');
 const { client } = require('../../Client');
 const { logger } = require('../../logger');
+const { setStandardFooter } = require('../../utils/embedFooter');
 
 async function onNotificationFreeGames() {
     try {
@@ -42,8 +43,8 @@ async function processGameNotification(game, activeGuilds) {
                     { name: '💻 Plataforma', value: game.platform || 'PC', inline: true },
                     { name: '📅 Lançamento', value: game.release_date || 'N/E', inline: true }
                 ).setURL(game.game_url || 'https://www.freetogame.com')
-                .setImage(game.thumbnail || null).setTimestamp()
-                .setFooter({ text: `${guildConfig.guildName} | Jogo Grátis`, iconURL: client.user.displayAvatarURL({ dynamic: true }) });
+                .setImage(game.thumbnail || null);
+            setStandardFooter(embed, client, `${guildConfig.guildName} | Jogo Grátis`);
 
             await discordChannel.send({ embeds: [embed] });
             await db.gameNotifications.create({ guildId: guildConfig.guildId, title: game.title, genre: game.genre || 'N/E', platform: game.platform || 'PC', release_date: game.release_date || 'N/E' });

@@ -2,6 +2,7 @@ const { EmbedBuilder } = require('discord.js');
 const { logger, commandExecuted } = require('../../logger');
 const { client } = require('../../Client');
 const { checkingComandChannelBlocked, checkingComandExecuntionModerador } = require('../../utils/checkingComandsExecution');
+const { setStandardFooter } = require('../../utils/embedFooter');
 
 /**
  * Comando avançado para criação de embeds personalizados
@@ -96,6 +97,8 @@ async function createEmbed(interaction) {
     const footerOptions = { text: footer };
     if (footerIcon && isValidUrl(footerIcon)) footerOptions.iconURL = footerIcon;
     embed.setFooter(footerOptions);
+  } else {
+    setStandardFooter(embed, client);
   }
 
   // Timestamp
@@ -116,8 +119,8 @@ async function createEmbed(interaction) {
         { name: 'Título', value: titulo || 'Não definido', inline: true },
         { name: 'Cor', value: cor, inline: true }
       )
-      .setColor('#00ff00')
-      .setTimestamp();
+      .setColor('#00ff00');
+    setStandardFooter(successEmbed, client);
 
     await interaction.reply({ embeds: [successEmbed], ephemeral: true });
 
@@ -132,8 +135,8 @@ async function createEmbed(interaction) {
           { name: 'Canal', value: canal.toString(), inline: true },
           { name: 'Título', value: titulo || 'Não definido', inline: false }
         )
-        .setColor('#ffa500')
-        .setTimestamp();
+        .setColor('#ffa500');
+      setStandardFooter(logEmbed, client);
 
       logChannel.send({ embeds: [logEmbed] });
     }
@@ -156,8 +159,8 @@ async function createEmbed(interaction) {
     const errorEmbed = new EmbedBuilder()
       .setTitle('❌ Erro ao Criar Embed')
       .setDescription('Ocorreu um erro ao enviar o embed. Verifique as permissões do bot no canal de destino.')
-      .setColor('#ff0000')
-      .setTimestamp();
+      .setColor('#ff0000');
+    setStandardFooter(errorEmbed, client);
 
     await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
   }

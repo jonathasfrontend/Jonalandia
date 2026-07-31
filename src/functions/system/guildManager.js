@@ -4,6 +4,7 @@ const { db } = require('../../database/service');
 const { invalidateGuildCache } = require('../../utils/cache');
 const { EmbedBuilder } = require('discord.js');
 const { EmbedBuilder: EB } = require('discord.js');
+const { setStandardFooter } = require('../../utils/embedFooter');
 
 async function createDefaultGuildConfig(guild) {
   const context = { module: 'GUILD_MANAGER', guildId: guild.id, guildName: guild.name };
@@ -50,15 +51,17 @@ client.on('guildCreate', async (guild) => {
       const owner = await guild.fetchOwner();
       const welcomeEmbed = new EB()
         .setColor('#00FF00').setTitle('🎉 Obrigado por adicionar o Jonalandia Bot!')
-        .setDescription(`Olá **${owner.user.username}**!\n\nObrigado por adicionar o bot ao **${guild.name}**!\n\nUse \`/painel\` para configurar.`)
-        .setFooter({ text: `Bot Jonalandia v2.0.0` }).setTimestamp();
+        .setDescription(`Olá **${owner.user.username}**!\n\nObrigado por adicionar o bot ao **${guild.name}**!\n\nUse \`/painel\` para configurar e \`/help\` para obter ajuda.`);
+      setStandardFooter(welcomeEmbed, client);
 
       await owner.send({ embeds: [welcomeEmbed] });
     } catch (dmError) {
       try {
         const systemChannel = guild.systemChannel;
         if (systemChannel) {
-          await systemChannel.send({ embeds: [new EB().setColor('#FFA500').setTitle('⚙️ Configuração').setDescription('Use `/painel` para configurar o bot.')] });
+          const fallbackEmbed = new EB().setColor('#FFA500').setTitle('⚙️ Configuração').setDescription('Use `/painel` para configurar o bot.');
+          setStandardFooter(fallbackEmbed, client);
+          await systemChannel.send({ embeds: [fallbackEmbed] });
         }
       } catch (e) {}
     }

@@ -4,6 +4,7 @@ const { logger, commandExecuted, securityEvent } = require('../../logger');
 const { saveUserInfractions } = require('../../utils/saveUserInfractions');
 const { checkingComandChannelBlocked, checkingComandExecuntionModerador } = require('../../utils/checkingComandsExecution');
 const { db } = require('../../database/service');
+const { setStandardFooter } = require('../../utils/embedFooter');
 
 async function unbanUser(interaction) {
     if (!interaction.isCommand()) return;
@@ -21,7 +22,7 @@ async function unbanUser(interaction) {
         const banList = await interaction.guild.bans.fetch();
 
         if (!banList.has(userToUnban.id)) {
-            return interaction.reply({ embeds: [new EmbedBuilder().setColor('Yellow').setDescription('Este usuário não está banido.')], ephemeral: true });
+            return interaction.reply({ embeds: [setStandardFooter(new EmbedBuilder().setColor('Yellow').setDescription('Este usuário não está banido.'), client)], ephemeral: true });
         }
 
         await interaction.guild.members.unban(userToUnban.id, 'Desbanido via comando');
@@ -45,6 +46,7 @@ async function unbanUser(interaction) {
         const embed = new EmbedBuilder()
             .setColor('Green')
             .setDescription(`${userToUnban.tag} foi desbanido com sucesso!`);
+        setStandardFooter(embed, client);
         await interaction.reply({ embeds: [embed], ephemeral: true });
 
         commandExecuted('desbanir', interaction.user, interaction.guild, true);

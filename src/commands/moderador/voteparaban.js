@@ -3,6 +3,7 @@ const { db } = require('../../database/service');
 const { client } = require("../../Client");
 const { logger, securityEvent } = require('../../logger');
 const { checkingComandChannelBlocked, checkingComandExecuntionModerador } = require('../../utils/checkingComandsExecution');
+const { setStandardFooter } = require('../../utils/embedFooter');
 
 async function voteParaBan(interaction) {
   if (!interaction.isCommand()) return;
@@ -39,6 +40,7 @@ async function voteParaBan(interaction) {
         .setColor("#ff0000").setTitle('Votação para Ban')
         .setAuthor({ name: client.user.username, iconURL: client.user.displayAvatarURL({ dynamic: true }) })
         .setDescription(`Votação para banir **${targetUser.tag}**. Votação termina <t:${Math.floor(endTime.getTime() / 1000)}:R>.`);
+      setStandardFooter(embed, client);
 
       await interaction.reply({ embeds: [embed], components: [row] });
       logger.info(`Votação criada para banir ${targetUser.tag}`);
@@ -55,6 +57,7 @@ async function voteParaBan(interaction) {
             .setColor(simVotes > naoVotes ? '#00ff00' : '#ff0000')
             .setTitle(simVotes > naoVotes ? '✅ Usuário Banido' : '❌ Votação Rejeitada')
             .setDescription(`**${targetUser.tag}**\nSim: ${simVotes} | Não: ${naoVotes}`);
+          setStandardFooter(resultEmbed, client);
 
           if (simVotes > naoVotes) {
             try {

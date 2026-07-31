@@ -4,6 +4,7 @@ const { db } = require('../../database/service');
 const axios = require('axios');
 const { EmbedBuilder } = require("discord.js");
 const cron = require('node-cron');
+const { setStandardFooter } = require('../../utils/embedFooter');
 
 async function onNotificationYoutube() {
     try {
@@ -63,8 +64,8 @@ async function checkYoutubeChannel(channel, guildConfig, discordChannel, baseCon
             .setColor('Red').setAuthor({ name: `▶️ YouTube - ${channel}` })
             .setTitle(title).setURL(videoUrl)
             .setDescription(`**${channel}** postou um novo vídeo!\n\n[Assistir](${videoUrl})`)
-            .setImage(thumbnailUrl).setTimestamp()
-            .setFooter({ text: `${guildConfig.guildName} | YouTube`, iconURL: client.user.displayAvatarURL({ dynamic: true }) });
+            .setImage(thumbnailUrl);
+        setStandardFooter(embed, client, `${guildConfig.guildName} | YouTube`);
 
         await discordChannel.send({ embeds: [embed] });
         await db.youtubeNotifications.create({ guildId: guildConfig.guildId, title, author: channel, thumbnail: thumbnailUrl, description: `${channel} postou vídeo` });

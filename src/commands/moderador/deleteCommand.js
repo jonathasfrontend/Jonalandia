@@ -2,6 +2,7 @@ const { EmbedBuilder } = require('discord.js');
 const { client } = require('../../Client');
 const { Logger } = require('../../logger');
 const { checkingComandChannelBlocked, checkingComandExecuntionModerador } = require('../../utils/checkingComandsExecution');
+const { setStandardFooter } = require('../../utils/embedFooter');
 
 async function excluirComando(interaction) {
     if (!interaction.isCommand()) return;
@@ -28,8 +29,8 @@ async function excluirComando(interaction) {
             const notFoundEmbed = new EmbedBuilder()
                 .setColor('Red')
                 .setTitle('Comando Não Encontrado')
-                .setDescription(`O comando \`${commandName}\` não foi encontrado.`)
-                .setTimestamp();
+                .setDescription(`O comando \`${commandName}\` não foi encontrado.`);
+            setStandardFooter(notFoundEmbed, client);
             await interaction.reply({ embeds: [notFoundEmbed], ephemeral: true });
             return;
         }
@@ -39,9 +40,8 @@ async function excluirComando(interaction) {
         const embed = new EmbedBuilder()
             .setColor('Green')
             .setTitle('Comando Excluído')
-            .setDescription(`O comando \`${commandName}\` foi excluído com sucesso.`)
-            .setTimestamp()
-            .setFooter({ text: `Ação realizada por ${member.user.tag}` });
+            .setDescription(`O comando \`${commandName}\` foi excluído com sucesso.`);
+        setStandardFooter(embed, client, `Ação realizada por ${member.user.tag}`);
 
         await interaction.reply({ embeds: [embed] });
 

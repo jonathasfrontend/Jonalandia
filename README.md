@@ -6,7 +6,7 @@
 
 **Bot Discord Multi-Guild para gerenciamento completo de servidores**
 
-[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/jonathasfrontend/jonalandia)
+[![Version](https://img.shields.io/badge/version-26.1-blue.svg)](https://github.com/jonathasfrontend/jonalandia)
 [![Node.js](https://img.shields.io/badge/node.js-18%2B-green.svg)](https://nodejs.org/)
 [![Discord.js](https://img.shields.io/badge/discord.js-14.23.2-7289da.svg)](https://discord.js.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green.svg)](https://supabase.com/)

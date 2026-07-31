@@ -1,8 +1,9 @@
 const { EmbedBuilder } = require("discord.js");
 const { client } = require("../Client");
+const { setStandardFooter } = require("../utils/embedFooter");
 
 function embedRegra() {
-    return new EmbedBuilder()
+    const embed = new EmbedBuilder()
         .setColor("White")
         .setTitle('📋 Regras')
         .setAuthor({
@@ -44,9 +45,8 @@ function embedRegra() {
         Qualquer spoiler de qualquer filme ou série deverá ser mandado no ⁠Desconhecido, qualquer outra sala é sujeito de banimento.
       `)
         .setThumbnail(`${client.user.displayAvatarURL({ dynamic: true })}`)
-        .setImage('https://raw.githubusercontent.com/jonathasfrontend/Jonalandia/refs/heads/main/bgregras.png')
-        .setTimestamp()
-        .setFooter({ text: `Por: ${client.user.tag}`, iconURL: `${client.user.displayAvatarURL({ dynamic: true })}` });
+        .setImage('https://raw.githubusercontent.com/jonathasfrontend/Jonalandia/refs/heads/main/image/bgregras.png');
+    return setStandardFooter(embed, client, `Por: ${client.user.tag}`);
 }
 
 module.exports = { embedRegra };

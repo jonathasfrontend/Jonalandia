@@ -19,10 +19,11 @@ const path = require('path');
 const { client } = require('../../Client');
 const { embedRegra } = require('../../embedsDefault/embedRegra');
 const { embedManutencao } = require('../../embedsDefault/embedManutencao');
+const { setStandardFooter } = require('../../utils/embedFooter');
 
 const PANEL_CONFIG = {
   TOTAL_PAGES: 6,
-  IMAGE_PATH: path.join(__dirname, '..', '..', '..', 'jonalandia.png'),
+  IMAGE_PATH: path.join(__dirname, '..', '..', '..', 'image', 'jonalandia.png'),
   IMAGE_NAME: 'jonalandia.png',
   ACCENT_COLOR: 0xffffff,
 };
@@ -58,11 +59,13 @@ async function checkPainelPermissions(interaction) {
 }
 
 function createResponseEmbed(color, title, description) {
-  return new EmbedBuilder()
-    .setColor(color)
-    .setTitle(title)
-    .setDescription(description)
-    .setTimestamp();
+  return setStandardFooter(
+    new EmbedBuilder()
+      .setColor(color)
+      .setTitle(title)
+      .setDescription(description),
+    client
+  );
 }
 
 function makeChannelSelect(customId, placeholder) {

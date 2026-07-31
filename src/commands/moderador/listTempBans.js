@@ -2,6 +2,7 @@ const { EmbedBuilder } = require('discord.js');
 const { db } = require('../../database/service');
 const { logger, commandExecuted } = require('../../logger');
 const { checkingComandChannelBlocked, checkingComandExecuntionModerador } = require('../../utils/checkingComandsExecution');
+const { setStandardFooter } = require('../../utils/embedFooter');
 
 async function listTempBans(interaction) {
     if (!interaction.isCommand()) return;
@@ -32,6 +33,8 @@ async function listTempBans(interaction) {
             }));
             embed.addFields(fields);
         }
+
+        setStandardFooter(embed, client);
 
         await interaction.editReply({ embeds: [embed] });
         commandExecuted('listbans', interaction.user, interaction.guild, true);

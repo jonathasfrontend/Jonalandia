@@ -4,6 +4,7 @@ const { logger, commandExecuted, securityEvent } = require('../../logger');
 const { saveUserInfractions } = require('../../utils/saveUserInfractions');
 const { checkingComandChannelBlocked, checkingComandExecuntionModerador } = require('../../utils/checkingComandsExecution');
 const punishmentConfig = require('../../config/punishmentConfig.json');
+const { setStandardFooter } = require('../../utils/embedFooter');
 
 async function timeout(interaction) {
     if (!interaction.isCommand()) return;
@@ -27,7 +28,7 @@ async function timeout(interaction) {
 
         if (userToTimeout.id === interaction.guild.ownerId || guildMember.permissions.has('Administrator')) {
             return interaction.editReply({
-                embeds: [new EmbedBuilder().setColor('#FF0000').setTitle('⚠️ Falhou').setDescription(`Não pode aplicar timeout em ${userToTimeout.tag} (dono/admin).`).setTimestamp()]
+                embeds: [setStandardFooter(new EmbedBuilder().setColor('#FF0000').setTitle('⚠️ Falhou').setDescription(`Não pode aplicar timeout em ${userToTimeout.tag} (dono/admin).`), client)]
             });
         }
 
@@ -45,9 +46,8 @@ async function timeout(interaction) {
 
         const embed = new EmbedBuilder()
             .setColor('#ff0000').setTitle('Timeout aplicado')
-            .setDescription(`${userToTimeout.tag} recebeu timeout de ${durationMinutes} minutos.`)
-            .setTimestamp()
-            .setFooter({ text: `Por: ${client.user.tag}`, iconURL: client.user.displayAvatarURL({ dynamic: true }) });
+            .setDescription(`${userToTimeout.tag} recebeu timeout de ${durationMinutes} minutos.`);
+        setStandardFooter(embed, client, `Por: ${client.user.tag}`);
 
         await interaction.editReply({ embeds: [embed] });
         commandExecuted('timeout', interaction.user, interaction.guild, true);

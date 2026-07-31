@@ -2,6 +2,7 @@ const { EmbedBuilder } = require("discord.js");
 const { client } = require("../../Client");
 const { logger, botEvent } = require('../../logger');
 const { db } = require('../../database/service');
+const { setStandardFooter } = require('../../utils/embedFooter');
 
 async function onMemberAdd(member) {
   const context = { module: 'MEMBER_EVENTS', user: member.user.tag, guild: member.guild?.name };
@@ -25,8 +26,8 @@ async function onMemberAdd(member) {
         .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
         .setTitle(`${member.user.tag} | Bem-vindo(a)!`)
         .setDescription(`<:feliz:1402690475634458664> Salve ${member.user}!`)
-        .setImage('https://media.giphy.com/media/GPQBFuG4ABACA/source.gif')
-        .setFooter({ text: client.user.username });
+        .setImage('https://media.giphy.com/media/GPQBFuG4ABACA/source.gif');
+      setStandardFooter(embed, client);
 
       welcomeChannel.send({ embeds: [embed] });
 

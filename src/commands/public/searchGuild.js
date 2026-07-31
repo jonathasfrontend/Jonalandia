@@ -1,6 +1,7 @@
 const { EmbedBuilder } = require("discord.js");
 const { client } = require("../../Client");
 const { Logger } = require('../../logger');
+const { setStandardFooter } = require('../../utils/embedFooter');
 const { checkingComandChannelBlocked } = require("../../utils/checkingComandsExecution");
 
 async function searchGuild(interaction) {
@@ -58,12 +59,8 @@ async function searchGuild(interaction) {
                 { name: '👑 Dono', value: `<@${guild.ownerId}>\n` + '`' + `${guild.ownerId}` + '`', inline: true },
             )
             .setThumbnail(guild.iconURL({ dynamic: true }))
-            .setImage(bannerURL || guild.iconURL({ dynamic: true }))
-            .setTimestamp()
-            .setFooter({
-                text: `Por: ${client.user ? client.user.tag : "Usuário não encontrado"}`,
-                iconURL: client.user ? client.user.displayAvatarURL({ dynamic: true }) : ""
-            });
+            .setImage(bannerURL || guild.iconURL({ dynamic: true }));
+        setStandardFooter(embed, client, `Por: ${client.user.tag}`);
 
         await interaction.reply({ embeds: [embed] });
 

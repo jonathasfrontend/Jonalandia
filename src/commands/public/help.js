@@ -1,4 +1,5 @@
 const { EmbedBuilder } = require('discord.js');
+const { setStandardFooter } = require('../../utils/embedFooter');
 
 async function Help(interaction) {
 
@@ -31,9 +32,8 @@ async function Help(interaction) {
         name: '💡 Primeiros Passos',
         value: '**1.** Use `/painel` para abrir o painel de configuração\n**2.** Navegue pelas 6 páginas usando os botões ◀ ▶\n**3.** Configure os canais, streamers e cargos conforme necessário\n**4.** Todas as configurações são salvas automaticamente!\n\n*O painel centraliza todas as configurações em uma interface moderna e intuitiva.*'
       }
-    )
-    .setFooter({ text: 'Jonalandia Bot v2.0.0', iconURL: interaction.client.user.displayAvatarURL() })
-    .setTimestamp();
+    );
+  setStandardFooter(embed, interaction.client);
 
   await interaction.reply({ embeds: [embed] });
 }

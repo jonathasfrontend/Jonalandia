@@ -1,6 +1,7 @@
 const { EmbedBuilder } = require('discord.js');
 const { client } = require("../Client");
 const { getRolePermissions, getBlockedChannels, invalidateGuildCache } = require('./cache');
+const { setStandardFooter } = require('./embedFooter');
 
 async function checkingComandChannelBlocked(interaction) {
   const { channelId, guild } = interaction;
@@ -15,9 +16,8 @@ async function checkingComandChannelBlocked(interaction) {
       })
       .setTitle("Este comando não pode ser usado neste canal")
       .setDescription('Vá ao canal <#1253377239370698873> para executar os comandos')
-      .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
-      .setTimestamp()
-      .setFooter({ text: `Por: ${client.user.tag}`, iconURL: client.user.displayAvatarURL({ dynamic: true }) });
+      .setThumbnail(client.user.displayAvatarURL({ dynamic: true }));
+    setStandardFooter(embed, client, `Por: ${client.user.tag}`);
     await interaction.reply({ embeds: [embed], ephemeral: true });
     return false;
   }
@@ -39,9 +39,8 @@ async function checkingComandExecuntionModerador(interaction) {
           iconURL: client.user.displayAvatarURL({ dynamic: true }),
         })
         .setDescription('Você não tem permissão para usar este comando.')
-        .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
-        .setTimestamp()
-        .setFooter({ text: `Por: ${client.user.tag}`, iconURL: client.user.displayAvatarURL({ dynamic: true }) });
+        .setThumbnail(client.user.displayAvatarURL({ dynamic: true }));
+      setStandardFooter(embed, client, `Por: ${client.user.tag}`);
 
       await interaction.reply({ embeds: [embed], ephemeral: true });
       return false;

@@ -4,6 +4,7 @@ const { db } = require('../../database/service');
 const axios = require('axios');
 const { EmbedBuilder } = require("discord.js");
 const cron = require('node-cron');
+const { setStandardFooter } = require('../../utils/embedFooter');
 
 async function onNotificationTwitch() {
     try {
@@ -62,8 +63,8 @@ async function checkStreamerStatus(streamer, guildConfig, discordChannel, baseCo
             .addFields(
                 { name: '🎮 Jogando', value: gameRes.data || 'Não definido', inline: true },
                 { name: '⏱️ Online', value: uptimeRes.data, inline: true }
-            ).setTimestamp()
-            .setFooter({ text: `${guildConfig.guildName} | Twitch`, iconURL: client.user.displayAvatarURL({ dynamic: true }) });
+            );
+        setStandardFooter(embed, client, `${guildConfig.guildName} | Twitch`);
 
         await discordChannel.send({ embeds: [embed] });
         await db.twitchNotifications.create({ guildId: guildConfig.guildId, title: titleRes.data, streamer, image: avatarRes.data, gamer: gameRes.data });

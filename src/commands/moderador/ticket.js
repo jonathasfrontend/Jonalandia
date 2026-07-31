@@ -6,6 +6,7 @@ const { client } = require("../../Client");
 const { logger, botEvent } = require('../../logger');
 const { checkingComandChannelBlocked, checkingComandExecuntionModerador } = require("../../utils/checkingComandsExecution");
 const { db } = require("../../database/service");
+const { setStandardFooter } = require("../../utils/embedFooter");
 
 const TICKET_OPTIONS = [
     { label: 'Tirar dúvidas', value: 'tirarduvida', emoji: '🌞' },
@@ -39,6 +40,7 @@ async function ticket(interaction) {
         .setColor(0xffffff).setTitle('💁 Central de Ajuda de Jonalandia.')
         .setDescription('**Abra um ticket 🎫 para falar com nossa equipe.**\nUse para tirar dúvidas, relatar problemas ou buscar suporte.')
         .setImage('https://raw.githubusercontent.com/jonathasfrontend/Jonalandia/refs/heads/main/bgticket.png');
+    setStandardFooter(embedTicket, client);
 
     const discordChannel = client.channels.cache.get(ticketConfig.channelId);
     if (!discordChannel) {
@@ -110,8 +112,8 @@ client.on('interactionCreate', async (interaction) => {
 
             const embedTicket = new EmbedBuilder()
                 .setColor(0xffffff).setTitle('📩 Ticket')
-                .setDescription(`Olá <@${interaction.user.id}>!\n\nO suporte estará com você em breve.`)
-                .setFooter({ text: client.user.tag }).setTimestamp();
+                .setDescription(`Olá <@${interaction.user.id}>!\n\nO suporte estará com você em breve.`);
+            setStandardFooter(embedTicket, client);
             await ticketChannel.send({ embeds: [embedTicket], components: [btnClose] });
         } catch (error) {
             logger.error('Erro ao criar ticket', { module: 'SUPPORT' }, error);
