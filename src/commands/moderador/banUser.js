@@ -4,6 +4,7 @@ const { logger, commandExecuted, securityEvent } = require('../../logger');
 const { saveUserInfractions } = require('../../utils/saveUserInfractions');
 const { checkingComandChannelBlocked, checkingComandExecuntionModerador } = require('../../utils/checkingComandsExecution');
 const { db } = require('../../database/service');
+const punishmentConfig = require('../../config/punishmentConfig.json');
 
 async function banUser(interaction) {
     if (!interaction.isCommand()) return;
@@ -23,15 +24,13 @@ async function banUser(interaction) {
         const memberToBan = await interaction.guild.members.fetch(userToBan.id);
 
         let unbanDate = null;
-        let durationText = 'permanente';
+        let durationText = punishmentConfig.ban.permanentLabel || 'permanente';
 
         if (duration) {
-            const now = Date.now();
-            const durations = { '1m': 60000, '1h': 3600000, '5h': 18000000, '1d': 86400000, '10d': 864000000 };
-            const ms = durations[duration];
-            if (ms) {
-                unbanDate = new Date(now + ms);
-                durationText = duration;
+            const durationConfig = punishmentConfig.ban.durations.find(d => d.value === duration);
+            if (durationConfig) {
+                unbanDate = new Date(Date.now() + durationConfig.ms);
+                durationText = durationConfig.value;
             }
         }
 

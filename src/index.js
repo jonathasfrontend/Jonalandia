@@ -51,6 +51,7 @@ const { clean } = require('./commands/moderador/clean');
 const { ticket } = require('./commands/moderador/ticket');
 const { timeout } = require('./commands/moderador/timeout');
 const { expulsar } = require('./commands/moderador/expulsar');
+const punishmentConfig = require('./config/punishmentConfig.json');
 const { banUser } = require('./commands/moderador/banUser');
 const { unbanUser } = require('./commands/moderador/unbanUser');
 const { listTempBans } = require('./commands/moderador/listTempBans');
@@ -237,13 +238,25 @@ client.once('ready', () => {
 
   client.application?.commands.create({
     name: 'timeout',
-    description: 'Aplica um timeout de 10 minutos em um usuário. (Moderador)',
+    description: 'Aplica um timeout em um usuário. (Moderador)',
     options: [
       {
         type: 6,
         name: 'usuario',
         description: 'Selecione o usuário para aplicar o timeout.',
         required: true,
+      },
+      {
+        type: 3,
+        name: 'nivel',
+        description: 'Nível do timeout (define a duração).',
+        required: true,
+        choices: [
+          { name: 'Low (5 minutos)', value: 'low' },
+          { name: 'Low Medium (10 minutos)', value: 'lowMedium' },
+          { name: 'Medium (1 hora)', value: 'medium' },
+          { name: 'High (24 horas)', value: 'high' },
+        ],
       },
     ],
   });
@@ -276,28 +289,7 @@ client.once('ready', () => {
         name: 'duracao',
         description: 'Duração do ban (deixe vazio para ban permanente)',
         required: false,
-        choices: [
-          {
-            name: '1 minuto',
-            value: '1m'
-          },
-          {
-            name: '1 hora',
-            value: '1h'
-          },
-          {
-            name: '5 horas',
-            value: '5h'
-          },
-          {
-            name: '1 dia',
-            value: '1d'
-          },
-          {
-            name: '10 dias',
-            value: '10d'
-          }
-        ]
+        choices: punishmentConfig.ban.durations.map(({ label, value }) => ({ name: label, value })),
       },
     ],
   });

@@ -1,11 +1,12 @@
 {
     "antiFlood": {
-        "maxMessages": 3,
-        "timeWindow": 10000,
+        "maxMessages": 8,
+        "timeWindow": 15000,
         "timeoutDuration": 300000,
         "decayTime": 2000,
-        "maxWarnings": 2,
-        "warningCooldown": 30000
+        "maxWarnings": 3,
+        "warningCooldown": 45000,
+        "warningResetTime": 300000
     },
     "timeoutLevel": {
         "low": {
@@ -21,13 +22,46 @@
             "timeoutDuration": 86400000
         }
     },
-    
+    "ban": {
+        "durations": [
+            {
+                "label": "1 minuto",
+                "value": "1m",
+                "ms": 60000
+            },
+            {
+                "label": "1 hora",
+                "value": "1h",
+                "ms": 3600000
+            },
+            {
+                "label": "5 horas",
+                "value": "5h",
+                "ms": 18000000
+            },
+            {
+                "label": "1 dia",
+                "value": "1d",
+                "ms": 86400000
+            },
+            {
+                "label": "10 dias",
+                "value": "10d",
+                "ms": 864000000
+            }
+        ],
+        "permanentLabel": "permanente"
+    },
+
     "description": {
         "maxMessages": "Limite de mensagens permitidas no período de tempo",
-        "timeWindow": "Período de tempo em milissegundos (padrão: 1 segundo)",
+        "timeWindow": "Período de tempo em milissegundos (padrão: 15 segundos)",
         "timeoutDuration": "Duração do timeout em milissegundos (padrão: 5 minutos = 300000ms)",
         "decayTime": "Tempo para decrementar mensagens antigas (padrão: 2 segundos)",
         "maxWarnings": "Número de avisos antes do timeout",
-        "warningCooldown": "Cooldown entre avisos (com 20 segundos)"
+        "warningCooldown": "Cooldown entre avisos (padrão: 45 segundos)",
+        "warningResetTime": "Tempo sem flood para zerar os avisos (padrão: 5 minutos = 300000ms)",
+        "ban.durations": "Opções de duração do ban temporário (label exibido, value enviado e ms = duração em milissegundos)",
+        "ban.permanentLabel": "Texto exibido quando o ban é permanente"
     }
 }

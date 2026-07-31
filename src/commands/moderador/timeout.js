@@ -3,6 +3,7 @@ const { client } = require("../../Client");
 const { logger, commandExecuted, securityEvent } = require('../../logger');
 const { saveUserInfractions } = require('../../utils/saveUserInfractions');
 const { checkingComandChannelBlocked, checkingComandExecuntionModerador } = require('../../utils/checkingComandsExecution');
+const punishmentConfig = require('../../config/punishmentConfig.json');
 
 async function timeout(interaction) {
     if (!interaction.isCommand()) return;
@@ -30,17 +31,21 @@ async function timeout(interaction) {
             });
         }
 
+        const nivel = options.getString('nivel') || 'low';
+        const duration = punishmentConfig.timeoutLevel[nivel]?.timeoutDuration || 300000;
+        const durationMinutes = Math.floor(duration / 60000);
+
         saveUserInfractions(
             interaction.guild.id, userToTimeout.id, userToTimeout.tag, userToTimeout.displayAvatarURL({ dynamic: true }),
             guildMember.user.createdAt, guildMember.joinedAt, 'timeouts',
-            `Timeout de 10 minutos em ${userToTimeout.tag}`, member.user.tag
+            `Timeout de ${durationMinutes} minutos em ${userToTimeout.tag}`, member.user.tag
         );
 
-        await guildMember.timeout(10 * 60 * 1000, 'Timeout aplicado via comando.');
+        await guildMember.timeout(duration, 'Timeout aplicado via comando.');
 
         const embed = new EmbedBuilder()
             .setColor('#ff0000').setTitle('Timeout aplicado')
-            .setDescription(`${userToTimeout.tag} recebeu timeout de 10 minutos.`)
+            .setDescription(`${userToTimeout.tag} recebeu timeout de ${durationMinutes} minutos.`)
             .setTimestamp()
             .setFooter({ text: `Por: ${client.user.tag}`, iconURL: client.user.displayAvatarURL({ dynamic: true }) });
 

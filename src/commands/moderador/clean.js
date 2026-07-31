@@ -5,8 +5,8 @@ const { checkingComandExecuntionModerador, checkingComandChannelBlocked } = requ
 async function clean(interaction) {
     if (!interaction.isCommand()) return;
 
-    const isAuthorized = await checkingComandChannelBlocked(interaction);
-    if (!isAuthorized) return;
+    // const isAuthorized = await checkingComandChannelBlocked(interaction);
+    // if (!isAuthorized) return;
     const isMod = await checkingComandExecuntionModerador(interaction);
     if (!isMod) return;
 

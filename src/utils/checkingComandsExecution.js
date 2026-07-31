@@ -54,4 +54,4 @@ async function checkingComandExecuntionModerador(interaction) {
   }
 }
 
-module.exports = { checkingComandChannelBlocked, checkingComandExecuntionModerador };
+module.exports = { checkingComandChannelBlocked, checkingComandExecuntionModerador, getBlockedChannels };

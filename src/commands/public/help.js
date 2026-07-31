@@ -9,11 +9,11 @@ async function Help(interaction) {
     .addFields(
       {
         name: '🤖 Comandos Públicos',
-        value: '`/help` - Exibe esta mensagem de ajuda\n`/server` - Exibe informações do servidor\n`/clima` - Mostra a previsão do tempo para uma cidade'
+        value: '`/oi` - Saudação do bot\n`/help` - Exibe esta mensagem de ajuda\n`/server` - Exibe informações do servidor\n`/clima` - Mostra a previsão do tempo para uma cidade'
       },
       {
         name: '🛠️ Comandos de Moderação',
-        value: '`/clean` - Limpa mensagens do canal ou de usuário específico\n`/timeout` - Aplica timeout de 3 minutos em um usuário\n`/expulsar` - Expulsa um usuário do servidor\n`/banir` - Bane um usuário do servidor (temporário ou permanente)\n`/desbanir` - Desbane um usuário do servidor\n`/listarbanstemporarios` - Lista todos os bans temporários ativos\n`/kickuser` - Expulsa um usuário do canal de voz\n`/embed` - Cria um embed personalizado\n`/ficha` - Busca dados completos do usuário no servidor\n`/voteparaban` - Inicia votação democrática para banir um usuário\n`/cargo` - Mostra painel de seleção de cargos\n`/ticket` - Mostra painel para abrir tickets de suporte'
+        value: '`/clean` - Limpa mensagens do canal ou de usuário específico\n`/timeout` - Aplica timeout (níveis: Low 5min, Low Medium 10min, Medium 1h, High 24h)\n`/expulsar` - Expulsa um usuário do servidor\n`/banir` - Bane um usuário do servidor (temporário ou permanente)\n`/desbanir` - Desbane um usuário do servidor\n`/listbans` - Lista todos os bans temporários ativos\n`/kickuser` - Expulsa um usuário do canal de voz\n`/embed` - Cria um embed personalizado\n`/ficha` - Busca dados completos do usuário no servidor\n`/voteparaban` - Inicia votação democrática para banir um usuário\n`/excluicomando` - Exclui um comando específico do bot\n`/ticket` - Mostra painel para abrir tickets de suporte'
       },
       {
         name: '⚙️ Comando de Configuração',
@@ -21,7 +21,7 @@ async function Help(interaction) {
       },
       {
         name: '🔄 Funcionalidades Automáticas',
-        value: '**🛡️ Sistema de Proteção:**\n• AntiFloodChat - Detecta spam com avisos progressivos\n• BlockLinks - Bloqueia links não autorizados\n• DetectInappropriateWords - Filtra palavras inadequadas\n• AutoKickNewMembers - Remove contas suspeitas\n\n**📢 Sistema de Notificações (por servidor):**\n• 🎮 Twitch Monitor - Notifica quando streamers entram ao vivo (3min)\n• 📺 YouTube Monitor - Avisa sobre novos vídeos (5min)\n• 🆓 Free Games Monitor - Alerta sobre jogos gratuitos (6h)\n• 👋 Welcome/Goodbye - Mensagens automáticas de entrada/saída\n• ⏰ TempBan Manager - Desbanimento automático de bans temporários (1min)'
+        value: '**🛡️ Sistema de Proteção:**\n• AntiFloodChat - Detecta spam com avisos progressivos\n• BlockLinks - Bloqueia links não autorizados\n• DetectInappropriateWords - Filtra palavras inadequadas\n• BlockFileTypes - Bloqueia envio de arquivos perigosos\n• AutoKickNewMembers - Remove contas suspeitas\n\n**📢 Sistema de Notificações (por servidor):**\n• 🎮 Twitch Monitor - Notifica quando streamers entram ao vivo (3min)\n• 📺 YouTube Monitor - Avisa sobre novos vídeos (5min)\n• 🆓 Free Games Monitor - Alerta sobre jogos gratuitos (6h)\n• 👋 Welcome/Goodbye - Mensagens automáticas de entrada/saída\n• ⏰ TempBan Manager - Desbanimento automático de bans temporários (1min)'
       },
       {
         name: '🌐 Multi-Guild Ready',
