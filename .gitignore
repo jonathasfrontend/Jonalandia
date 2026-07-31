@@ -2,6 +2,7 @@
 src/logs/
 /.vscode
 /cspell.json
+
 *.txt
 *.rar
 *.backup
@@ -10,6 +11,11 @@ Servidor de Suporte Tecnico para bot Jonalandia - ATUALIZADO.md
 tests/
 docs/
 shard.json
+bg2.png
+bg3.png
+bgregras2.png
+regrasteste.png
+regrasteste2.png
 
 # dependencies
 /node_modules
