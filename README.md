@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Jonalandia](jonalandia.png)
+![Jonalandia](./image/jonalandia.png)
 
 **Bot Discord Multi-Guild para gerenciamento completo de servidores**
 
